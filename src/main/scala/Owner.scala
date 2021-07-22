@@ -94,7 +94,8 @@ class Owner {
     else
       inventory_avg_cost(item) = (inventory_total_cost(item) +
         units_added * unit_cost) / (inventory(item) + units_added)
-
+    
+    
     println("recalculate_inv_avg_cost: " + units_added + " " + unit_cost +
       " " + inventory_avg_cost(item));
   }

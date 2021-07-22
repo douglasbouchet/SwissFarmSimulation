@@ -31,10 +31,13 @@ package object Commodities {
   val Wheat       = Commodity("wheat")
   val Flour       = Commodity("flour")
   val Land        = Commodity("land")
-  val MovieTicket = Commodity("ticket")
   val Beef        = Commodity("beef")
-  val Burger      = Commodity("burger")
+  val Steak       = Commodity("steak")
+  val WheatSeeds  = Commodity("wheatSeeds")
+  //val MovieTicket = Commodity("ticket")
+  //val Burger      = Commodity("burger")
 
-  val all_commodities = List(Wheat, Flour, Land, MovieTicket, Beef, Burger);
+  //val all_commodities = List(Wheat, Flour, Land, MovieTicket, Beef, Burger);
+  val all_commodities = List(Wheat, Flour, Land, Beef, Steak, WheatSeeds);
 }
 

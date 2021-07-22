@@ -50,7 +50,7 @@ case class ProductionLine(
   protected def algo = __forever(
     __do { // start of production run
       costs_consumables = 0;
-      //print("buying consumables: " + o + " " + this + ". ");
+      print("buying consumables: " + o + " " + this + ". ");
       frac = 1.0;
       for(x <- pls.consumed) {
         val n = math.min(o.available(x._1), x._2); // requested and available
@@ -66,14 +66,14 @@ case class ProductionLine(
     __dowhile(
       __wait(1),
       __do{
-        //print("paying salaries. ");
+        print("paying salaries. ");
         // salaries are paid globally (by the factory)
         goodwill += pls.employees_needed * salary;
         rpt += 1;
       }
     )({ rpt < pls.time_to_complete }),
     __do{
-      //print("production complete! ");
+      print("production complete! ");
       val units_produced = (pls.produced._2  * frac).toInt;
       val personnel_costs = pls.employees_needed * salary *
                             pls.time_to_complete;

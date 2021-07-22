@@ -6,27 +6,31 @@ import Securities.Commodities._
 object MainExample {
   val s = new Simulation;
 
-  val f   = new Farm(s);
-  val m   = new Mill(s);
+  val f1   = new Farm(s, 20);
+  val f2   = new Farm(s, 50);
+  //val f2   = new Farm(s);
+  //val m   = new Mill(s);
   //val c   = new Cinema(s);
   //val rf  = new CattleFarm(s);
   //val mcd = new McDonalds(s);
   val landlord        = new Source(Land,  20, 100000*100, s);
+  val seedsProvider   = new Source(WheatSeeds, 100, 1*100, s)
   //val cattle_farmer = new Source(Beef,   100,  26000*100, s);
   //val silo          = new Source(Wheat, 1000,   6668*100, s);
   //val silo2         = new Trader(Wheat, 100, s);
   //val flour_trader  = new Trader(Flour, 50, s);
-  val flour_buyer     = new Buyer(Flour, () => 40, s);
+  //val flour_buyer     = new Buyer(Flour, () => 40, s);
 
   val people = for(x <- 1 to 12) yield new Person(s, false);
 
   s.init(List(
     landlord,
+    seedsProvider,
     //silo,
     // silo2, flour_trader, cattle_farmer,
-    f, m,
+    f1,f2// m,
     // c, rf, mcd,
-    flour_buyer
+    //flour_buyer
   ) ++ people.toList);
 
   def main(argv: Array[String]) {
@@ -35,7 +39,9 @@ object MainExample {
     //if((argv.length != 1) || (argv(0).toInt < 1))
     //  println("Exactly one integer >0 argument needed!");
     //else
-    s.run("10".toInt);
+
+    println(s.market)
+    s.run(7);
       //s.run(argv(0).toInt);
   }
 }

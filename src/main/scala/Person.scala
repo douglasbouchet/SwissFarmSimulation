@@ -19,14 +19,14 @@ class Person(
 
   private val properties : Map[Commodity, Map[String, Int]] =
     Map((Flour  -> Map("calories" -> 100)),
-        (Burger -> Map("calories" -> 500)));
+        (Steak -> Map("calories" -> 400)));
 
-  private val foodstuffs = List(Flour, Burger);
+  private val foodstuffs = List(Flour, Steak);
 
   // TODO: factor in bounded rationality: far-off rewards are to be discounted
   private def expected_enjoyment(item: Commodity) : Int = {
     item match {
-      case MovieTicket => 1
+      //case MovieTicket => 1
       case _ if properties(item).contains("calories") =>
         properties(item)("calories")
       case _ => 0
@@ -43,7 +43,7 @@ class Person(
   protected def algo = __forever(
     __do{
       if(active) {
-        val food = if(GLOBAL.rnd.nextInt(2) == 0) Flour else Burger;
+        val food = if(GLOBAL.rnd.nextInt(2) == 0) Flour else Steak;
 
         happiness -= 100; // hunger
 
@@ -51,9 +51,9 @@ class Person(
         shared.market(food).market_buy_order_now(shared.timer, this, 1);
            // needs to eat
         if(available(food) >= 1) consume(food, 1);
-        shared.market(MovieTicket).market_buy_order_now(shared.timer, this, 1);
+        //shared.market(MovieTicket).market_buy_order_now(shared.timer, this, 1);
            // wants entertainment
-        if(available(MovieTicket) >= 1) consume(MovieTicket, 1);
+        //if(available(MovieTicket) >= 1) consume(MovieTicket, 1);
 
         // shared.market("miete").market_buy_order_now(shared.timer, this, 1);
       }
