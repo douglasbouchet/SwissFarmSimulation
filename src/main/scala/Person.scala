@@ -18,7 +18,7 @@ class Person(
   }
 
   private val properties : Map[Commodity, Map[String, Int]] =
-    Map((Flour  -> Map("calories" -> 100)),
+    Map((Bread  -> Map("calories" -> 200)),
         (Steak -> Map("calories" -> 400)));
 
   private val foodstuffs = List(Flour, Steak);
@@ -43,14 +43,18 @@ class Person(
   protected def algo = __forever(
     __do{
       if(active) {
-        val food = if(GLOBAL.rnd.nextInt(2) == 0) Flour else Steak;
+        val food = if(GLOBAL.rnd.nextInt(2) == 0) Bread else Steak;
 
         happiness -= 100; // hunger
 
         // assert(market(food).is_at_time(shared.timer));
         shared.market(food).market_buy_order_now(shared.timer, this, 1);
            // needs to eat
-        if(available(food) >= 1) consume(food, 1);
+        if(available(food) >= 1) {
+          consume(food, 1);
+        }
+        else {
+        }
         //shared.market(MovieTicket).market_buy_order_now(shared.timer, this, 1);
            // wants entertainment
         //if(available(MovieTicket) >= 1) consume(MovieTicket, 1);

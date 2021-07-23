@@ -96,8 +96,8 @@ class Owner {
         units_added * unit_cost) / (inventory(item) + units_added)
     
     
-    println("recalculate_inv_avg_cost: " + units_added + " " + unit_cost +
-      " " + inventory_avg_cost(item));
+    //println("recalculate_inv_avg_cost: " + units_added + " " + unit_cost +
+    //  " " + inventory_avg_cost(item));
   }
 
   /** This is the number of units in the inventory available for taking;
@@ -138,7 +138,7 @@ class Owner {
     (total_value_destroyed/100).toInt);
 
   /** Prints status info (balance sheet and inventory). */
-  def stat { println((balance_sheet.toString, inventory_to_string())) }
+  def stat { println((balance_sheet.toString, "Remaining: " + inventory_to_string())) }
 
   final protected def init_inv(item: ITEM_T) {
     inventory += (item -> 0);

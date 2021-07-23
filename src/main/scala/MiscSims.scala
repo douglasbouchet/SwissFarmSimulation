@@ -25,7 +25,6 @@ class Source(commodity: Commodity, units: Int, p: Int,
   override def price(dummy: Commodity) = Some(p)
 }
 
-
 case class Trader(commodity: Commodity,
                   desired_inventory: Int,
                   shared: Simulation) extends
@@ -78,13 +77,14 @@ case class Buyer(commodity: Commodity,
 
 
 class Farm(s: Simulation, prod: Int) extends Factory(
-  ProductionLineSpec(1, List((Land, 1), (WheatSeeds,prod)), List((WheatSeeds,prod)), (Wheat, prod), 4), s)
+  ProductionLineSpec(prod/10, List((Land, 1), (WheatSeeds,prod)), List((WheatSeeds,prod)), (Wheat, prod), 4), s)
 
 class Mill(s: Simulation, prod:Int) extends Factory(
   ProductionLineSpec(1, List(), List((Wheat, prod)), (Flour, prod), 1), s)
 
-//class Cinema(s: Simulation) extends Factory(
-//  ProductionLineSpec(2, List(), List(), (MovieTicket, 2000), 1), s)
+class Bakery(s: Simulation, prod: Int) extends Factory(
+  ProductionLineSpec(2, List(), List((Flour, prod)), (Bread, prod), 1), s)
+
 
 class CattleFarm(s: Simulation) extends Factory(
   ProductionLineSpec(1, List((Land, 1)), List(), (Beef, 5), 6), s)
@@ -93,5 +93,8 @@ class CattleFarm(s: Simulation) extends Factory(
 //  ProductionLineSpec(1, List(), List((Flour, 10), (Beef, 5)),
 //                 (Burger, 10), 2), s)
 
+
+//class Cinema(s: Simulation) extends Factory(
+//  ProductionLineSpec(2, List(), List(), (MovieTicket, 2000), 1), s)
 
 

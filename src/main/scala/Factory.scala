@@ -50,7 +50,7 @@ case class ProductionLine(
   protected def algo = __forever(
     __do { // start of production run
       costs_consumables = 0;
-      print("buying consumables: " + o + " " + this + ". ");
+      //print("buying consumables: " + o + " " + this + ". ");
       frac = 1.0;
       for(x <- pls.consumed) {
         val n = math.min(o.available(x._1), x._2); // requested and available
