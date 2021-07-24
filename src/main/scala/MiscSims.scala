@@ -77,7 +77,7 @@ case class Buyer(commodity: Commodity,
 
 
 class Farm(s: Simulation, prod: Int) extends Factory(
-  ProductionLineSpec(prod/10, List((Land, 1), (WheatSeeds,prod)), List((WheatSeeds,prod)), (Wheat, prod), 4), s)
+  ProductionLineSpec(prod/10, List((Land, 1)), List((WheatSeeds,prod)), (Wheat, prod), 4), s)
 
 class Mill(s: Simulation, prod:Int) extends Factory(
   ProductionLineSpec(1, List(), List((Wheat, prod)), (Flour, prod), 1), s)
@@ -85,9 +85,14 @@ class Mill(s: Simulation, prod:Int) extends Factory(
 class Bakery(s: Simulation, prod: Int) extends Factory(
   ProductionLineSpec(2, List(), List((Flour, prod)), (Bread, prod), 1), s)
 
+class CattleFarm(s: Simulation, prod: Int) extends Factory(
+  ProductionLineSpec(1, List((Land, 1)), List((FeedStuff, 1*prod), (Cows, prod)), (Beef, prod), 5), s){
+    var n_cows: Int = prod
+  }
 
-class CattleFarm(s: Simulation) extends Factory(
-  ProductionLineSpec(1, List((Land, 1)), List(), (Beef, 5), 6), s)
+class Butcher(s: Simulation, nBeaf: Int) extends Factory (
+  ProductionLineSpec(1, List(), List((Beef, nBeaf)), (Steak, nBeaf * 40), 1), s)
+
 
 //class McDonalds(s: Simulation) extends Factory(
 //  ProductionLineSpec(1, List(), List((Flour, 10), (Beef, 5)),

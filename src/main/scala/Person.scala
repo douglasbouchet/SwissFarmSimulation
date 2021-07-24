@@ -21,7 +21,7 @@ class Person(
     Map((Bread  -> Map("calories" -> 200)),
         (Steak -> Map("calories" -> 400)));
 
-  private val foodstuffs = List(Flour, Steak);
+  private val foodstuffs = List(Bread, Steak);
 
   // TODO: factor in bounded rationality: far-off rewards are to be discounted
   private def expected_enjoyment(item: Commodity) : Int = {
