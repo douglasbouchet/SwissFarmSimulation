@@ -65,3 +65,7 @@ Dans l'algo:
 
 
 
+
+
+QUESTIONS: 
+Is it a problem if the object are mutable ? eg cows 

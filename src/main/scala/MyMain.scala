@@ -30,7 +30,6 @@ object MainExample {
     landlord,
     seedsProvider,
     feedStuffProvider,
-    wheatTrader,
     //pregnantCow,
     //silo,
     // silo2, 
