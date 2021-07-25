@@ -15,6 +15,10 @@ package DougSimulation{
       agents = agents :+ agent
     }
 
+    def remAgent(agent: Agents) {
+      agents = agents.filterNot(_ == agent)
+    }
+
     def passTurn(){
       agents.foreach(_.updtateState())
       }

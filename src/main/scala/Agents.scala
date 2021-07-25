@@ -71,12 +71,13 @@ package Agents{
       // inc. cows if one is pregnant since 6 turn 
       override def updtateState(){
         stateCounter += 1
+        produced = List()
         consumed = List((Wheat,herd.map(cow => cow.quantityFeedstuff).sum)) // add vaccin etc after 
         herd.foreach(cow => 
           if(cow.state == pregnant) {
             if (cow.pregnantSince >= PREGNANCY_DURATION){
-              println("MAKING A NEW COW ")
-              val newCow = new Cow(s, false, 100)
+              val newCow = Cow(s, false, 100)
+              println("New Cow")
               herd = herd :+ newCow
               sim.addAgent(newCow)
             }
@@ -84,12 +85,26 @@ package Agents{
         if(stateCounter % 12 == 0){
           herd.foreach(inseminateCow(_))
         }
+
+        if(herd.length > 5){
+          println("Killing a cow")
+          killCow()
+        }
+
       }
 
-      def inseminateCow(cow: Cow){
-        if(cow.age >= 3 & cow.state != `pregnant`){
-          cow.state = pregnant
+      def inseminateCow(_cow: Cow){
+        if(_cow.age >= 3 & _cow.state != `pregnant`){
+          _cow.state = pregnant
         }
+      }
+
+      def killCow(){
+          val killed : Cow = herd.head
+          herd = herd.tail
+          s.remAgent(killed)
+          produced = List((Beef, killed.weight))
+          println("The produces is : " + produced)
       }
 
       
@@ -144,11 +159,19 @@ package Agents{
           }
           case _ =>
         }
+        
         //stat()
       }
       def stat(){
         println("age: " + age +  " weight: "  + weight + " state: " + state + " quantity of food to find: " + quantityFeedstuff + 
         " pregnant since : " + pregnantSince)
+      }
+
+       override def equals(that: Any): Boolean = {
+         that match {
+           case that: Cow => this eq that
+           case _ => false
+         }
       }
 
       // ----------------- NOT SURE
