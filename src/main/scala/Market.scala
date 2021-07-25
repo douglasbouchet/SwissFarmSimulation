@@ -11,6 +11,7 @@ package Market{
     
     def init(){
       allGoods.foreach(elem => goods += (elem -> 0))
+      goods(FeedStuff) = 100000
       }
       
       def newProduct(agents: List[Agents]){
@@ -23,6 +24,18 @@ package Market{
           })
         })
       }
+
+      def getProduct(product : Goods, quantity: Int): Boolean = {
+        if(goods.getOrElse(product,0) >= quantity){
+          goods(product) = goods.getOrElse(product, 0) - quantity
+          return true
+        }
+        return false
+      }
+
+    def stat(){
+      println(goods)
+    }
               
               
 }

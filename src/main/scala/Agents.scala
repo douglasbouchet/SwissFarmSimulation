@@ -14,13 +14,16 @@ package Agents{
 
     
     def init(){
+    }
+
+    def stat(){
 
     }
     def findSupplies(market: Market): Boolean = {
       println("findSupplies: This should have been overrided")
       false
     }
-    def updtateState(){
+    def updateState(market: Market){
       println("updtateState: This should have been overrided")
     }
 
@@ -55,37 +58,38 @@ package Agents{
       val s : DougSimulation = sim
     }
 
-    case class CattleFarm(sim : DougSimulation, bio: Boolean, nEmployee: Int) extends Agents{
+    case class CattleFarm(sim : DougSimulation, bio: Boolean, nEmployee: Int, initHerd: List[Cow]) extends Agents{
 
       val s : DougSimulation = sim
       var required : List[(Goods,Int)] = List()
       var produced : List[(Goods,Int)] = List()
 
       var employee: List[Person] = List()
-      var herd : List[Cow] = List()
+      var herd : List[Cow] = initHerd
 
       var stateCounter : Int = 0
 
-      override def init(initherd : List[Cow]){
-        herd = initherd
+      def init(initHerd : List[Cow]){
+      }
+      override def stat(){
+        println("The farm has " + employee.length + " employee, and " + herd.length + " cows.")
       }
 
       override def findSupplies(market: Market): Boolean = {
-        println("findSupplies: This should have been overrided")
-        false
+        true
       }
 
       //each turn, ask for feedstuff for cows
       // produced a cow if its state is ready to be eat, but one at a time for the moment
       // inc. cows if one is pregnant since 6 turn 
-      override def updtateState(){
+      override def updateState(market: Market){
         stateCounter += 1
         produced = List()
         required = List((Wheat,herd.map(cow => cow.quantityFeedstuff).sum)) // add vaccin etc after 
         herd.foreach(cow => 
           if(cow.state == pregnant) {
             if (cow.pregnantSince >= PREGNANCY_DURATION){
-              val newCow = Cow(s, false, 100, this)
+              val newCow = Cow(s, false, 100)
               println("New Cow")
               herd = herd :+ newCow
               sim.addAgent(newCow)
@@ -121,7 +125,7 @@ package Agents{
 
     
 
-    case class Cow(sim: DougSimulation, initOrganicFeedstuff: Boolean, initHealth: Int, owner: CattleFarm)
+    case class Cow(sim: DougSimulation, initOrganicFeedstuff: Boolean, initHealth: Int)
       extends Animals{
       
       val s : DougSimulation = sim
@@ -137,11 +141,25 @@ package Agents{
       var state: CowState = calf
       var stateCounter : Int = 0
 
-      override def findSupplies(market: Market) : Boolean = {
-        true
+      override def init(){
+
       }
 
-      override def updtateState(market: Market){
+      override def findSupplies(market: Market) : Boolean = {
+        var obtained = true
+        // TODO problem si plusieurs required, on peut prendre premier good mais si fail au deuxieme, le marché a quand même
+        // été débité du premier, donc voir comment mieux gérer ca (avec une liste de possédé etc)
+        required.foreach(item =>{
+          //println("The item required is :" + item)
+          if(market.getProduct(item._1,item._2) == false){
+            obtained = false
+          }
+        })
+        //println("The value of obtained is: " + obtained)
+        obtained
+      }
+
+      override def updateState(market: Market){
         stateCounter += 1
         age = stateCounter / 12
         findSupplies(market) match {
@@ -170,9 +188,8 @@ package Agents{
         
         //stat()
       }
-      def stat(){
-        println("age: " + age +  " weight: "  + weight + " state: " + state + " quantity of food to find: " + quantityFeedstuff + 
-        " pregnant since : " + pregnantSince)
+      override def stat(){
+        println("age: " + age +  " weight: "  + weight + " state: " + state + " quantity of food to find: " + quantityFeedstuff)
       }
 
        override def equals(that: Any): Boolean = {
