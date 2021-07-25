@@ -5,13 +5,18 @@ package Agents{
   import cowState._
   import Goods._
   import Constants._
+  import Market._
 
 
   trait Agents{
 
     val sim : DougSimulation
 
-    def findSupplies(): Boolean = {
+    
+    def init(){
+
+    }
+    def findSupplies(market: Market): Boolean = {
       println("findSupplies: This should have been overrided")
       false
     }
@@ -19,7 +24,7 @@ package Agents{
       println("updtateState: This should have been overrided")
     }
 
-    var consumed : List[(Goods, Int)] // this evolved at each state 
+    var required : List[(Goods, Int)] // this evolved at each state 
     var produced : List[(Goods,Int)] // this evolved at each state
   }
 
@@ -45,23 +50,27 @@ package Agents{
     
     //TODO
     case class Person(sim : DougSimulation) extends Agents{
-      var consumed : List[(Goods,Int)] = ???
+      var required : List[(Goods,Int)] = ???
       var produced : List[(Goods,Int)] = ???
       val s : DougSimulation = sim
     }
 
-    case class CattleFarm(sim : DougSimulation, bio: Boolean, nEmployee: Int, initHerd: List[Cow]) extends Agents{
+    case class CattleFarm(sim : DougSimulation, bio: Boolean, nEmployee: Int) extends Agents{
 
       val s : DougSimulation = sim
-      var consumed : List[(Goods,Int)] = List()
+      var required : List[(Goods,Int)] = List()
       var produced : List[(Goods,Int)] = List()
 
       var employee: List[Person] = List()
-      var herd : List[Cow] = initHerd
+      var herd : List[Cow] = List()
 
       var stateCounter : Int = 0
 
-      override def findSupplies(): Boolean = {
+      override def init(initherd : List[Cow]){
+        herd = initherd
+      }
+
+      override def findSupplies(market: Market): Boolean = {
         println("findSupplies: This should have been overrided")
         false
       }
@@ -72,11 +81,11 @@ package Agents{
       override def updtateState(){
         stateCounter += 1
         produced = List()
-        consumed = List((Wheat,herd.map(cow => cow.quantityFeedstuff).sum)) // add vaccin etc after 
+        required = List((Wheat,herd.map(cow => cow.quantityFeedstuff).sum)) // add vaccin etc after 
         herd.foreach(cow => 
           if(cow.state == pregnant) {
             if (cow.pregnantSince >= PREGNANCY_DURATION){
-              val newCow = Cow(s, false, 100)
+              val newCow = Cow(s, false, 100, this)
               println("New Cow")
               herd = herd :+ newCow
               sim.addAgent(newCow)
@@ -87,7 +96,6 @@ package Agents{
         }
 
         if(herd.length > 5){
-          println("Killing a cow")
           killCow()
         }
 
@@ -104,7 +112,7 @@ package Agents{
           herd = herd.tail
           s.remAgent(killed)
           produced = List((Beef, killed.weight))
-          println("The produces is : " + produced)
+          println("Killing a cow provided: " + produced)
       }
 
       
@@ -113,12 +121,12 @@ package Agents{
 
     
 
-    case class Cow(sim: DougSimulation, initOrganicFeedstuff: Boolean, initHealth: Int)
+    case class Cow(sim: DougSimulation, initOrganicFeedstuff: Boolean, initHealth: Int, owner: CattleFarm)
       extends Animals{
       
       val s : DougSimulation = sim
-      var consumed = List((Wheat,10)) // maybe not necessecary inside the cow class, but more on the cattlefarmer class
-      var produced = List((Beef,10))
+      var required = List((FeedStuff,10)) // maybe not necessecary inside the cow class, but more on the cattlefarmer class
+      var produced = List((Beef,0))
 
       var organicFeedstuff = initOrganicFeedstuff
       var health = initHealth
@@ -129,14 +137,14 @@ package Agents{
       var state: CowState = calf
       var stateCounter : Int = 0
 
-      override def findSupplies() : Boolean = {
+      override def findSupplies(market: Market) : Boolean = {
         true
       }
 
-      override def updtateState(){
+      override def updtateState(market: Market){
         stateCounter += 1
         age = stateCounter / 12
-        findSupplies match {
+        findSupplies(market) match {
           case x if x == true & weight < 700 => weight += 10
           case false => weight -= 5 //discrete for the moment but weight will be udp. in f(quantity eaten)
           case _ => 

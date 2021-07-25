@@ -2,13 +2,18 @@ package DougSimulation{
 
   
   import Agents._
+  import Goods._
+  import Market._
   
   class DougSimulation(){
 
     var agents : List[Agents] = List()
+    var market = new Market();
     
     def init(agentList: List[Agents]){
+      agentList.foreach(agent => agent.init())
       agentList.foreach(addAgent(_))
+      market.init()
     }
 
     def addAgent(agent: Agents) {
@@ -20,7 +25,16 @@ package DougSimulation{
     }
 
     def passTurn(){
+
+      market.newProduct(agents)
+      
+      //buy all needs etc 
+      agents.foreach(agent => agent.findSupplies)
+      //agents.foreach(agent => println(agent.required))
+
+      // Then change the state if all needs are found 
       agents.foreach(_.updtateState())
+
       }
     
       
@@ -32,7 +46,5 @@ package DougSimulation{
     }
   }
 
-  class Market(initAgents: List[Agents]){
-    //TODO
-  }
+  
 }

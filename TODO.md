@@ -69,3 +69,11 @@ Dans l'algo:
 
 QUESTIONS: 
 Is it a problem if the object are mutable ? eg cows 
+
+
+
+TODO:
+
+Rendre le nombre de cow tuable a chaque tour un paramètre du cattlefarm
+
+- modifier un peu la structure pour ne pas avoir besoin de passser market en argument de updtate (passer market en global ??)
