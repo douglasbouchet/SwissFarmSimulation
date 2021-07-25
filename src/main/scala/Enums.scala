@@ -7,6 +7,18 @@ package Agents{
     val pregnant    = Value("Pregnant")
     val rdyToBeEat  = Value("RdyToBeEat")
     val calf        = Value("Calf")
-    val normal      = Value("Normal")
     }
+
+  object Goods extends Enumeration{
+    type Goods = Value
+    
+    val Wheat       = Value("wheat")
+    val Flour       = Value("flour")
+    val Land        = Value("land")
+    val Beef        = Value("beef")
+    val Steak       = Value("steak")
+    val WheatSeeds  = Value("wheatSeeds")
+    val Bread       = Value("bread")
+    val FeedStuff   = Value("feedStuff")
+  }
 }
