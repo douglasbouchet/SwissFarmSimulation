@@ -1,13 +1,15 @@
 package Agents{
 
-  import Simulation._
+  import DougSimulation._
   //import Securities.Commodities._
   import cowState._
   import Goods._
-  import scala.collection.mutable.ListBuffer
+  import Constants._
 
 
   trait Agents{
+
+    val sim : DougSimulation
 
     def findSupplies(): Boolean = {
       println("findSupplies: This should have been overrided")
@@ -17,8 +19,8 @@ package Agents{
       println("updtateState: This should have been overrided")
     }
 
-    var consumed : ListBuffer[Map[Goods, Int]] // this evolved at each state 
-    var produced : ListBuffer[Map[Goods, Int]] // this evolved at each state
+    var consumed : List[(Goods, Int)] // this evolved at each state 
+    var produced : List[(Goods,Int)] // this evolved at each state
   }
 
    trait Animals extends Agents{
@@ -42,55 +44,73 @@ package Agents{
     }
     
     //TODO
-    case class Person() extends Agents{
-      var consumed : ListBuffer[Map[Goods, Int]] = ???
-      var produced : ListBuffer[Map[Goods, Int]] = ???
+    case class Person(sim : DougSimulation) extends Agents{
+      var consumed : List[(Goods,Int)] = ???
+      var produced : List[(Goods,Int)] = ???
+      val s : DougSimulation = sim
     }
 
-    case class CattleFarm(bio: Boolean, nEmployee: Int, initHerd: List[Cows]) extends Agents{
+    case class CattleFarm(sim : DougSimulation, bio: Boolean, nEmployee: Int, initHerd: List[Cow]) extends Agents{
 
-      var consumed : ListBuffer[Map[Goods, Int]] = ListBuffer(Map((Wheat -> initHerd.map(cow => cow.quantityFeedstuff).sum)))
-      var produced : ListBuffer[Map[Goods, Int]] = ListBuffer(Map())
+      val s : DougSimulation = sim
+      var consumed : List[(Goods,Int)] = List()
+      var produced : List[(Goods,Int)] = List()
 
       var employee: List[Person] = List()
-      var herd : List[Cows] = initHerd
+      var herd : List[Cow] = initHerd
 
       var stateCounter : Int = 0
 
       override def findSupplies(): Boolean = {
-      println("findSupplies: This should have been overrided")
-      false
+        println("findSupplies: This should have been overrided")
+        false
       }
+
       //each turn, ask for feedstuff for cows
       // produced a cow if its state is ready to be eat, but one at a time for the moment
       // inc. cows if one is pregnant since 6 turn 
       override def updtateState(){
         stateCounter += 1
-        //println("QUantity required: " + herd.map(cow => cow.quantityFeedstuff).sum)
-        consumed :+ Map(Wheat -> herd.map(cow => cow.quantityFeedstuff).sum)
-        println("Goods needed are : ")
-        consumed.foreach(event => println(event))
-        println((Wheat -> herd.map(cow => cow.quantityFeedstuff).sum))
-
+        consumed = List((Wheat,herd.map(cow => cow.quantityFeedstuff).sum)) // add vaccin etc after 
+        herd.foreach(cow => 
+          if(cow.state == pregnant) {
+            if (cow.pregnantSince >= PREGNANCY_DURATION){
+              println("MAKING A NEW COW ")
+              val newCow = new Cow(s, false, 100)
+              herd = herd :+ newCow
+              sim.addAgent(newCow)
+            }
+          })
+        if(stateCounter % 12 == 0){
+          herd.foreach(inseminateCow(_))
+        }
       }
 
-      //TODO
+      def inseminateCow(cow: Cow){
+        if(cow.age >= 3 & cow.state != `pregnant`){
+          cow.state = pregnant
+        }
+      }
+
+      
     }
 
 
     
 
-    case class Cows(initOrganicFeedstuff: Boolean, initHealth: Int)
+    case class Cow(sim: DougSimulation, initOrganicFeedstuff: Boolean, initHealth: Int)
       extends Animals{
-
-      var consumed = ListBuffer(Map(Wheat -> 10)) // maybe not necessecary inside the cow class, but more on the cattlefarmer class
-      var produced = ListBuffer(Map(Beef -> 10))
+      
+      val s : DougSimulation = sim
+      var consumed = List((Wheat,10)) // maybe not necessecary inside the cow class, but more on the cattlefarmer class
+      var produced = List((Beef,10))
 
       var organicFeedstuff = initOrganicFeedstuff
       var health = initHealth
       var age = 0
       var weight = 40
       var quantityFeedstuff = weight/10
+      var pregnantSince : Int = 0
       var state: CowState = calf
       var stateCounter : Int = 0
 
@@ -112,15 +132,28 @@ package Agents{
           case x if x > 36 & state != pregnant => state = rdyToBeEat
           case _ => 
         }
-        stat()
+        state match{
+          case `pregnant` => {
+            if (pregnantSince < PREGNANCY_DURATION){
+              pregnantSince += 1
+            }
+            else {
+              state = rdyToBeEat
+              pregnantSince = 0
+            }
+          }
+          case _ =>
+        }
+        //stat()
       }
       def stat(){
-        println("age: " + age +  " weight: "  + weight + " state: " + state + " quantity of food to find: " + quantityFeedstuff)
+        println("age: " + age +  " weight: "  + weight + " state: " + state + " quantity of food to find: " + quantityFeedstuff + 
+        " pregnant since : " + pregnantSince)
       }
 
       // ----------------- NOT SURE
       //override def mycopy(_shared: Simulation.Simulation,_substitution: scala.collection.mutable.Map[Simulation.SimO,Simulation.SimO]): Simulation.SimO = {
-      //  val n = new Cows(s,age,weight,organicFeedstuff,quantityFeedstuff,health);
+      //  val n = new Cow(s,age,weight,organicFeedstuff,quantityFeedstuff,health);
       //  copy_state_to(n);
       //  n
       //}

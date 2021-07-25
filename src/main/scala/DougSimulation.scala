@@ -3,10 +3,18 @@ package DougSimulation{
   
   import Agents._
   
-  class DougSimulation(initAgents: List[Agents]){
+  class DougSimulation(){
 
-    val agents : List[Agents] = initAgents
+    var agents : List[Agents] = List()
     
+    def init(agentList: List[Agents]){
+      agentList.foreach(addAgent(_))
+    }
+
+    def addAgent(agent: Agents) {
+      agents = agents :+ agent
+    }
+
     def passTurn(){
       agents.foreach(_.updtateState())
       }
