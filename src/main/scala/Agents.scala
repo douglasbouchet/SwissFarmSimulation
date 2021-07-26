@@ -75,7 +75,6 @@ package Agents{
       var stateCounter : Int = 0
 
       override def init(){
-        stat()
       }
       override def stat(){
         println("The CattleFarm has " + employee.length + " employee, and " + herd.length + " cows.")
@@ -96,17 +95,23 @@ package Agents{
           if(cow.state == pregnant) {
             if (cow.pregnantSince >= PREGNANCY_DURATION){
               val newCow = Cow(s, 100)
-              println("New Cow")
+              //println("New Cow")
               herd = herd :+ newCow
               sim.addAgent(newCow)
             }
-          })
+          }
+          else if(cow.state == `dead`){
+            killCow(cow)
+            //println("Cow has died from starving, no meat produced")
+            
+          }
+          )
         if(stateCounter % 12 == 0){
           herd.foreach(inseminateCow(_))
         }
 
         if(herd.length > 5){
-          killCow()
+          killCow(herd.head)
         }
 
       }
@@ -117,18 +122,19 @@ package Agents{
         }
       }
 
-      def killCow(){
-          val killed : Cow = herd.head
+      def killCow(killed : Cow){
           herd = herd.tail
           s.remAgent(killed)
           produced = List((Beef, killed.weight))
-          if(grassLand){
+          if (killed.state != dead){
+            if(grassLand){
             cO2 += KG_CO2_PER_KG_MEAT_GRASSLAND*killed.weight
           }
           else{
             cO2 += KG_CO2_PER_KG_MEAT_NOT_GRASSLAND*killed.weight
           }
-          println("Killing a cow provided: " + produced)
+          }
+          //println("Killing a cow produced " + produced)
       }
 
       
@@ -153,7 +159,6 @@ package Agents{
       var stateCounter : Int = 0
 
       override def init(){
-          stat()
       }
 
       override def findSupplies(market: Market) : Boolean = {
@@ -174,8 +179,14 @@ package Agents{
         stateCounter += 1
         age = stateCounter / 12
         findSupplies(market) match {
-          case x if x == true & weight < 700 => weight += randomBetween(6,13)
-          case false => weight -= randomBetween(3,7) //discrete for the moment but weight will be udp. in f(quantity eaten)
+          case x if x == true & weight < 700 => {
+            weight += randomBetween(6,13)
+            health = (100).min(health + 3)
+          }
+          case false =>{
+            weight -= randomBetween(2,4) //discrete for the moment but weight will be udp. in f(quantity eaten)
+            health -= 10
+          } 
           case _ => 
           }
         quantityFeedstuff = weight/10
@@ -185,7 +196,7 @@ package Agents{
           case _ => 
         }
         state match{
-          case `pregnant` => {
+          case `pregnant` if health > 0 => {
             if (pregnantSince < PREGNANCY_DURATION){
               pregnantSince += 1
             }
@@ -194,7 +205,8 @@ package Agents{
               pregnantSince = 0
             }
           }
-          case _ =>
+          case _ if health < 0 => state = dead
+          case _ => 
         }
         
         //stat()

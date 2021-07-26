@@ -19,9 +19,9 @@ package Market{
         agents.foreach(agent => {
           agent.produced.foreach(product =>{
             goods(product._1) = goods.getOrElse(product._1, 0) + product._2
-            if(product._2 > 0){
-              println(product._2 + " " + product._1 + " are put on the market")
-            } 
+            //if(product._2 > 0){
+            //  println(product._2 + " " + product._1 + " are put on the market")
+            //} 
           })
         })
       }
