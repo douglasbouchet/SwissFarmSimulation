@@ -4,8 +4,11 @@ package Agents{
   //import Securities.Commodities._
   import cowState._
   import Goods._
-  import Constants._
+  import Numbers._
   import Market._
+
+  
+
 
 
   trait Agents{
@@ -47,8 +50,8 @@ package Agents{
       //val location : Location(type to define)
     }
 
-    class Farm(){
-      //TODO
+    case class Farm(){
+    //TODO
     }
     
     //TODO
@@ -63,16 +66,19 @@ package Agents{
       val s : DougSimulation = sim
       var required : List[(Goods,Int)] = List()
       var produced : List[(Goods,Int)] = List()
+      
+      var CO2 : Double = 0.0
 
       var employee: List[Person] = List()
       var herd : List[Cow] = initHerd
 
       var stateCounter : Int = 0
 
-      def init(initHerd : List[Cow]){
+      override def init(){
+        stat()
       }
       override def stat(){
-        println("The farm has " + employee.length + " employee, and " + herd.length + " cows.")
+        println("The CattleFarm has " + employee.length + " employee, and " + herd.length + " cows.")
       }
 
       override def findSupplies(market: Market): Boolean = {
@@ -142,7 +148,7 @@ package Agents{
       var stateCounter : Int = 0
 
       override def init(){
-
+          stat()
       }
 
       override def findSupplies(market: Market) : Boolean = {
@@ -163,8 +169,8 @@ package Agents{
         stateCounter += 1
         age = stateCounter / 12
         findSupplies(market) match {
-          case x if x == true & weight < 700 => weight += 10
-          case false => weight -= 5 //discrete for the moment but weight will be udp. in f(quantity eaten)
+          case x if x == true & weight < 700 => weight += randomBetween(6,13)
+          case false => weight -= randomBetween(3,7) //discrete for the moment but weight will be udp. in f(quantity eaten)
           case _ => 
           }
         quantityFeedstuff = weight/10
@@ -189,7 +195,7 @@ package Agents{
         //stat()
       }
       override def stat(){
-        println("age: " + age +  " weight: "  + weight + " state: " + state + " quantity of food to find: " + quantityFeedstuff)
+        println("Cow = age: " + age +  " weight: "  + weight + " state: " + state + " quantity of food to find: " + quantityFeedstuff)
       }
 
        override def equals(that: Any): Boolean = {

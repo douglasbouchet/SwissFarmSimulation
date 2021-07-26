@@ -14,8 +14,8 @@ package DougSimulation{
       agentList.foreach(agent => agent.init())
       agentList.foreach(addAgent(_))
       market.init()
-
-      print(market.goods)
+      
+      stat()
     }
 
     def addAgent(agent: Agents) {
@@ -45,6 +45,12 @@ package DougSimulation{
         passTurn()
       }
 
+      agents.foreach(agent => agent.stat())
+      market.stat()
+    }
+
+    def stat(){
+      println("The agents are : ")
       agents.foreach(agent => agent.stat())
       market.stat()
     }

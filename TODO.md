@@ -74,6 +74,14 @@ Is it a problem if the object are mutable ? eg cows
 
 TODO:
 
+
+ADD CO2 production 
+
 Rendre le nombre de cow tuable a chaque tour un paramètre du cattlefarm
 
 - modifier un peu la structure pour ne pas avoir besoin de passser market en argument de updtate (passer market en global ??)
+
+
+Améliorer le marché en créeant des owner et Buyer 
+  Keep track of all ressources stored in the market as "goods"
+  But add a list of owner wich have a Good and a quantity and a price

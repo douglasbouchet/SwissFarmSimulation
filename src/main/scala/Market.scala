@@ -12,9 +12,10 @@ package Market{
     def init(){
       allGoods.foreach(elem => goods += (elem -> 0))
       goods(FeedStuff) = 100000
+      
       }
       
-      def newProduct(agents: List[Agents]){
+    def newProduct(agents: List[Agents]){
         agents.foreach(agent => {
           agent.produced.foreach(product =>{
             goods(product._1) = goods.getOrElse(product._1, 0) + product._2
@@ -34,7 +35,7 @@ package Market{
       }
 
     def stat(){
-      println(goods)
+      println("Market: " + goods)
     }
               
               

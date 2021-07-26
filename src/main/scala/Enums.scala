@@ -20,7 +20,7 @@ package Agents{
     val WheatSeeds  = Value("wheatSeeds")
     val Bread       = Value("bread")
     val FeedStuff   = Value("feedStuff")
-
+  
     val allGoods = List(Wheat, Beef, Steak, WheatSeeds, Bread, FeedStuff) 
   }
 }
