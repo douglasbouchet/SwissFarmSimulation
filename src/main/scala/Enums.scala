@@ -7,6 +7,7 @@ package Agents{
     val pregnant    = Value("pregnant")
     val rdyToBeEat  = Value("RdyToBeEat")
     val calf        = Value("Calf")
+    val dead        = Value("Dead")
     }
 
   object Goods extends Enumeration{

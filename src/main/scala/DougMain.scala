@@ -7,11 +7,13 @@ object MainExample {
   
   var sim = new DougSimulation()
   
-  var herd = for(cow <- 1 to 1) yield new Cow(sim,false, 100);
+  var herd0 = for(cow <- 1 to 1) yield new Cow(sim, 100);
+  var herd1 = for(cow <- 1 to 1) yield new Cow(sim, 100);
   
-  var cattleFarm = new CattleFarm(sim, false, 1, herd.toList)
+  var grassLandCattleFarm = new CattleFarm(sim, true, 1, herd0.toList)
+  var notGrassLandCattleFarm = new CattleFarm(sim, false, 1, herd1.toList)
 
-  var agentList : List[Agents] = herd.toList :+ cattleFarm
+  var agentList : List[Agents] = herd0.toList ++ herd1.toList :+ grassLandCattleFarm :+ notGrassLandCattleFarm
 
 
 
@@ -19,7 +21,7 @@ object MainExample {
 
     sim.init(agentList)
 
-    sim.run(1000)
+    sim.run(500)
 
   }
 }

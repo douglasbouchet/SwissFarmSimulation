@@ -35,7 +35,6 @@ package Agents{
   }
 
    trait Animals extends Agents{
-    var organicFeedstuff: Boolean // (start with something simple, but then extends to all kinds of cereals etc)
     var age: Int // in year
     var health: Int //-> usefull to determine quality of the meat in f. of feedstuff, environnement, vaccin)
     var weight: Int // in kg
@@ -60,14 +59,15 @@ package Agents{
       var produced : List[(Goods,Int)] = ???
       val s : DougSimulation = sim
     }
-
-    case class CattleFarm(sim : DougSimulation, bio: Boolean, nEmployee: Int, initHerd: List[Cow]) extends Agents{
+    
+    //Grass land = cows eat grass, else cows eat imported feedstuff (assume import in anycase for the moment)
+    case class CattleFarm(sim : DougSimulation, grassLand: Boolean, nEmployee: Int, initHerd: List[Cow]) extends Agents{
 
       val s : DougSimulation = sim
       var required : List[(Goods,Int)] = List()
       var produced : List[(Goods,Int)] = List()
       
-      var CO2 : Double = 0.0
+      var cO2 : Double = 0.0
 
       var employee: List[Person] = List()
       var herd : List[Cow] = initHerd
@@ -95,7 +95,7 @@ package Agents{
         herd.foreach(cow => 
           if(cow.state == pregnant) {
             if (cow.pregnantSince >= PREGNANCY_DURATION){
-              val newCow = Cow(s, false, 100)
+              val newCow = Cow(s, 100)
               println("New Cow")
               herd = herd :+ newCow
               sim.addAgent(newCow)
@@ -122,6 +122,12 @@ package Agents{
           herd = herd.tail
           s.remAgent(killed)
           produced = List((Beef, killed.weight))
+          if(grassLand){
+            cO2 += KG_CO2_PER_KG_MEAT_GRASSLAND*killed.weight
+          }
+          else{
+            cO2 += KG_CO2_PER_KG_MEAT_NOT_GRASSLAND*killed.weight
+          }
           println("Killing a cow provided: " + produced)
       }
 
@@ -131,14 +137,13 @@ package Agents{
 
     
 
-    case class Cow(sim: DougSimulation, initOrganicFeedstuff: Boolean, initHealth: Int)
+    case class Cow(sim: DougSimulation, initHealth: Int)
       extends Animals{
       
       val s : DougSimulation = sim
       var required = List((FeedStuff,10)) // maybe not necessecary inside the cow class, but more on the cattlefarmer class
       var produced = List((Beef,0))
 
-      var organicFeedstuff = initOrganicFeedstuff
       var health = initHealth
       var age = 0
       var weight = 40

@@ -14,7 +14,7 @@ package DougSimulation{
       agentList.foreach(agent => agent.init())
       agentList.foreach(addAgent(_))
       market.init()
-      
+
       stat()
     }
 
@@ -37,7 +37,6 @@ package DougSimulation{
       agents.foreach(_.updateState(market))
 
       }
-    
       
     def run(turn: Int){
       var i : Int = 0
@@ -47,12 +46,27 @@ package DougSimulation{
 
       agents.foreach(agent => agent.stat())
       market.stat()
+      emittedPollution()
     }
 
     def stat(){
       println("The agents are : ")
       agents.foreach(agent => agent.stat())
       market.stat()
+    }
+
+    def emittedPollution() = {
+      agents.foreach(agent => agent match{
+        case x : CattleFarm => {
+          if(x.grassLand){
+            println("The grassLand CattleFarm produced: " + (x.cO2).round + " kg of CO2 per kg of meat")
+          }
+          else{
+            println("The mixed agriculture system (import feedstuff) CattleFarm produced: " + (x.cO2).round + " kg of CO2 per kg of meat")
+          }
+        }
+        case _ =>
+      })
     }
   }
 
