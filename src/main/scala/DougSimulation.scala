@@ -39,6 +39,8 @@ package DougSimulation{
       }
       
     def run(turn: Int){
+
+      println("Running the simulation for " + turn + " turns")
       var i : Int = 0
       for (i <- 0 to turn){
         passTurn()

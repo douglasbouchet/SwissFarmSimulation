@@ -1,11 +1,3 @@
-update the number of cows in cattle farm when cows are produced
-
-
-Role of the trader for the simulation ? 
-
-
-
-
 # Plan
 
 # The Class 
@@ -65,23 +57,35 @@ Dans l'algo:
 
 
 
+# The global Agent (The map):
+
+## What it needs to do: 
+
+- Put agents on location 
+- Manage actions of agents between them (maybe some locals action can be done by the agent themself but anyway they will have to tell their new state to the global agent, so maybe only the global agent manage the actions)? 
+- Manage the weather
+- Manage the market (all exchange) 
+  - Need a search algo to put agents in relation
+- May play the role of the government ?
+
+## What do we represent:
+- The roads form the edges of the network, they needs to be updated, so the network change
+  - Flux (vehicule per min)
+  - Type ? (dirt, tar etc)
+  - Restriction (no more than 20T, prohibited for tractor (e.g highway), private)
+  - Respect the shape of the real world (plot as plotted on google map) or just edges with caracteristic ?? The edge could be plot between each intersection -> hard to correctly represent the true land without overlapping-> prefer a real representation, but use edges that can have a slot shape between each intersection 
+- Lands 
+  - Type (field, pasture, vines, urban, other)
+  - Possessor (Agents ?), the one that interact on it (+ some other agents may interact on it also)
+  - Surface 
+  - Shape (as a polygone, with a list of sides)
+  - Connected to which road (where can be implemented latter, just say which side of the polygon, concerning koch on outgoing points)
+  - Some stats (dry/wet, quality of the sol) -> This can come after, and just add some attributs (EZ to add)
+  - + maybe we want to model rare events (boar, too much rain, freeze,...)
+- All other agents could need a graphical representation (e.g person by cities, farms next to their land etc) 
 
 
-QUESTIONS: 
-Is it a problem if the object are mutable ? eg cows 
-
-
-
-TODO:
-
-
-ADD CO2 production 
-
-Rendre le nombre de cow tuable a chaque tour un paramètre du cattlefarm
-
-- modifier un peu la structure pour ne pas avoir besoin de passser market en argument de updtate (passer market en global ??)
-
-
-Améliorer le marché en créeant des owner et Buyer 
-  Keep track of all ressources stored in the market as "goods"
-  But add a list of owner wich have a Good and a quantity and a price
+## How the agents are managed
+- Each agent chose individually what he wants to do
+- The global agent needs to keep state consistent of all agents -> each time an agent make a modification of its state -> report to the global agent (but only modifications that other agents may care about)
+- Some local actions don't need a report to the global agent, but they might have changes (e.g number of cows available to eat) that needs to be report.
