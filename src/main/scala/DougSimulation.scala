@@ -3,17 +3,17 @@ package DougSimulation{
   
   import Agents._
   import Goods._
-  import Market._
+  import TempMarket._
   
   class DougSimulation(){
 
     var agents : List[Agents] = List()
-    var market = new Market();
+    var TempMarket = new TempMarket();
     
     def init(agentList: List[Agents]){
       agentList.foreach(agent => agent.init())
       agentList.foreach(addAgent(_))
-      market.init()
+      TempMarket.init()
 
       stat()
     }
@@ -28,13 +28,13 @@ package DougSimulation{
 
     def passTurn(){
 
-      market.newProduct(agents)
+      TempMarket.newProduct(agents)
       
       //buy all needs etc 
-      agents.foreach(agent => agent.findSupplies(market))
+      agents.foreach(agent => agent.findSupplies(TempMarket))
 
       // Then change the state if all needs are found 
-      agents.foreach(_.updateState(market))
+      agents.foreach(_.updateState(TempMarket))
 
       }
       
@@ -47,14 +47,14 @@ package DougSimulation{
       }
 
       agents.foreach(agent => agent.stat())
-      market.stat()
+      TempMarket.stat()
       emittedPollution()
     }
 
     def stat(){
       println("The agents are : ")
       agents.foreach(agent => agent.stat())
-      market.stat()
+      TempMarket.stat()
     }
 
     def emittedPollution() = {

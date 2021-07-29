@@ -5,7 +5,7 @@ package Agents{
   import cowState._
   import Goods._
   import Numbers._
-  import Market._
+  import TempMarket._
 
   
 
@@ -22,11 +22,11 @@ package Agents{
     def stat(){
 
     }
-    def findSupplies(market: Market): Boolean = {
+    def findSupplies(TempMarket: TempMarket): Boolean = {
       println("findSupplies: This should have been overrided")
       false
     }
-    def updateState(market: Market){
+    def updateState(TempMarket: TempMarket){
       println("updtateState: This should have been overrided")
     }
 
@@ -80,14 +80,14 @@ package Agents{
         println("The CattleFarm has " + employee.length + " employee, and " + herd.length + " cows.")
       }
 
-      override def findSupplies(market: Market): Boolean = {
+      override def findSupplies(TempMarket: TempMarket): Boolean = {
         true
       }
 
       //each turn, ask for feedstuff for cows
       // produced a cow if its state is ready to be eat, but one at a time for the moment
       // inc. cows if one is pregnant since 6 turn 
-      override def updateState(market: Market){
+      override def updateState(TempMarket: TempMarket){
         stateCounter += 1
         produced = List()
         required = List((Wheat,herd.map(cow => cow.quantityFeedstuff).sum)) // add vaccin etc after 
@@ -161,13 +161,13 @@ package Agents{
       override def init(){
       }
 
-      override def findSupplies(market: Market) : Boolean = {
+      override def findSupplies(TempMarket: TempMarket) : Boolean = {
         var obtained = true
         // TODO problem si plusieurs required, on peut prendre premier good mais si fail au deuxieme, le marché a quand même
         // été débité du premier, donc voir comment mieux gérer ca (avec une liste de possédé etc)
         required.foreach(item =>{
           //println("The item required is :" + item)
-          if(market.getProduct(item._1,item._2) == false){
+          if(TempMarket.getProduct(item._1,item._2) == false){
             obtained = false
           }
         })
@@ -175,10 +175,10 @@ package Agents{
         obtained
       }
 
-      override def updateState(market: Market){
+      override def updateState(TempMarket: TempMarket){
         stateCounter += 1
         age = stateCounter / 12
-        findSupplies(market) match {
+        findSupplies(TempMarket) match {
           case x if x == true & weight < 700 => {
             weight += randomBetween(6,13)
             health = (100).min(health + 3)

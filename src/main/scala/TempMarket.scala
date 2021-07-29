@@ -1,4 +1,4 @@
-package Market{
+package TempMarket{
 
   
   import Agents._
@@ -6,7 +6,7 @@ package Market{
   
   
   //Basic version, everyone can buy/sell to everyone, but this will need to change
-  class Market(){
+  class TempMarket(){
     var goods : scala.collection.mutable.Map[Goods,Int] = scala.collection.mutable.Map() // we do not store yet provider of the source but this will come after(in order to manage silos etc..)
     
     def init(){
