@@ -15,6 +15,7 @@ Lands only grows Cereals (superclass of all cereals (wheat, barley, mais etc))
 Only cows. 
 Market is a unique place, where we can find all buyers and sellers, but could become separate things 
 (e.g some local markets, big international markets, etc... in phase 2+). 
+Lands are only connected to a road -> phase +, add where the land in connected on the road, to have more efficient travel computation
 
 Key word : basics needs for all entity, basic production
 

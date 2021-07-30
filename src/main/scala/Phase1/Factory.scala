@@ -1,9 +1,7 @@
-package factory{
+package factory
 
   trait Factory{
     
     
     
   }
-  
-}

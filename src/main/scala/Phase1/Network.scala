@@ -1,26 +1,22 @@
 package network{
 
   import enum.TypeLand._
+  import geographic._
 
-  class Network(){
+  //This is the object that will handle all the simulation
+  object Network{
 
-  }
+    //This is 
+    var roadSystem = new RoadSystem()
 
-  class Land(){ 
 
-    var landType: TypeLand = Unknown
-    val connectedTo :  Road = ???
-    val owner : Any = ??? //TODO see how to implement it
 
-  }
-
-  class Road(){
-
-  }
-
-  class Intersection(){
-
-  val intersection: List[Road] = ???
+    def init(){
+      //call the init methods of attributs if they have
+    }
 
   }
+
+
+  
 }

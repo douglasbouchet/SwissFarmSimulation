@@ -1,0 +1,6 @@
+package owner{
+
+class Owner(){
+  
+}
+}

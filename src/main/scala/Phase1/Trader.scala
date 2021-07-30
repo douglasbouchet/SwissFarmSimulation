@@ -55,6 +55,11 @@ package Trader{
     }
     
     }
+
+    trait Owner{
+
+      
+    }
     
     
   //case class Balance(_initMoney: Int, _initGoods: List[Map[Goods, Int]]){

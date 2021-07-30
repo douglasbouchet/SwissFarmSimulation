@@ -1,0 +1,7 @@
+package commodities{
+
+  trait Commodities{
+    
+  }
+
+}

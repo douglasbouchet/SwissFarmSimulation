@@ -1,6 +1,5 @@
-
+package Agents
 import code._
-
 
 trait Sim {
   type T = Int // time type
@@ -47,12 +46,8 @@ object Sim {
 } // end object Sim.
 
 
-trait SimpleSim extends Sim {
-  def action : Instruction
-  override def algo = __forever(action, __wait(1))
-}
-
-//trait blabla extends Sim {
+//Integrate into this sim the notion of objectives (in order to influence decisions made by agents)
+//trait SimpleSim extends Sim {
 //  def action : Instruction
 //  override def algo = __forever(action, __wait(1))
 //}
