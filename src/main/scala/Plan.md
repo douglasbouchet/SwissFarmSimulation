@@ -28,3 +28,6 @@ More complex aliments are proposed. Thoses have a more accurate influence on Per
 More complex lands, influence of quality of ground on production (dry, weet,...)
 Where does the ressources of the source come from, model it, make it evolve
 More complicated market, prices influence by quantity, amount of work needed to produce the good, possibility to negotiate the price 
+
+
+//TODO see if we don't merge the trader and the owner into a single trait 

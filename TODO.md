@@ -61,40 +61,31 @@ Dans l'algo:
 
 ## What it needs to do: 
 
-- Manage actions of agents between them
+- Put agents on location 
+- Manage actions of agents between them (maybe some locals action can be done by the agent themself but anyway they will have to tell their new state to the global agent, so maybe only the global agent manage the actions)? 
 - Manage the market (all exchange) 
+  - Need a search algo to put agents in relation
 - Manage the weather
-- Should not play the role of the government ?
+- May play the role of the government ?
 
 ## What do we represent:
-- Lands 
-  - Type (field, pasture, vines, urban?, other)
-  - Possessor (Agents ?), the one that interact on it (+ some other agents may interact on it also)
-  - Shape (as a polygone, with a list of sides)
-  - Location of each point of the polygone
-  - Connected to which road (where can be implemented latter, just say which side of the polygon, concerning koch on outgoing points)
-  - Surface 
 - The roads form the edges of the network, they needs to be updated, so the network change
   - Flux (vehicule per min)
   - Type ? (dirt, tar etc)
   - Restriction (no more than 20T, prohibited for tractor (e.g highway), private)
-  - Respect the shape of the real world (plot as plotted on google map)
-(The edge could be plot between each intersection -> hard to correctly represent the true land without overlapping-> prefer a real representation, but use edges that can have a slot shape between each intersection)
-And in case not connected, state it.
+  - Respect the shape of the real world (plot as plotted on google map) or just edges with caracteristic ?? The edge could be plot between each intersection -> hard to correctly represent the true land without overlapping-> prefer a real representation, but use edges that can have a slot shape between each intersection 
+- Lands 
+  - Type (field, pasture, vines, urban, other)
+  - Possessor (Agents ?), the one that interact on it (+ some other agents may interact on it also)
+  - Surface 
+  - Shape (as a polygone, with a list of sides)
+  - Connected to which road (where can be implemented latter, just say which side of the polygon, concerning koch on outgoing points)
   - Some stats (dry/wet, quality of the sol) -> This can come after, and just add some attributs (EZ to add)
   - + maybe we want to model rare events (boar, too much rain, freeze,...)
-- Not all other agents could need a graphical representation (e.g person by cities, farms next to their land etc) 
+- All other agents could need a graphical representation (e.g person by cities, farms next to their land etc) 
 
 
 ## How the agents are managed
 - Each agent chose individually what he wants to do
 - The global agent needs to keep state consistent of all agents -> each time an agent make a modification of its state -> report to the global agent (but only modifications that other agents may care about)
 - Some local actions don't need a report to the global agent, but they might have changes (e.g number of cows available to eat) that needs to be report.
-
-
-
-# Questions to the organisation
-- Based on the characteristics of a farm(type of culture, cereals, surface and pollution), what changes are possible in order to make it more sustainable. 
-- What are the benefits of an organic agriculture on consumer.
-- List of all the needs for farmer and cattlefarmer ? 
-- Needs in feed ressources for the swiss population ?
