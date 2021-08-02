@@ -3,7 +3,6 @@ package factory
   import code._
   import Agents._
   import `enum`.Goods.Goods
-  //import enum._
   import owner._
   trait Factory{
 
@@ -21,33 +20,24 @@ package factory
 
     // does not do its own buying
     case class ProductionLine(
-                               val pls: ProductionLineSpec,
-                               var o: Owner,
-                               val salary: Int,
-                               val start_time: Int,
-
-                               //  var log : List[(Int, Double)] = List(),
-                               // (time production run was completed, efficiency of production run)
-
-                               // state of the machine (this plus env)
-                               var goodwill : Double = 0.0,
-                               var lost_runs_cost : Double = 0.0,
-                               // cost from zero-efficiency production runs
-                               private var rpt : Int = 0,
-                               private var frac : Double = 1.0,
-                               // fraction of theoretical capacity currently achieved
-                               private var costs_consumables : Double = 0.0 // of current production run
-
-                             ) extends Sim {
+       val pls: ProductionLineSpec,
+       var o: Owner,
+       val salary: Int,
+       val start_time: Int,
+       //  var log : List[(Int, Double)] = List(),
+       // (time production run was completed, efficiency of prod
+       // state of the machine (this plus env)
+       var goodwill : Double = 0.0,
+       var lost_runs_cost : Double = 0.0,
+       // cost from zero-efficiency production runs
+       private var rpt : Int = 0,
+       private var frac : Double = 1.0,
+       // fraction of theoretical capacity currently achieved
+       private var costs_consumables : Double = 0.0 // of current production run
+      ) extends Sim {
       init(start_time);
 
-      //def mycopy(_o: Owner) = {
-      //  val p = this.copy();
-      //  p.o = _o;
-      //  this.copy_state_to(p);
-      //  //println("ProductionLine.mycopy(" + _o + "): pl.get_time = " + p.get_time);
-      //  p
-      //}
+      def make()
 
       protected def algo = __forever(
         __do { // start of production run
@@ -60,7 +50,7 @@ package factory
             frac = math.min(frac, n.toDouble / x._2);
           }
           goodwill = costs_consumables;
-          if((frac < 1.0) && (! GLOBAL.silent))
+          if(frac < 1.0)
             println(o + " " + " starts low-efficiency run.");
 
           rpt = 0;
@@ -84,17 +74,9 @@ package factory
 
           if(units_produced > 0) {
             o.make(pls.produced._1, units_produced, unit_cost);
-
-            if(! GLOBAL.silent)
-              println(o + " produces " + units_produced + "x " +
-                pls.produced._1 + " at efficiency " + frac +
-                " and " + (unit_cost/100).toInt + "/unit.");
           }
           else {
             lost_runs_cost += total_cost;
-
-            if(! GLOBAL.silent)
-              println(o + " had a production line with zero efficiency.");
           }
           //      log = (get_time, frac) :: log;
         }
@@ -124,19 +106,14 @@ package factory
     }
 
 
-    class Factory(pls: ProductionLineSpec,
-                  shared: Simulation
-                 ) extends SimO(shared) {
-
+    class Factory(pls: ProductionLineSpec) extends SimO(shared) {
       var pl : List[ProductionLine] = List()
-      private var zombie_cost2 : Double = 0.0 // cost from canceled prod. runs
       var prev_mgmt_action : Int = 0
       protected var hr : HR = new HR(shared, this)
       protected var goal_num_pl = 0;
 
       // constructor
       {
-        shared.market(pls.produced._1).add_seller(this);
         goal_num_pl = 1; // have one production line
       }
 
@@ -213,126 +190,6 @@ package factory
       protected def goodwill: Int = pl.map(_.goodwill).sum.toInt
 
       override def stat {
-        val zombie_cost = pl.map(_.lost_runs_cost).sum.toInt;
-
-        println((
-          (assets + goodwill + liabilities)/100,
-          ((assets + goodwill)/100, (assets/100, goodwill/100),
-            liabilities/100),
-          zombie_cost.toInt/100,
-          zombie_cost2.toInt/100,
-          inventory_to_string(),
-          pl.length
-        ))
-      }
-
-      protected def tactics() = {
-        import Timeseries._;
-
-        /* cost and price concerns disregarded -- everyone makes market orders.
-           supply of consumables disregarded because we want some stability
-           in the simulation.
-        //val labor_cost_fc = new Timeseries(shared.timer, 1.0/0, (t: Int) => salary)
-        // absolute volume that will be available to us
-        val sourcing_volume: Forecast = ...
-        // not needed now, since everybody makes market orders
-        //val sourcing_unit_cost: Int => Forecast = ... // given volume to be bought
-        // for the same reason, no price forecast is needed now.
-        */
-
-
-        def historic_demand : Timeseries[Int] = sum_grp[SalesRecord](
-          shared.market(pls.produced._1).order_history.toTimeseries, _.num_ordered);
-
-        val past_demand: Timeseries[Int] =
-          historic_demand.end_at(shared.timer - 1);
-
-        val demand_fc : Double =
-          super_forecast(past_demand).apply(shared.timer - 1);
-
-
-        // the number of units we can sell per tick at a price point
-        //val demand_fc2: Double => Forecast = ...
-
-        // TODO: should be big enough to be a buffer against fluctuations
-        // of demand. probabilistic modeling once volatility of demand is
-        // modeled.
-        // val desired_inventory = 2 * demand_fc;
-
-        // TODO: subtract the supply by other suppliers that is actually
-        // traded from demand_fc.
-
-        /*
-        // the number of units we are producing if all production lines
-        // are perfectly efficient (= we can source all consumables)
-        def units_produced(num_pl: Int) =
-          num_pl * pls.theoretical_max_productivity
-        val suitable_num_pl = argmin(1, num_pl,
-              (n: Int) => math.abs(demand_fc - units_produced(n)));
-        */
-
-        // TODO: maximize assets - liabilities, not production we can sell.
-        /*
-          if we run production lines at low efficiency, we lose money.
-          take into account how much we can sell at a price point.
-          maintaining debt causes us to pay interest.
-          val v = smoothe(new Timeseries(delta (assets - liabilities)), window);
-          val fc = forecast(v).Apply(shared.timer + 12);
-          probfail = prob(fc < 0)
-        */
-        /*
-            // Also reduce production if we are at over capacity with respect to the
-            // available consumables.
-            val efficiencies = pl.flatMap(x => x.log.take(2)).map(_._2);
-            val pl_fail: Boolean = (efficiencies.length - efficiencies.sum >= 2);
-            if(pl_fail)
-            {
-              remove_production_line();
-              prev_mgmt_action = shared.timer;
-            }
-        */
-
-        val suitable_num_pl =
-          math.ceil(demand_fc / pls.theoretical_max_productivity).toInt;
-
-        if(! GLOBAL.silent)
-          println(this + " demand_fc = " + demand_fc + ", best_pl = " +
-            suitable_num_pl + ", currently = " + pl.length);
-
-
-        if(suitable_num_pl >= 1) {
-          println(this + ": First nested simulation starts.");
-          goal_num_pl = suitable_num_pl;
-          val old2new1 = shared.run_sim(10);
-          val future_self1 = old2new1(this).asInstanceOf[Factory];
-          future_self1.stat;
-          println(this + ": First nested simulation ends.");
-
-          println(this + ": Second nested simulation starts.");
-          //run simulation to see whether this is better.
-          goal_num_pl -= 1;
-          val old2new2 = shared.run_sim(10);
-          val future_self2 = old2new2(this).asInstanceOf[Factory];
-          future_self2.stat;
-          goal_num_pl += 1;
-          println(this + ": Second nested simulation ends.");
-
-          def valuation(f: Factory) = f.assets + f.goodwill + f.liabilities;
-
-          if(valuation(future_self1) < valuation(future_self2))
-            println("ONE LESS WOULD BE BETTER");
-          else println(goal_num_pl + " IS A GOOD DECISION!")
-        }
-
-        goal_num_pl = suitable_num_pl;
-      }
-
-
-      // This is the cost-based price of product on stock
-      override def price(dummy: Commodity) : Option[Double] = {
-        if(available(pls.produced._1) > 0)
-          Some(1.0 * inventory_avg_cost.getOrElse(pls.produced._1, 0.0))
-        else None
       }
 
 
@@ -345,7 +202,6 @@ package factory
           {
             prev_mgmt_action = shared.timer; // call before tactics to avoid
             // immediate recursion in nested simulation.
-            tactics(); // changes goal_num_pl
           }
 
           for(i <- (pl.length + 1) to goal_num_pl)

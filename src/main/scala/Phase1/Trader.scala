@@ -7,10 +7,11 @@ package Trader{
 
   import Market._
   import enum.Goods._
+  import owner._
   
   trait Trader{
     
-    var balance : Balance 
+    var owner: Owner 
     var localTrader : List[Trader] = List()
     var market: Market = Market()
     
@@ -19,22 +20,29 @@ package Trader{
     //Use to buy a product, choice between market and local buy can be done randomly:
     //Trivial example, change next
     //Can be overrided after to offer more complexity
+    //The future represent the possibility that a supplie, good is currently not buyable/sellable, 
+    //But could be in the following turns
     def buy(product: (Any, Int)): Future[Boolean] = {
+      //or if local trader does not have the needed supplies
       if(localTrader.isEmpty){
         buyOnMarket(market, product)
+        //perfom changes of capital in both traders + change of inventory
       }
       else{
         buyLocally(localTrader.head, product)
-        //random choice between both, etc...
+        //perfom changes of capital in both traders + change of inventory
+        //random choice between both, or best price etc... + add fact that local are priviliged (entraide)
       }
     }
+    
 
-    def buyLocally(_localTrader: Trader, product: (Any, Int)): Future[Boolean] = {
-      return Future{true}
-    }
-    def buyOnMarket(_market: Market, product: (Any, Int)): Future[Boolean] = {
-      return Future{true}
-    }
+    //CARRRRE, SO OPERATIONS NEEDS TO BE ATOMIC
+    def buyLocally(_localTrader: Trader, product: (Any, Int)): Future[Boolean] = ???
+      //return true
+    //}
+    def buyOnMarket(_market: Market, product: (Any, Int)): Future[Boolean] = ???
+    //  return Future{true}
+    //}
 
     //Same with sell, in case of sellOnMarket, the product may not be sell immediatly or may never by sell 
     def sell(product: (Any, Int)): Future[Boolean] = {
@@ -47,36 +55,24 @@ package Trader{
       }
     }
 
-    def sellLocally(_localTrader: Trader, product: (Any, Int)): Future[Boolean] = {
-      return Future{true}
-    }
-    def sellOnMarket(_market: Market, product: (Any, Int)): Future[Boolean] = {
-      return Future{true}
-    }
+    def sellLocally(_localTrader: Trader, product: (Any, Int)): Future[Boolean] = ???
+    //  return true
+    //}
+    def sellOnMarket(_market: Market, product: (Any, Int)): Future[Boolean] = ???
+    //  return Future{basicSupplier}
+    //}
     
-    }
-
-    trait Owner{
-
-      
-    }
-    
-    
-  //case class Balance(_initMoney: Int, _initGoods: List[Map[Goods, Int]]){
-  //temp version only for compiling, actual version above
-  case class Balance(_initMoney: Int, _initGoods: List[Map[Goods, Int]]){
-    
-    //var goods : List[Map[Goods, Int]] = _initGoods
-    //temp version only for compiling, actual version above
-    var goods : List[Map[Goods, Int]] = _initGoods
-    var money : Int = _initMoney
-    
-    //Called by the trader when he buy or sells some product
-    //Use money to add good to goods
-    def add() = ???
-    //Remove good from goods to make money
-    def remove() = ???
-    
+    //Some functions to perform an exchange, based on changing the capital and inventory of an other Trader
+    def transferMoneyTo(other: Trader, amount: Int): Boolean = {
+      //ofc add assets etc...
+      this.owner.capital -= amount
+      other.owner.capital += amount
+      return true
     }
 
+    //+ an other method for crediting this trader when selling to someone or negative amount ? 
+
+    //used in the upper methods before calling a buy/sell operation
+    def traderGotSupplies(supplies: List[(Goods, Int)], _trader : Trader) : Boolean = ???
+    }
 }

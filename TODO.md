@@ -89,3 +89,8 @@ Dans l'algo:
 - Each agent chose individually what he wants to do
 - The global agent needs to keep state consistent of all agents -> each time an agent make a modification of its state -> report to the global agent (but only modifications that other agents may care about)
 - Some local actions don't need a report to the global agent, but they might have changes (e.g number of cows available to eat) that needs to be report.
+
+
+
+
+
