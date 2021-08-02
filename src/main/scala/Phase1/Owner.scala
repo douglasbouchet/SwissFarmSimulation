@@ -2,12 +2,13 @@ package owner
 
 import enum.Goods._
 
-class Owner(){
+class Owner(_capital: Int){
+
 
   //Store all the goods owned by the trader
   protected var inventory : collection.mutable.Map[Goods, Int] = collection.mutable.Map[Goods, Int]()
   //TODO currently public, but pass in private after, just see how to modify both capital in a transfert
-  var capital : Int 
+  var capital : Int = _capital
 
   //def add some actions to perfom changes on capital and inventory (when buy/sell)
   //operations are made by trader/people 

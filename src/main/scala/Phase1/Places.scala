@@ -10,24 +10,24 @@ package places{
 
     val connectedTo: Road
     var location: (String,String,String) //In the form Canton/district/city
-    var owner: Sim
+    var placePossessor: Sim
 
   }
 
-  class Land(_connectedTo: Road, _location: (String,String,String), _surface: Int, _owner: Sim) extends Places {
+  class Land(_connectedTo: Road, _location: (String,String,String), _surface: Int, _placePossessor: Sim) extends Places {
     
     var landType: TypeLand = Unknown
     val connectedTo :  Road = _connectedTo
     var location : (String,String,String) = _location
-    var owner : Sim = _owner //TODO see how to implement it
+    var placePossessor : Sim = _placePossessor //TODO see how to implement it
     var surface : Int = _surface // in ha
     
   } 
-  class supermarket(_connectedTo: Road, _location: (String,String,String), _owner : Sim) extends Places {
+  class supermarket(_connectedTo: Road, _location: (String,String,String), _placePossessor : Sim) extends Places {
 
     val connectedTo :  Road = _connectedTo
     var location = _location 
-    var owner : Sim = _owner //TODO see how to implement it
+    var placePossessor : Sim = _placePossessor //TODO see how to implement it
   }
 
 }

@@ -11,7 +11,7 @@ class People(_location: (String,String,String))extends Sim with Places{
 
   var location : (String,String,String) = _location
   val connectedTo: Road = ???
-  var owner: Sim = this
+  var placePossessor: Sim = this
 
   
   //Buy food (in supermarket, butcher etc...)
