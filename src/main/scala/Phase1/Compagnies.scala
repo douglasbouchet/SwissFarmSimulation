@@ -2,7 +2,7 @@ package Agents
 
 import Trader._
 import code.Instruction
-import geographic.Road
+import network.Road
 import people._
 import places._
 import owner._
@@ -13,7 +13,7 @@ trait Compagnies extends Sim with Trader{
   //Used to represent the stock of the compagnies 
   var owner: Owner 
   //This is where the compagny is
-  var place : Places 
+  var place : Place 
   
   var required: List[Goods] = List()
   var employee : List[People]
@@ -38,7 +38,7 @@ case class Farmer(_capital : Int, _connectedTo : Road, _location: (String,String
 
   //Herited methods/objects
   override var employee: List[People] = _
-  override var place : Places = new Land(_connectedTo, _location, _surface, this)
+  override var place : Place = new Land(_connectedTo, _location, _surface, this)
 
   override def hire(): Boolean = ???
   override def fire(): Boolean = ???

@@ -7,12 +7,10 @@ import geographic._
 
 
 //TODO see if people need to extend Trader in order to buy food 
-class People(_location: (String,String,String))extends Sim with Places{
+//change the type of place in function of people e.g a farmer live in a farm, other people live in house. etc
+class People(_place : Place)extends Sim{
 
-  var location : (String,String,String) = _location
-  val connectedTo: Road = ???
-  var placePossessor: Sim = this
-
+  var place: Place = _place
   
   //Buy food (in supermarket, butcher etc...)
   def algo: Instruction = ???
