@@ -21,6 +21,7 @@ trait Compagnies extends Sim with Trader{
   def hire(): Boolean
   def fire(): Boolean
 
+
   //Boolean in phase 1 cause on/off for production, in phase + change type
   //Use the inventory of the owner to check, + may need access to market from trader 
   //in order to perform actions to fullfiull the stuff required
@@ -34,7 +35,7 @@ trait Compagnies extends Sim with Trader{
 
 
 //TODO change by Farm, currently used in upper directory
-case class Farmer(_capital : Int, _connectedTo : Road, _location: (String,String,String), _surface: Int) extends Compagnies {
+case class Farm(_capital : Int, _connectedTo : Road, _location: (String,String,String), _surface: Int) extends Compagnies {
 
   //Herited methods/objects
   override var employee: List[People] = _

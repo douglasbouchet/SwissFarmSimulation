@@ -19,12 +19,6 @@ trait Sim {
     current_time   = start_time;
   }
 
-  //protected def copy_state_to(_to: Sim) {
-  //  _to.current_pos    = current_pos
-  //  _to.current_time   = current_time;
-  //  _to.algo_c = compile(_to.algo);
-  //}
-
   /** Runs until at most time `until`. */
   def run_until(until: T) : Option[T] = {
     val (a, b, next_goal_time) =
@@ -43,7 +37,7 @@ object Sim {
     code.execp[Sim, Int](sims, (s: Sim, t: Int) => s.run_until(t),
                          start_time, end_time)
 
-} // end object Sim.
+} 
 
 
 //Integrate into this sim the notion of objectives (in order to influence decisions made by agents)
