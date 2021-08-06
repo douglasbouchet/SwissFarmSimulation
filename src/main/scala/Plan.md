@@ -3,14 +3,17 @@
 
 * What do we simulate:
     * Agricultural sector  
-        $\bullet$ **grain farmer, cereal farmer, cattle farmer** TODO see which cereals  
+        $\bullet$ **grain farmer**   
+        $\bullet$ **cereal farmer**  
+        $\bullet$ **cattle farmer** TODO see which cereals  
         $\Rightarrow$ next:
         - *pig farmer*, *poultry farmer*,
         based on most consumed type of animal in Switzerland  
         ["Stats"](#a) 
     * Food industry  
-        $\bullet$ **wholesaler, packaging compagny**  
-        $\bullet$ Cereals: **agricultural cooperative, mills, bakery**  
+        $\bullet$ **wholesaler**  
+        $\bullet$ **packaging compagny**  
+        $\bullet$ Cereals: **agricultural cooperative**, **mills**, **bakery**  
         $\bullet$ Beef Meat: **slaughtered house, butchery + ?** TODO  
         ["Assumptions"](#b)
         $\Rightarrow$ next: TBD
@@ -21,14 +24,14 @@
           - variable pay, based on current swiss situation if data available  
           - add the origin of food (bio farm, permaculture, ...) to the product sold on market  
           - if data concerning behavior of people regarding food consumption based on their salary + product's origin + meat consumption implement it
-    * Lands  
+    * Lands  TODO
         $\bullet$ **arable land**: only represent the surface, and crops type
         $\bullet$ **other lands**: ?  
         $\Rightarrow$ next: add soil quality (parameters TBD...)  
     * Market
       * Types of contract: TODO
-* The food supply chain  
-    1. Farmers buy *seeds* and *feedstuff* to *wholesaler* and/or *agricultural cooperative*
+* The food supply chain (bead wheat)
+    1. Farmers buy *seeds* and *feedstuff* (only feed wheat + grass atm) to *wholesaler* and/or *agricultural cooperative*
     2. Cereals are sold to *cooperative* or *wholesaler*
     3. Cows are sent to *slaughetered houses*
     4. Cereals are *stored*, *transformed into flour* on the spot or inside mills
@@ -46,9 +49,30 @@ $\bullet$ agricultural equipment (tractor, cereal bins,...)
 
 * Add a basic production of the CO2 for the food supply chain
 
+* Data structure of lands:
+
+* The relationship network, represented as a graph (undirected ?)
+  * Each agent is represented as a node
+  * Relation between agents are represented by edge
+  * Edges are created by making exchange between the 2 nodes
+  * Goal of the relationship network: keep track of interactions, to give choice to agent to pick someone from their network, or find someone on the market
+  * $\Rightarrow$ next: edge have different level == importance of relationship
+    * level1 = basic level, both nodes can directly talk to each other (stored in their local cache)
+    * level2:
+      * other node preferred vs market (can be selected randomly with proba)
+      * access to other node's network ? 
+      * contracts can be made easier TODO see contract part to see how this can influence the contracts ?
+    * making exchange increase level, don't make decrease
+  
+* Different types of market exchange:
+  - Market is a unique place, where we can find all buyers and sellers, but could become separate things (e.g some local markets, big international markets, etc... in phase 2+). BADDDDD
+  - Different types of contract ? TODO 
+
 # Phase 2, inclusion of types of agriculture
 
 ## Types of agriculture: ["definition"](http://www.riav.fr/quels-sont-les-differents-types-agriculture/)
+
+TBD, possibles types + required and effects needs to be discussed with other people
 - Conventional agriculture
 - Organic farming
 - Sustainable agriculture
@@ -61,11 +85,14 @@ $\bullet$ agricultural equipment (tractor, cereal bins,...)
   * or randomly assign 
   * Goal is to have the current situation of swiss agriculture, in order to compare it with phase 3
 
+* This will probably need to adapte the supply needed by farmer
+* Will influence productivity & economic
+
 * Measurement of food supply chain on CO2 emission + other pollution (soil quality, water quality ? )
   * **True cost**
   * Need advise of Christian or experts to determine the major factor of pollution emission in food supply chain
 
-# Phase 3, impacts of types of agriculture
+# Phase 3: impact of types of agriculture
 
 * Farmers can change method of production:
   *  can buy fertilizer, pesticide, vaccin, nutrients
@@ -81,17 +108,11 @@ Goal is to play with differents scenarios and see the total CO2 + other pollutio
 
 * Mesuring effect of different agriculture types
   * Effects on soil quality, pollution due to type of cereals used, intensity and methods of farming
+  * Economic impact 
   * Compare it to previous result 
   
   
-- Data structure of the world (TODO):
-  - Land and roads represented as a network
-  - Lands only grows Cereals (superclass of all cereals (wheat, barley, mais etc))
-  - More complex lands, influence of quality of ground on production (dry, weet,...)
-  - Lands are only connected to a road -> phase +, add where the land in connected on the road, to have more efficient travel computation
-- How exchange are made between each agents (TODO)
-  - Market is a unique place, where we can find all buyers and sellers, but could become separate things (e.g some local markets, big international markets, etc... in phase 2+). BADDDDD
-  - Different types of contract ? TODO 
+
 
 
 More complicated market, prices influence by quantity, amount of work needed to produce the good, possibility to negotiate the price 
@@ -124,3 +145,22 @@ For the moment, we assume that packaging (primary, secondary, tertiary) is made 
 
 6. What are the changes in term of requires(more work, more products,...) compared to the production(ton per ha) induced by a change of type of agriculture.
 I.e what is the cost of changing agriculture's type (only financial cost could be taken into account but if possible we can use the True cost method proposed by Christian in order to see the real difference by taking into account durability of thoses changes). Easier if you want to convince the governement or people that changing your agriculture type can be worth, even if your productivity has decreased.
+
+# Disagrement with Koch code
+
+1. Land should be a class instead of commodity, in order to add a localization, and other data on them like soil quality etc..
+
+# Contracts (Temp)
+
+Input based contracts, output based contracts
+
+contracts involved incompletness 
+
+Souvent des contrats car monde agricole pas sur de: (possbilité de mauvaises récoltes, périssable donc 
+doivent être vite stocké, cycle de production long (mois voir années)). concerne surtout la viande 
+
+Diff: prix de marché vs prix de campagne ??????????????
+
+Vente soit par la coopérative(prix de campagne askip), soit par futur contract (futures market for agriculture interdit en Suisse) (prix, location, quantité dédicé à l'avance) 
+sur Euronext pour la Suisse ? obligatoire pour la france donc peut-être pareil.
+sinon il existe : Chicago Board of Trade (CBOT),Kansas City Board of Trade (KCBT),Minneaolis Grain Exchange (MGEX) (au USA)
