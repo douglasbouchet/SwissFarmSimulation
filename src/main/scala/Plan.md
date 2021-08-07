@@ -4,8 +4,8 @@
 * What do we simulate:
     * Agricultural sector  
         $\bullet$ **grain farmer**   
-        $\bullet$ **cereal farmer**  
-        $\bullet$ **cattle farmer** TODO see which cereals  
+        $\bullet$ **cereal farmer**  TODO see which cereals  
+        $\bullet$ **cattle farmer** 
         $\Rightarrow$ next:
         - *pig farmer*, *poultry farmer*,
         based on most consumed type of animal in Switzerland  
@@ -15,7 +15,7 @@
         $\bullet$ **packaging compagny**  
         $\bullet$ Cereals: **agricultural cooperative**, **mills**, **bakery**  
         $\bullet$ Beef Meat: **slaughtered house, butchery + ?** TODO  
-        ["Assumptions"](#b)
+        ["Assumptions"](#b)  
         $\Rightarrow$ next: TBD
     * **People**  
         $\bullet$ Workers and consumers at the moment, constant and guaranteed salary  
@@ -24,30 +24,36 @@
           - variable pay, based on current swiss situation if data available  
           - add the origin of food (bio farm, permaculture, ...) to the product sold on market  
           - if data concerning behavior of people regarding food consumption based on their salary + product's origin + meat consumption implement it
-    * Lands  TODO
-        $\bullet$ **arable land**: only represent the surface, and crops type
+    * Lands  TODO  
+        $\bullet$ **arable land**: only represent the surface, and crops type  
         $\bullet$ **other lands**: ?  
         $\Rightarrow$ next: add soil quality (parameters TBD...)  
-    * Market
-      * Types of contract: TODO
-* The food supply chain (bead wheat)
+* Markets:
+    * 2 types of market: **derivative**, **on spot**
+        * **derivative**: *right (options)/obligation (futures)*
+            * Exchange-traded derivative contract
+            * Over-the-counter 
+        * **on spot**: exchange directly (physical)  
+
+* The food supply chain (bread wheat)
     1. Farmers buy *seeds* and *feedstuff* (only feed wheat + grass atm) to *wholesaler* and/or *agricultural cooperative*
     2. Cereals are sold to *cooperative* or *wholesaler*
     3. Cows are sent to *slaughetered houses*
-    4. Cereals are *stored*, *transformed into flour* on the spot or inside mills
+    4. Cereals are *stored*, *transformed into flour* on the spot or inside *mills*
     5. Meat is sent to *butchery*
-    6. Cereals are sent to *bakery* to be transformed into *bread*
-    7. Meat and cereals are sold to *packaging compagny*
-    8. They are ready to be distributed on the market. 
+    6. Flour is sent to *bakery* to be transformed into *bread*
+    7. Meat and bread are sold to *packaging compagny*
+    8. They are ready to be distributed on the market.   
 
-Find the start point where basic supplies are just "generated": 
-- ex: vaccin are mades by pharmaceutical laboratory, but this one does not need to import nitrate, alcool, etc.., it just create vaccin
+* What are the sources ? 
+    * Find the start point where basic supplies are just "generated": 
+        * ex: vaccin are mades by pharmaceutical laboratory, but this one does not need to import nitrate, alcool, etc.., it just create vaccin
+    * Can be seen as factory that does not have any requires  
+    - $\bullet$ seeds farmers     
+    - $\bullet$ pesticides, fertilizer, vaccins + ?  
+    * $\bullet$ agricultural equipment (tractor, cereal bins,...)  
 
-$\bullet$ seeds farmers     
-$\bullet$ pesticides, fertilizer, vaccins + ?  
-$\bullet$ agricultural equipment (tractor, cereal bins,...)  
-
-* Add a basic production of the CO2 for the food supply chain
+* Add a basic(simple) production of CO2, water & soil pollution, for the food supply chain
 
 * Data structure of lands:
 
@@ -64,19 +70,15 @@ $\bullet$ agricultural equipment (tractor, cereal bins,...)
       * contracts can be made easier TODO see contract part to see how this can influence the contracts ?
     * making exchange increase level, don't make decrease
   
-* Different types of market exchange:
-  - Market is a unique place, where we can find all buyers and sellers, but could become separate things (e.g some local markets, big international markets, etc... in phase 2+). BADDDDD
-  - Different types of contract ? TODO 
-
 # Phase 2, inclusion of types of agriculture
 
 ## Types of agriculture: ["definition"](http://www.riav.fr/quels-sont-les-differents-types-agriculture/)
 
-TBD, possibles types + required and effects needs to be discussed with other people
+TBD, possibles types + required and effects needs to be discussed with other people  
 - Conventional agriculture
-- Organic farming
-- Sustainable agriculture
-- Integrated agriculture
+- Organic farming  
+- Sustainable agriculture  
+- Integrated agriculture  
 - And the use of farming's product as: fertilizer, pesticide, vaccin, nutrients, ...
 
 * Each farmer get assigned a type of agriculture:
@@ -111,14 +113,7 @@ Goal is to play with differents scenarios and see the total CO2 + other pollutio
   * Economic impact 
   * Compare it to previous result 
   
-  
 
-
-
-More complicated market, prices influence by quantity, amount of work needed to produce the good, possibility to negotiate the price 
-
-
-Voir définition basique du market
 
 seeds are produced by seed farmerss 
 
@@ -146,7 +141,7 @@ For the moment, we assume that packaging (primary, secondary, tertiary) is made 
 6. What are the changes in term of requires(more work, more products,...) compared to the production(ton per ha) induced by a change of type of agriculture.
 I.e what is the cost of changing agriculture's type (only financial cost could be taken into account but if possible we can use the True cost method proposed by Christian in order to see the real difference by taking into account durability of thoses changes). Easier if you want to convince the governement or people that changing your agriculture type can be worth, even if your productivity has decreased.
 
-# Disagrement with Koch code
+# Disagrement with Koch's code
 
 1. Land should be a class instead of commodity, in order to add a localization, and other data on them like soil quality etc..
 
@@ -164,3 +159,6 @@ Diff: prix de marché vs prix de campagne ??????????????
 Vente soit par la coopérative(prix de campagne askip), soit par futur contract (futures market for agriculture interdit en Suisse) (prix, location, quantité dédicé à l'avance) 
 sur Euronext pour la Suisse ? obligatoire pour la france donc peut-être pareil.
 sinon il existe : Chicago Board of Trade (CBOT),Kansas City Board of Trade (KCBT),Minneaolis Grain Exchange (MGEX) (au USA)
+
+
+check spot market 
