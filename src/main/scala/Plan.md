@@ -1,15 +1,32 @@
 # The Main phases of the Simulation:
+
+
+# Phase 1: basic simulation of food supply chain 
+  - Complete simulation of the food supply chain, from seed growth to bread consumption, and all intermediate exchanges  
+  - Basic C02, water and soil pollution
+
+# Phase 2: different types of agriculture 
+  - Achieve the current situation in switzerland in term of productivity, and methods of farming
+  - Have an approximation of pollution emitted by food supply chain
+
+# Phase 3: impact of types of agriculture
+  - Farmers change the way they cultivate, and we compare the impact vs phase 2's results
+
+\newpage 
+
+
 # Phase 1, basic simulation of food supply chain 
 
 * What do we simulate:
     * Agricultural sector  
         $\bullet$ **grain farmer**   
-        $\bullet$ **cereal farmer**  TODO see which cereals  
+        $\bullet$ **cereal farmer**, only wheat  
         $\bullet$ **cattle farmer**  
         $\Rightarrow$ next:
         - *pig farmer*, *poultry farmer*,
         based on most consumed type of animal in Switzerland  
         ["Stats"](#a) 
+        - more cereals (based on the most consumed ones)
     * Food industry  
         $\bullet$ **wholesaler**  
         $\bullet$ **packaging compagny**  
@@ -54,28 +71,35 @@
     * $\bullet$ agricultural equipment (tractor, cereal bins,...)  
 
 * Add a basic(simple) production of CO2, water & soil pollution, for the food supply chain
+  * $\Rightarrow$ *Next*: Extends to more fields (more gas, social impact, biodiversity, climate, energy and ressources use, nutrients management, plant and crop health, animal husbandry, production)
 
-* Data structure of lands:
+* Data structure of lands: TODO
 
-* The relationship network, represented as a graph (undirected ?)
+* Connecting differents lands (i.e the network of roads): 
+  * We want given a location, to know the nearest (in time travelling) buyer/seller. Not as crow flies (think about going from lausanne to thonon, near for bird, high for cars) 
+  * Phase 1: Store shortest path to go to from your city to every city in your district, from your district to every other district of your canton, from your canton to every other canton. 
+  * $\Rightarrow$ *Next* (Ideal version): you got the shortest path from every starting point to every other point -> O(#address * (# address + # roads)) Big
+
+* The relationship network, represented as a graph
+  * Goal: Create relation between agents, in order to make usual buyer/seller, that can have some advantages when making deals, prefers to trade with each other than with others on the market etc. 
   * Each agent is represented as a node
   * Relation between agents are represented by edge
   * Edges are created by making exchange between the 2 nodes
-  * Goal of the relationship network: keep track of interactions, to give choice to agent to pick someone from their network, or find someone on the market
   * $\Rightarrow$ next: edge have different level == importance of relationship
     * level1 = basic level, both nodes can directly talk to each other (stored in their local cache)
     * level2:
-      * other node preferred vs market (can be selected randomly with proba)
+      * other node preferred vs market (weighted by proba)
       * access to other node's network ? 
-      * contracts can be made easier TODO see contract part to see how this can influence the contracts ?
-    * making exchange increase level, don't make decrease
+      * contracts more advantageous, (some parts not declared ?)
+    * making exchange increase level
+    * don't exchange, delay in delivery, bad payer decrease
   
 # Phase 2, inclusion of types of agriculture
 
 ## Types of agriculture: ["definition"](http://www.riav.fr/quels-sont-les-differents-types-agriculture/)
 
 TBD, possibles types + required and effects needs to be discussed with other people  
-- Conventional agriculture
+- Conventional agriculture  
 - Organic farming  
 - Sustainable agriculture  
 - Integrated agriculture  
@@ -87,6 +111,10 @@ TBD, possibles types + required and effects needs to be discussed with other peo
   * or randomly assign 
   * Goal is to have the current situation of swiss agriculture, in order to compare it with phase 3
 
+* More complex methods of production:
+  * Fertilizer, pesticide, vaccin, nutrients
+  * consequences: buy new land, hire people, higher cost, less productivity
+
 * This will probably need to adapte the supply needed by farmer
 * Will influence productivity & economic
 
@@ -96,12 +124,8 @@ TBD, possibles types + required and effects needs to be discussed with other peo
 
 # Phase 3: impact of types of agriculture
 
-* Farmers can change method of production:
-  *  can buy fertilizer, pesticide, vaccin, nutrients
-  *  change the type of agriculture 
-  *  consequences: buy new land, hire people, higher cost, less productivity
 
-* Farmers can change what they produced: 
+* Farmers can change what they produced and their type of agriculture: 
   * based on global recomendation of supplies needed (if data available)
   * randomly
   * Can get help from the government, or associations
@@ -109,9 +133,10 @@ TBD, possibles types + required and effects needs to be discussed with other peo
 Goal is to play with differents scenarios and see the total CO2 + other pollution emitted by thoses, and compare it to scenario of **phase 2**
 
 * Mesuring effect of different agriculture types
-  * Effects on soil quality, pollution due to type of cereals used, intensity and methods of farming
+  * Effects on soil quality, pollution due to type of cereals used
   * Economic impact 
   * Compare it to previous result 
+  * consequences: buy new land, hire people, higher cost, less productivity
   
 
 
@@ -179,3 +204,6 @@ check spot market
 How to reflect the fact that pollution of a farmer affects the land he crops on + water 
 
 ADD water point to Land 
+
+Take into account fact that production line of farm DEPENDS on fertilizer, pesticide and surface
+-> surface of crops can be get into the land required 
