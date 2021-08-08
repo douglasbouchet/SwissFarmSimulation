@@ -5,7 +5,7 @@
     * Agricultural sector  
         $\bullet$ **grain farmer**   
         $\bullet$ **cereal farmer**  TODO see which cereals  
-        $\bullet$ **cattle farmer** 
+        $\bullet$ **cattle farmer**  
         $\Rightarrow$ next:
         - *pig farmer*, *poultry farmer*,
         based on most consumed type of animal in Switzerland  
@@ -141,9 +141,19 @@ For the moment, we assume that packaging (primary, secondary, tertiary) is made 
 6. What are the changes in term of requires(more work, more products,...) compared to the production(ton per ha) induced by a change of type of agriculture.
 I.e what is the cost of changing agriculture's type (only financial cost could be taken into account but if possible we can use the True cost method proposed by Christian in order to see the real difference by taking into account durability of thoses changes). Easier if you want to convince the governement or people that changing your agriculture type can be worth, even if your productivity has decreased.
 
-# Disagrement with Koch's code
+# enhancement of Koch's code
 
 1. Land should be a class instead of commodity, in order to add a localization, and other data on them like soil quality etc..
+2. Factory is good, but how to model the fact that requires are not "required at the same time"
+ex: seeds are required in october, but trucks are required in july during harvesting 
+Add different type of production line in a farm: 
+e.g 
+  - production line requiring seeds and produce cereals (not harvested)
+  - production line requiring not harveseted cereal, harvester and produce cereals
+3. Production line should have a timer based on a global timer to start, i.e if you cannot afford seeds, you cannot start a production of wheat in May, you need to wait until October.
+4. add an attribut to production line (optional) which are commodities that are not obligated to run the production line, but increase productivity (ex: fertilizer)
+
+How the agents interacts 
 
 # Contracts (Temp)
 
@@ -162,3 +172,10 @@ sinon il existe : Chicago Board of Trade (CBOT),Kansas City Board of Trade (KCBT
 
 
 check spot market 
+
+
+# Questions about implementation
+
+How to reflect the fact that pollution of a farmer affects the land he crops on + water 
+
+ADD water point to Land 
