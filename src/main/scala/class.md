@@ -21,8 +21,14 @@ trader
 ## Packaging compagny 
 factory
 
-## Agriculure cooperativ
+## transport compagny 
+
+
+## Agriculure cooperative
 factory (required mill for example) otw Trader (stocks cereals and sell them to mill, or buy seeds)
+
+## cattle farmer cooperative
+In charge of finding vaccins, controlling health of cows
 
 ## Mills
 factory
