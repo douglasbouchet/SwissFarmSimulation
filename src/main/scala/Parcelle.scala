@@ -44,7 +44,14 @@ class Land extends Parcelle {
 
   // polygon: List[Point]
 
-  val buildings : List[Building]
+  val buildings : List[Building] // Building type TBD
+
+  /** BFS search over neighbors parcelles
+  * @return first parcelle of type Road found 
+  */
+  def findNearestRoad(): Road = {
+
+  }
 }
 
 class Patch {
@@ -128,14 +135,10 @@ object PathFinder {
   val roadGraph: scalax.collection.Graph
   val railGraph: scalax.collection.Graph
 
-  def createRoadGraph(roads: List[Road],
-                      road_intersection: List[Intersection]): scalax.collection.Graph = {
-
+  def createRoadGraph(): scalax.collection.Graph = {
   }
                   
-  def createRailGraph:(rails: List[Railway],
-                       marshalling_yard : List[Yard]): scalax.collection.Graph = {
-
+  def createRailGraph(): scalax.collection.Graph = {
   }
 
   /** 
@@ -144,12 +147,12 @@ object PathFinder {
   * Advance near destination on cantonal roads 
   * Exit cantonal roads and finish on communal roads until end_parcelle
   * First version, ofc need more work on it 
+  * @return all intersections of the path (used to compute time travel + distance)
   */
-  def findPath(start_parcelle: Parcelle, end_parcelle: Parcelle, vehicle_type: Any /** TBD */): List[Road] = {
-
+  def findPath(start_parcelle: Parcelle, end_parcelle: Parcelle, vehicle_type: Any /** TBD */): List[Intersection] = {
+    val starting_road: Road = start_parcelle.findNearestRoad()
+    val ending_road: Road = end_parcelle.findNearestRoad()
   }
-
-
 
 }
 
