@@ -76,9 +76,13 @@ case class Buyer(commodity: Commodity,
 }
 
 
-
+ 
 class Farm(s: Simulation) extends Factory(
   ProductionLineSpec(1, List((Land, 1)), List(), (Wheat, 20), 4), s)
+
+class Farm(s: Simulation) extends Factory(
+  List(ProductionLineSpec(1, List((Land, 1)), List()))
+)
 
 class Mill(s: Simulation) extends Factory(
   ProductionLineSpec(1, List(), List((Wheat, 10)), (Flour, 10), 1), s)

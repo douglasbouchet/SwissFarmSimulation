@@ -8,21 +8,24 @@ import Securities.Commodities._
 case class ProductionLineSpec(employees_needed: Int,
                               required: List[(Commodity, Int)],
                               consumed: List[(Commodity, Int)],
-                              produced: (Commodity, Int),
+                              simulated_commodities: List[Commodity], // this can evolve
+                              production_function: (List[Commodity]) => Int,
                               time_to_complete: Int) {
+  
+  /** This will change in function of the simulated Commodities
+  ex: if wheat is drier, it's weight is lower, and thus the produced quantity is lower */                         
+  var produced: (Commodity, Int) = production_function(simulated_commodities)
 
   def theoretical_max_productivity(): Double =
     produced._2.toDouble / time_to_complete
 }
-
-
 
 // does not do its own buying
 case class ProductionLine(
   val pls: ProductionLineSpec,
   var o: Owner,
   val salary: Int,
-  val start_time: Int,
+  val start_time: Int
 
 //  var log : List[(Int, Double)] = List(),
       // (time production run was completed, efficiency of production run)
@@ -121,10 +124,11 @@ case class HR(private val shared: Simulation,
   def fire(n: Int) { for(i <- 1 to n) fire_one(); }
 }
 
-
-class Factory(pls: ProductionLineSpec,
+ 
+// Instead of having 1 type of production, allow to have different ones. 
+class Factory(pls: List[ProductionLineSpec],
               shared: Simulation
-) extends SimO(shared) {
+) extends Seller with InteractiveSim(List()) {
 
   var pl : List[ProductionLine] = List()
   private var zombie_cost2 : Double = 0.0 // cost from canceled prod. runs
@@ -132,9 +136,12 @@ class Factory(pls: ProductionLineSpec,
   protected var hr : HR = new HR(shared, this)
   protected var goal_num_pl = 0;
 
+  var linked_sims = List()
+
   // constructor
   {
-    shared.market(pls.produced._1).add_seller(this);
+    pls.foreach(p => shared.market(p.produced._1).add_seller(this))
+    //shared.market(pls.produced._1).add_seller(this);
     goal_num_pl = 1; // have one production line
   }
 

@@ -11,7 +11,8 @@ class Parcelle
 //start from middle of parcelle, and compute length to nearest DP road, but how to ? )
 class Road extends Parcelle {
 
-//The id is the same as a land (DP 34)
+/** Second element a string now (e.g DP 234) */
+override val id : (String, String)
 
 val adjacent_road_dist: List[(Road, Double)] // List of (Road, distance(m) from center of this to Road) cf plan ipad 
 
