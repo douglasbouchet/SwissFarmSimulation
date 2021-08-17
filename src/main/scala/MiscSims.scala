@@ -80,9 +80,26 @@ case class Buyer(commodity: Commodity,
 class Farm(s: Simulation) extends Factory(
   ProductionLineSpec(1, List((Land, 1)), List(), (Wheat, 20), 4), s)
 
+
+//Not working, just an example
+def trivial_prod_function(cereals: List[SimCommodities]) : (SimCommodity, Int) {
+  val saleable = cereals.filter(c => c.state == harvestable & c.weight > 1.5)
+  return (Wheat, saleable.size)
+}
+
+//Really Basic
 class Farm(s: Simulation) extends Factory(
-  List(ProductionLineSpec(1, List((Land, 1)), List()))
+  List(
+    ProductionLineSpec(1, List((Land, 1)), List(WheatSeeds, 1000), for i in range(1000) yield Wheat(), trivial_prod_function, 10),
+    ProductionLineSpec(1, List((Land, 1)), List(BarleySeeds, 500), for i in range(500) yield Barley(), trivial_prod_function, 9)
+  /** parameters in ProductionLineSpec like number of wheat, could be obtained as a function
+  of land's area */ 
 )
+{
+  val fertilize: Action = {
+    
+  }
+}
 
 class Mill(s: Simulation) extends Factory(
   ProductionLineSpec(1, List(), List((Wheat, 10)), (Flour, 10), 1), s)

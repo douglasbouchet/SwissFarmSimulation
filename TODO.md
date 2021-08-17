@@ -94,3 +94,16 @@ Dans l'algo:
 
 
 
+
+
+
+
+
+est ce que si on achète une parcelle, qu'elle est membre d'un overlay, peut on changer par exemple la partie ocmmune d'un paddoc a un field ? 
+
+Create object Crops Manager which keep track of all land overlay, and their purpose ? 
+
+
+Comment on définit un champ: 
+
+Parcelle -> obvious mais land overlay implique plus de flexiblité, et ca peut très bien être une parcelle 

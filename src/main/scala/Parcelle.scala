@@ -2,8 +2,153 @@ class Parcelle
 {
   val id : (String, Int) // (commune name, n° inside commune), unique over switzerland
 
-  val owner : String // obtained in land register, should be a name 
+  var owner : String // obtained in land register, should be a single name 
   val adjacent_parcelles: List[Parcelle]
+  // var which_land_overlay_part_of : List[(LandOverlay, Int)]
+  
+  // (Land overlay -> percentage of parcelle in (0 to 1))
+  var part_of: collection.mutable.Map[LandOverlay, Double] = collection.mutable.Map[LandOverlay, Double]()
+
+  val area: Double
+}
+
+//group the parcelles which are physically the same field/paddoc/meadow, and belong to one or multiple owners
+// store the type locally. 
+class LandOverlay(aggregation: List[(Parcelle, Double)]) {
+
+  /** (Parcelle, Percentage occupied on it (0 to 1)) */ 
+  //TODO shpuld we use a map isntead ??
+  var land_aggregation : List[(Parcelle, Double)] = aggregation
+  /** How much percentage of the aggregated lands each owner possess (some fields have multiple owner) */
+
+  var ownership_distribution : List[(Owner, Double)] = cmpt_ownership_distrib(land_aggregation)
+
+  //If not compiling, put it above
+  def cmpt_ownership_distrib(new_land_aggregation: List[(Parcelle, Double)]): List[(Owner, Double)] = {
+
+    val total_area: Double = new_land_aggregation.foldLeft(0.0){(acc, tup) => acc + tup._1.area * tup._2}
+
+    val owner_area_use: List[Owner, Double)] =
+       new_land_aggregation.map(elem => (elem._1.owner, elem._1.area * elem._2))
+    var use_per_owner = collection.mutable.Map[String, Int]()
+    owner_area_use.foreach{
+      tup => map += (tup._1 -> use_per_owner.getOrElse(tup._1,0.0) + tup._2)
+    }
+    use_per_owner.toList.map(tup => (tup._1, tup._2 / total_area))
+
+  }
+
+  def addParcelle(parcelle: Parcelle, proportion: Double) = {
+      assert(! land_aggregation.contains((parcelle,proportion)))
+      land_aggregation ::= (parcelle, proportion)
+      ownership_distribution = cmpt_ownership_distrib(land_aggregation)
+  }
+
+  def removeParcelle(parcelle: Parcelle) = {
+    parcelle.get(this) match {
+      case Some(x) => {
+        assert(land_aggregation.contains((parcelle, x)))
+        land_aggregation.filterNot(_ == (parcelle, proportion))
+      ownership_distribution = cmpt_ownership_distrib(land_aggregation)
+      }
+      case None => println("trying to remove a parcelle that is not part of this land overlay")
+    }
+  }
+
+  def getParcelles() = land_aggregation.map(_._1).toList
+
+  class Crop(aggregation: List[(Parcelle, Int)],
+           owner_distrib: List[(Int, Owner)],
+           usage: /**TODO */) extends LandOverlay(aggregation, owner_distrib)
+           {  }
+  class Paddoc(aggregation: List[(Parcelle, Int)],
+               owner_distrib: List[(Int, Owner)],
+               animals: List[Animals]) {}
+
+  class Meadow(aggregation: List[(Parcelle, Int)],
+               owner_distrib: List[(Int, Owner)],) {
+    //TODO what information to keep inside }
+  //TODO ou alors on a cette information dans un attribut de type enumerate
+}
+
+/** object LandOverlayManager */
+/** object LandOverlayAdministrator {*/
+
+what it does: keep track of all lands, all lands overlay 
+if you want to find all crops for example, if you want to find paddoc for your cows
+
+!! Find for example paddoc at a distance from a Cattle farm ()
+At start: find Land overlay (or part of it )
+Method to get all LandOverlay that could be bought (And each parcelle that could be bought in this one)
+//This might be done on the market, no need to store this info here.
+object LandAdministrator(parcelle_data: Object, land_overlay_data: Object) {
+  
+  /** Constructor */
+  {
+    /** Create all parcelles, given data
+    Set Owner to ""
+    */
+    def createParcelles(data: Object): List[Parcelle] = ???
+
+    /** 
+    For each paddoc/field/meadow:
+      Find The list of Parcelle part of and by how much percentage  
+      In function of area of parcelles + perc of parcelle inside overlay + owner find 
+      how much does each owner of overlay possess of it (usefull for computing crops income of grouped farmers)
+    */
+    def createLandsOverlays(data: Object): List[LandOverlay] = ???
+
+  
+    var all_parcelles: List[Parcelle] = createParcelles()
+    var all_lands_overlays : List[LandOverlay] = List()
+    
+    /** Optional */
+    val all_crops: List[LandOverlay] = all_lands_overlays.filter(l_overlay => l_overlay.type == Crop)
+  } // end constructor
+
+  /** Split a land overlay in multiple lands overlays. 
+  * @param current: LandOverlay, the land overlay to split 
+  * @param into: List[LandOverlay], the final lands overlays 
+  * into must only contain Parcelles belonging to current, and each Parcelle can appear in one and only one 
+  * LandOverlay
+  */
+  def SplitLandOverlay(current: LandOverlay, into: List[LandOverlay]): Boolean = {
+    
+    assert(all_lands_overlays.contains(current))
+
+    into.foreach(assert(_.getParcelles.length > 0)))
+    //Check if each Parcelle of into is actually in current
+    assert(into.foreach(_.getParcelles().foreach(current.getParcelles().contains(_))))
+    //Check if no parcelles appear multiple times
+    assert(into.flatten.map(_._1).length == into.flatten.map(_._1).distinct.length)
+
+    all_lands_overlays.remove(current)
+    into.foreach(all_lands_overlays ::= _)
+    
+    return true
+  }
+
+  def MergeLandOverlay(to_merge: List[LandOverlay]): Boolean = {
+
+    var new_aggregation: List[(Parcelle, Int)] = to_merge.flatten
+    //Check if not adding multiple time the same Parcelle
+    assert(new_aggregation.map(_._1).distinct.length == new_aggregation.map(_._1).length)
+    var merged_land_overlay = new LandOverlay(new_aggregation, List())
+    assert(to_merge.foreach(all_lands_overlays.contains(_)))
+    to_merge.foreach(all_lands_overlays.remove(_))
+    all_lands_overlays ::= merged_land_overlay
+
+    return true
+  }
+
+
+  def changePurpose(changing: LandOverlay, newState: LandOverlay) = {
+    if (changing.type != newState.type){ // see if Crop != Paddoc not sure
+      var newLandOverlay
+    } 
+  }
+  //new ownership, new parcelle,...
+  def changeOrganisation()
 }
 
 
@@ -39,7 +184,7 @@ class Land extends Parcelle {
 
   val zoneType: ZoneType //TODO Does Road also have this type ? 
 
-  val features : Patch
+  val features : Information
   // val pieces_of_land : List[Patch] cut land into small pieces, with different features
   // val pieces_of_land : List[List[Patch]] same but in 3d 
 
@@ -55,23 +200,16 @@ class Land extends Parcelle {
   }
 }
 
-class Patch {
+class Information {
 
   // main features
   val area : Double // m^2
   // polygon: List[Point]
   
   // This attributs contains information about the land, extend them with what we need/is available
-  val crops : Crops 
   val geological_info: Geological
   val ground_info: Ground
-
-  stuff about water,...
-}
-
-class Land_Overlay {
-  structure: List[Patch]
-}
+  val crops : Crops 
 
 class Geological {
   // examples
@@ -98,6 +236,15 @@ class Crops {
   val fertilizer : List[Fertilizer]
   val pesticide : List[Pesticide]
 }
+}
+
+class Land_Overlay {
+
+  political_parcelles: List[Parcelle]
+  structure: List[Patch]
+}
+
+
 
 // Use to define what can be made on a land, e.g cannot construct houses on agricultural zone
 // All zones: https://ge.ch/sitg/geodata/SITG/CATALOGUE/INFORMATIONS_COMPLEMENTAIRES/DESCRIPTIF_ZONES_AFFECTATION.pdf

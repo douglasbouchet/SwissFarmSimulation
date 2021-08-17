@@ -48,8 +48,7 @@ e.g a truck could influence a global Sim "Pollution", cereal bin could influence
 
 }
 
-class Wheat(prod_line: ProductionLine) extends SimCommodities("Wheat") {
-  var o = owner
+class Wheat() extends SimCommodities("Wheat") {
   var state : WheatState /** germination, lifting, heading, harvestable, dead */ 
   var weight : Double 
   var eaten_by_insects: Boolean 

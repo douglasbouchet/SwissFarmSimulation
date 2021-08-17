@@ -69,20 +69,19 @@ abstract class SimO(
              _substitution: collection.mutable.Map[SimO, SimO]): SimO
 }
 
-//abstract class interactivSim(shared: Simulation, 
-trait InteractivSim(start_time: Int = 0 /** Declared as a trait, otw cannot extend SimCommodities with it */
-                    init_interactive_sims: List[Sim]) extends Sim {
+/** Declared as a trait, otw cannot extend SimCommodities with it */
+trait InteractivSim(init_interactive_sims: List[Sim]) extends Sim {
 
   var interactive_sims : List[Sim] = init_interactive_sims
 
-  var interactions: List[Event] = List() /** TODO define Event */ 
+  var interactions: List[Action] = List() /** TODO define Event */ 
 
-  def action(to: Type, actionToApply : (Sim) => /** return nothing */) {
+  def applyTo(to: Type, event: Action) {
     //For the moment, only apply to a specific type of linked_sims
   }
-  def waitEvent(event: Event) 
+  def waitEvent(action: Action) 
 
-  def listenEvent(event: Event)
+  def listenEvent(action: Action)
 
   def addSims(sims: List[Sim]) {linked_sims = sims ::: linked_sims}
 
