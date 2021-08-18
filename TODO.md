@@ -104,14 +104,6 @@ est ce que si on achète une parcelle, qu'elle est membre d'un overlay, peut on 
 Create object Crops Manager which keep track of all land overlay, and their purpose ? 
 
 
-Comment on définit un champ: 
-
-Parcelle -> obvious mais land overlay implique plus de flexiblité, et ca peut très bien être une parcelle 
-
-in parcelle.scala see where to make the function that needs to be called if the owner change (inside 
-parcelle, or landOverlay, or landAdministrator (probably this one))
-
-
 TOMORROW focus on road network 
 -> keep roads as parcelle atm, maybe easier when we get the data
 But most of the work will be done in the RoadAdministrator (find a good name) which
@@ -119,3 +111,10 @@ will be in charge of creating a network and computing path, length etc....
 this is the object that will be called, as the land administrator
 
 also, see if define a function inside landAdministrator to find for example saleable parcelles, but should probably be in an market instead
+
++ compile parcelle file inside desktop for example
+
+
+Parcelle -> CadastralParcel, parcelles -> cadastral_parcels, parcelle -> cadastral_parcel
+
+ASK KOCH !!!!!!!!!! Change Parcelle by LandLot, parcelles = landlots
