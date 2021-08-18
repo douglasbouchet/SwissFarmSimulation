@@ -1,14 +1,61 @@
-//import scalax.collection.GraphPredef._
-//import scalax.collection.GraphEdge._
-//import scalax.collection.constrained.mutable.Graph
-//import scalax.collection.constrained.constraints.Connected
- 
-//implicit val conf: Config = Connected
-//
-//val e = Graph(1 ~ 2, 3 ~ 4) // Graph()
-//val g = Graph(1 ~ 2, 2 ~ 4) // Graph(1, 2, 4, 1~2, 2~4)
-//g += 3                      // Graph(1, 2, 4, 1~2, 2~4)
-//g += 2 ~ 3                  // Graph(1, 2, 3, 4, 1~2, 2~3, 2~4)
+import scalax.collection.Graph // or scalax.collection.mutable.Graph
+import scalax.collection.GraphPredef._
+import scalax.collection.GraphEdge._
+
+import scalax.collection.edge.WDiEdge
+import scalax.collection.edge.WUnDiEdge
+import scalax.collection.edge.Implicits._
+
+object RoadNetwork {
+  val g = Graph(1~2 % 4, 2~3 % 2, 1~>3 % 5, 1~5  % 3, 3~5 % 2, 3~4 % 1, 4~>4 % 1, 4~>5 % 0)
+  def n(outer: Int): g.NodeT = g get outer
+  val path = n(3) shortestPathTo n(1)
+}
+
+/** Milestone 1: Consider only undirected edge, but try implement Complex edge types, possessing max weight, in order
+to include this */
+
+
+/** Milestone 2: Add directed edges ? */ 
+
+case class Intersection(val name: String){
+  override def toString = "City of " + name
+}
+
+/** weight of edges could be computing as the length of road/avg speed 
+Also adding maxweight for each road 
+Working !!!!!!!
+*/
+case class EdgeRoad[+N](fromIntersection: N, toIntersection: N, roadWeight: Double, max_weight: Int)
+  extends WUnDiEdge[N](NodeProduct(fromIntersection, toIntersection), roadWeight)
+  with ExtendedKey[N]
+  with EdgeCopy[EdgeRoad]
+  with OuterEdge[N,EdgeRoad] {
+  private def this(nodes: Product, roadWeight: Double, max_weight: Int) {
+    this(nodes.productElement(0).asInstanceOf[N],
+         nodes.productElement(1).asInstanceOf[N], roadWeight, max_weight)
+  }
+  def keyAttributes = Seq(roadWeight)
+  override def copy[NN](newNodes: Product) = new EdgeRoad[NN](newNodes, roadWeight, max_weight)
+  override protected def attributesToString = s" ($roadWeight) + max weight: + ($max_weight)" 
+} 
+object EdgeRoad {
+  implicit final class ImplicitEdge[A <: Intersection](val e: WUnDiEdge[A]) extends AnyVal {
+    def ##(roadWeight: Double, max_weight: Int) = new EdgeRoad[A](e._1, e._2, roadWeight, max_weight)
+  } 
+}
+
+// val x = laus ~> gen ## 40 does not seem to works, use EdgeRoad[Intersection](laus, gen, 40) instead
+
+// val laus = Intersection("Lausanne"), pareil avec geneve et paris, shortest path fonctionne
+//g.get(laus) shortestPathTo g.get(paris)
+
+// val p = n(laus).withSubgraph(edges = _.max_weight > 3) pathTo n(gen) CA MARCHE, il tej bien les max weight trop petits
+// pour l'example !! define n() as g.get()
+
+
+
+
 
 
 //object RoadNetwork {

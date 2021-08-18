@@ -2,12 +2,14 @@ import Owner._
 
 class CadastralParcel(_id: (String, Int), _owner: Owner, _adj_parcels: List[CadastralParcel], _area: Double)
 {
-  val id : (String, Int) = _id// (commune name, n° inside commune), unique over switzerland
+  /** (commune name, n° inside commune), unique over switzerland */
+  val id : (String, Int) = _id
 
-  var owner : Owner = _owner// obtained in land register, TODO see if add multiple owners
+  /** next: List[Owner] instead of a single */
+  var owner : Owner = _owner
   val adjacent_cadastral_parcels: List[CadastralParcel] = _adj_parcels
-  // (Land overlay -> percentage of cadastral parcel in (0 to 1))
-  /** redundant perc. used for a land overlay, easier to determine if some cadasral parcels have free space*/
+  /** (Land overlay -> percentage of cadastral parcel in (0 to 1))
+  redundant perc. used for a land overlay, easier to determine if some cadasral parcels have free space */
   var part_of: collection.mutable.Map[LandOverlay, Double] = collection.mutable.Map[LandOverlay, Double]()
   val area: Double = _area
 }
@@ -51,7 +53,7 @@ class LandOverlay(aggregation: List[(CadastralParcel, Double)]) {
     }
   }
 
-  def getCadastralParcels() = cadastral_parcels_aggregation.map(_._1).toList
+  def getCadastralParcels() : List[CadastralParcel] = cadastral_parcels_aggregation.map(_._1).toList
 }
 
 /** Used to perform operation on LandOverlay (split, merge, add/remove parcelles)
