@@ -12,7 +12,11 @@ libraryDependencies  ++= Seq(
   "org.scalanlp" %% "breeze" % "0.12",
 //  "org.scalanlp" %% "breeze-natives" % "0.12",
   "org.scalanlp" %% "breeze-viz" % "0.12",
-  "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.0" % "test",
+
+
+  //Added for scalax 
+  //"org.scala-graph" %% "graph-core" % "1.13.2"
 )
 
 resolvers += "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"

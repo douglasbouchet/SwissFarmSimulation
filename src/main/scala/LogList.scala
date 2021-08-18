@@ -1,7 +1,7 @@
 package Timeseries;
 
 
-abstract case class LogList[T](
+case class LogList[T](
   var l : List[(Int, T)] = List[(Int, T)](),
   private var latest : Int = 0
 ) {

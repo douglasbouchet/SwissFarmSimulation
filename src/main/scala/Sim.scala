@@ -70,22 +70,7 @@ abstract class SimO(
 }
 
 /** Declared as a trait, otw cannot extend SimCommodities with it */
-trait InteractivSim(init_interactive_sims: List[Sim]) extends Sim {
-
-  var interactive_sims : List[Sim] = init_interactive_sims
-
-  var interactions: List[Action] = List() /** TODO define Event */ 
-
-  def applyTo(to: Type, event: Action) {
-    //For the moment, only apply to a specific type of linked_sims
-  }
-  def waitEvent(action: Action) 
-
-  def listenEvent(action: Action)
-
-  def addSims(sims: List[Sim]) {linked_sims = sims ::: linked_sims}
-
-  def removeSims(sims: List[Sim]) {sims.foreach(linked_sims.remove(_))}
+trait InteractiveSim extends Sim {
 }
 
 
