@@ -1,5 +1,7 @@
 import Owner._
+import roadNetwork.ParcelAccess
 
+package landAdministrator{
 class CadastralParcel(_id: (String, Int), _owner: Owner, _adj_parcels: List[CadastralParcel], _area: Double)
 {
   /** (commune name, n° inside commune), unique over switzerland */
@@ -12,6 +14,9 @@ class CadastralParcel(_id: (String, Int), _owner: Owner, _adj_parcels: List[Cada
   redundant perc. used for a land overlay, easier to determine if some cadasral parcels have free space */
   var part_of: collection.mutable.Map[LandOverlay, Double] = collection.mutable.Map[LandOverlay, Double]()
   val area: Double = _area
+  /** TODO add method in LandAdministrator or whater that should find a ParcelAccess for this parcel
+  add it, and add this parcel inside ParcelAcess's "connectedParcels" attribut */
+  val access: ParcelAccess = null 
 }
 
 /** group the cadastral parcels which are physically the same field/paddoc/meadow, and belong to one or multiple owners */
@@ -174,6 +179,9 @@ class LandAdministrator(parcelle_data: Object, land_overlay_data: Object) {
   }
   //new ownership, new parcelle,...
   //def changeOrganisation()
+
+  //TODO
+  def findParcelAccess(parcel: CadastralParcel){}
 
 }
 
@@ -352,3 +360,4 @@ object CropsType extends Enumeration {
 
 
 // TODO !!!! No infos exists on size of private roads....
+}
