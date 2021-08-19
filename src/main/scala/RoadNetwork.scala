@@ -2,7 +2,7 @@
 
 /** Milestone 2: Add directed edges, bridges, highways, railways */ 
 
-package roadNetwork{
+//package roadNetwork{
 
   import scalax.collection.Graph // or 
   import scalax.collection.mutable.Graph
@@ -27,7 +27,7 @@ case class Intersection(override val id: String) extends Node(id){}
 
 /** The point where parcels are connected to the network 
 TODO do we have to store connectedParcels, or maybe having this info only inside each parcel is sufficient ? */
-case class ParcelAccess(override val id: String, var connectedParcels: List[CadastralParcel]) extends Node(id) {}
+//case class ParcelAccess(override val id: String, var connectedParcels: List[CadastralParcel]) extends Node(id) {}
 
 /** weight of edges could be computing as the length of road/avg speed */
 case class EdgeRoad[+N](fromNode: N, toNode: N, name: String, roadWeight: Double, maxWeight: Int)
@@ -53,55 +53,63 @@ object EdgeRoad {
 // val edge = laus ~> gen ## 40 does not seem to works, use EdgeRoad[Intersection](laus, gen, 40) instead
 
 /** We can make a class as it will be initialized in the main, before getting called by "agents" */
-class RoadNetwork(/*roadData: Any */ /** Define type when data on road will be available */) {
+object RoadNetwork/*roadData: Any */ /** Define type when data on road will be available */ {
 
   //val roadNetwork = scalax.collection.mutable.Graph(EdgeRoad[Node](new Node("a"),new Node("b"), "a", 1, 1))
   val roadNetwork: scalax.collection.mutable.Graph[Node, EdgeRoad] = scalax.collection.mutable.Graph[Node, EdgeRoad]()
   /** add(Node),add(EdgeRoad)m remove(EdgeRoad), remove(Node) already implemented */ 
 
+  def addNodes(nodes: List[Node]): Boolean = {
+    var check: Boolean = true
+    nodes.foreach { node => {check &= roadNetwork.add(node)}}
+    check
+  }
+  def addEdges(edges: List[Node]): Boolean = {
+    var check: Boolean = true
+    edges.foreach { edge => {check &= roadNetwork.add(edge)}}
+    check
+  }
+
   def n(outer: Node): roadNetwork.NodeT = roadNetwork get outer
 
   /** TODO find how to define the type "Path" */
-  def findPath(start: CadastralParcel, end: CadastralParcel)/** Define Type */ = {
-    n(start.access) shortestPathTo n(end.access) match {
+  def findPath(start: Node, end: Node)/** Define Type */ = {
+    n(start) shortestPathTo n(end) match {
       case Some(path) => path
       case None => {println("No path was found"); null}
     }
   }
   /** TODO find how to define the type "Path" */
-  def findPathWeightConstraint(start: CadastralParcel, end: CadastralParcel, weightConstraint: Int) /** Define Type */ = {
-    n(start.access).withSubgraph(edges = _.maxWeight > weightConstraint) shortestPathTo n(end.access) match {
+  def findPathWeightConstraint(start: Node, end: Node, weightConstraint: Int) /** Define Type */ = {
+    n(start).withSubgraph(edges = _.maxWeight > weightConstraint) shortestPathTo n(end) match {
       case Some(path) => path
       case None => {println("No path was found"); null /** return Empty "Path" instead */}
     }
   }
   
   // def pathWeight(path: Any /** TODO define with "Path" type */): Double = path.weight
-}
-
-
-
 
   //small example
-  val doug: Owner = new Owner()
-  val parcelDoug = new CadastralParcel(("Morges", 110), doug, List(), 1)
-  val papa: Owner = new Owner()
-  val parcelPapa = new CadastralParcel(("Vaison", 1221), papa, List(), 1)
-  val laus = Intersection("Lausanne")
-  val gen = Intersection("Geneve")
-  val start = ParcelAccess("chez moi", List(parcelDoug))
-  val end = ParcelAccess("chez papa", List(parcelPapa))
-  val h0 = EdgeRoad[Node](start, laus, "DP12", 2, 10)
-  val h1 = EdgeRoad[Node](start, gen, "DP12", 1, 10)
-  val h2 = EdgeRoad[Node](laus, end, "DP13", 2, 10)
-  val h3 = EdgeRoad[Node](gen, end, "DP14", 10, 10)
-  val g : scalax.collection.mutable.Graph[Node, EdgeRoad] = scalax.collection.mutable.Graph[Node,EdgeRoad](h0,h1,h2,h3)
-  val path = g.get(start) shortestPathTo g.get(end)
-  val goodpath = path.get
-  goodpath.weight
-  goodpath.nodes
-
+  //val doug: Owner = new Owner()
+  //val parcelDoug = new CadastralParcel(("Morges", 110), doug, List(), 1)
+  //val papa: Owner = new Owner()
+  //val parcelPapa = new CadastralParcel(("Vaison", 1221), papa, List(), 1)
+  //val laus = Intersection("Lausanne")
+  //val gen = Intersection("Geneve")
+  //val start = ParcelAccess("chez moi", List(parcelDoug))
+  //val end = ParcelAccess("chez papa", List(parcelPapa))
+  //val h0 = EdgeRoad[Node](start, laus, "DP12", 2, 10)
+  //val h1 = EdgeRoad[Node](start, gen, "DP12", 1, 10)
+  //val h2 = EdgeRoad[Node](laus, end, "DP13", 2, 10)
+  //val h3 = EdgeRoad[Node](gen, end, "DP14", 10, 10)
+  //val g : scalax.collection.mutable.Graph[Node, EdgeRoad] = scalax.collection.mutable.Graph[Node,EdgeRoad](h0,h1,h2,h3)
+  //val path = g.get(start) shortestPathTo g.get(end)
+  //val goodpath = path.get
+  //goodpath.weight
+  //goodpath.nodes
 }
+
+//}
 
 
 
