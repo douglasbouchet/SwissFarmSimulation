@@ -4,12 +4,14 @@
 
 package roadNetwork
 
-import scalax.collection.Graph // or scalax.collection.mutable.Graph
+import scalax.collection.Graph // or 
+import scalax.collection.mutable.Graph
 import scalax.collection.GraphPredef._
 import scalax.collection.GraphEdge._
 
 import scalax.collection.edge.WUnDiEdge
 import scalax.collection.edge.Implicits._
+import scalax.collection.GraphTraversal._
 
 import landAdministrator.CadastralParcel
 import Owner._
@@ -51,17 +53,34 @@ object EdgeRoad {
 
 // val edge = laus ~> gen ## 40 does not seem to works, use EdgeRoad[Intersection](laus, gen, 40) instead
 
-object RoadNetwork {
+/** We can make a class as it will be initialized in the main, before getting called by "agents" */
+class RoadNetwork(/*roadData: Any */ /** Define type when data on road will be available */) {
 
-  var roadNetwork: scalax.collection.Graph[Node, EdgeRoad] = Graph()
+  //val roadNetwork = scalax.collection.mutable.Graph(EdgeRoad[Node](new Node("a"),new Node("b"), "a", 1, 1))
+  val roadNetwork = scalax.collection.mutable.Graph[Node, EdgeRoad]()
+  /** add(Node),add(EdgeRoad)m remove(EdgeRoad), remove(Node) already implemented */ 
 
-  def addNode(node: Node) = roadNetwork += node
-  def rmNode(node: Node) = roadNetwork -= node
-  def addEdge(edge: EdgeRoad[Node]) = roadNetwork += edge
-  def rmEdge(edge: EdgeRoad[Node]) = roadNetwork -= edge
+  def n(outer: Node): roadNetwork.NodeT = roadNetwork get outer
+
+  /** TODO find how to define the type "Path" */
+  def findPath(start: CadastralParcel, end: CadastralParcel)/** Define Type */ = {
+    n(start.access) shortestPathTo n(end.access) match {
+      case Some(path) => path
+      case None => {println("No path was found"); null}
+    }
+  }
+  /** TODO find how to define the type "Path" */
+  def findPathWeightConstraint(start: CadastralParcel, end: CadastralParcel, weightConstraint: Int) /** Define Type */ = {
+    n(start.access).withSubgraph(edges = _.maxWeight > weightConstraint) shortestPathTo n(end.access) match {
+      case Some(path) => path
+      case None => {println("No path was found"); null /** return Empty "Path" instead */}
+    }
+  }
+
+  // def pathWeight(path: Any /** TODO define with "Path" type */): Double = path.weight
 
 
-  def n(outer: Node): g.NodeT = g get outer
+
 
   //small example
   val doug: Owner = new Owner()
@@ -85,38 +104,4 @@ object RoadNetwork {
 }
 
 
-
-
-
-
-//object RoadNetwork {
-//
-//  val roads : List[Road]
-//  val road_intersection : List[Intersection] //choice between multiple roads
-//  val rails : List[Railway]
-//  val marshalling_yard : List[Yard] // Only yard atm, but can be industrial complex also (+ other ?) 
-//
-//  val roadGraph: scalax.collection.Graph
-//  val railGraph: scalax.collection.Graph
-//
-//  def createRoadGraph(): scalax.collection.Graph = {
-//  }
-//                  
-//  def createRailGraph(): scalax.collection.Graph = {
-//  }
-//
-//  /** 
-//  * Remove on graph prohibited roads for vehicle and find path using the following logic:
-//  * Find path to reach cantonal road from start_parcelle
-//  * Advance near destination on cantonal roads 
-//  * Exit cantonal roads and finish on communal roads until end_parcelle
-//  * First version, ofc need more work on it 
-//  * @return all intersections of the path (used to compute time travel + distance)
-//  */
-//  def findPath(start_parcelle: CadastralParcel, end_parcelle: CadastralParcel, vehicle_type: Any /** TBD */): List[Intersection] = {
-//    val starting_road: Road = start_parcelle.findNearestRoad()
-//    val ending_road: Road = end_parcelle.findNearestRoad()
-//  }
-//
-//}
 

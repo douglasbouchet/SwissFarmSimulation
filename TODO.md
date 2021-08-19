@@ -112,7 +112,6 @@ this is the object that will be called, as the land administrator
 
 also, see if define a function inside landAdministrator to find for example saleable parcelles, but should probably be in an market instead
 
-+ compile parcelle file inside desktop for example
 + method add and remove landOverlays
 
 TODO See if adding caracterstics about the crops etc inside the LandOverlay 

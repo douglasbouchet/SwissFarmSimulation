@@ -16,7 +16,7 @@ class CadastralParcel(_id: (String, Int), _owner: Owner, _adj_parcels: List[Cada
   val area: Double = _area
   /** TODO add method in LandAdministrator or whater that should find a ParcelAccess for this parcel
   add it, and add this parcel inside ParcelAcess's "connectedParcels" attribut */
-  val access: ParcelAccess = null 
+  val access: ParcelAccess = ParcelAccess("sds", List()) 
 }
 
 /** group the cadastral parcels which are physically the same field/paddoc/meadow, and belong to one or multiple owners */
