@@ -2,24 +2,23 @@
 
 /** Milestone 2: Add directed edges, bridges, highways, railways */ 
 
-package roadNetwork
+package roadNetwork{
 
-import scalax.collection.Graph // or 
-import scalax.collection.mutable.Graph
-import scalax.collection.GraphPredef._
-import scalax.collection.GraphEdge._
+  import scalax.collection.Graph // or 
+  import scalax.collection.mutable.Graph
+  import scalax.collection.GraphPredef._
+  import scalax.collection.GraphEdge._
+  
+  import scalax.collection.edge.WUnDiEdge
+  import scalax.collection.edge.Implicits._
+  import scalax.collection.GraphTraversal._
+  
+  import landAdministrator.CadastralParcel
+  import Owner._
 
-import scalax.collection.edge.WUnDiEdge
-import scalax.collection.edge.Implicits._
-import scalax.collection.GraphTraversal._
-
-import landAdministrator.CadastralParcel
-import Owner._
-
-
-class Node(val id: String){
+  class Node(val id: String){
   override def toString = s"$id "
-}
+  }
 
 /** Represent an intersection between multiples roads. A node in the graph
 * We might not want to store in/out going edges, as it will be stored in the graph
@@ -57,7 +56,7 @@ object EdgeRoad {
 class RoadNetwork(/*roadData: Any */ /** Define type when data on road will be available */) {
 
   //val roadNetwork = scalax.collection.mutable.Graph(EdgeRoad[Node](new Node("a"),new Node("b"), "a", 1, 1))
-  val roadNetwork = scalax.collection.mutable.Graph[Node, EdgeRoad]()
+  val roadNetwork: scalax.collection.mutable.Graph[Node, EdgeRoad] = scalax.collection.mutable.Graph[Node, EdgeRoad]()
   /** add(Node),add(EdgeRoad)m remove(EdgeRoad), remove(Node) already implemented */ 
 
   def n(outer: Node): roadNetwork.NodeT = roadNetwork get outer
@@ -76,8 +75,9 @@ class RoadNetwork(/*roadData: Any */ /** Define type when data on road will be a
       case None => {println("No path was found"); null /** return Empty "Path" instead */}
     }
   }
-
+  
   // def pathWeight(path: Any /** TODO define with "Path" type */): Double = path.weight
+}
 
 
 
@@ -95,7 +95,7 @@ class RoadNetwork(/*roadData: Any */ /** Define type when data on road will be a
   val h1 = EdgeRoad[Node](start, gen, "DP12", 1, 10)
   val h2 = EdgeRoad[Node](laus, end, "DP13", 2, 10)
   val h3 = EdgeRoad[Node](gen, end, "DP14", 10, 10)
-  val g = Graph(h0,h1,h2,h3)
+  val g : scalax.collection.mutable.Graph[Node, EdgeRoad] = scalax.collection.mutable.Graph[Node,EdgeRoad](h0,h1,h2,h3)
   val path = g.get(start) shortestPathTo g.get(end)
   val goodpath = path.get
   goodpath.weight
