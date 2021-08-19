@@ -19,29 +19,30 @@ to include this */
 /** Milestone 2: Add directed edges ? */ 
 
 case class Intersection(val name: String){
-  override def toString = "City of " + name
+  override def toString = s"$name "
 }
 
 /** weight of edges could be computing as the length of road/avg speed 
 Also adding maxweight for each road 
 Working !!!!!!!
 */
-case class EdgeRoad[+N](fromIntersection: N, toIntersection: N, roadWeight: Double, max_weight: Int)
+case class EdgeRoad[+N](fromIntersection: N, toIntersection: N, name: String, roadWeight: Double, maxWeight: Int)
   extends WUnDiEdge[N](NodeProduct(fromIntersection, toIntersection), roadWeight)
   with ExtendedKey[N]
   with EdgeCopy[EdgeRoad]
   with OuterEdge[N,EdgeRoad] {
-  private def this(nodes: Product, roadWeight: Double, max_weight: Int) {
+  private def this(nodes: Product, name: String, roadWeight: Double, maxWeight: Int) {
     this(nodes.productElement(0).asInstanceOf[N],
-         nodes.productElement(1).asInstanceOf[N], roadWeight, max_weight)
+         nodes.productElement(1).asInstanceOf[N], name, roadWeight, maxWeight)
   }
   def keyAttributes = Seq(roadWeight)
-  override def copy[NN](newNodes: Product) = new EdgeRoad[NN](newNodes, roadWeight, max_weight)
-  override protected def attributesToString = s" ($roadWeight) + max weight: + ($max_weight)" 
+  override def copy[NN](newNodes: Product) = new EdgeRoad[NN](newNodes, name, roadWeight, maxWeight)
+  //override protected def attributesToString = s" ($roadWeight) + max weight: + ($maxWeight)"
+  override protected def attributesToString = s" $name " 
 } 
 object EdgeRoad {
   implicit final class ImplicitEdge[A <: Intersection](val e: WUnDiEdge[A]) extends AnyVal {
-    def ##(roadWeight: Double, max_weight: Int) = new EdgeRoad[A](e._1, e._2, roadWeight, max_weight)
+    def ##(name: String, roadWeight: Double, maxWeight: Int) = new EdgeRoad[A](e._1, e._2, name, roadWeight, maxWeight)
   } 
 }
 
