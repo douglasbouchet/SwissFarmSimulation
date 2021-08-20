@@ -53,11 +53,13 @@ object EdgeRoad {
 // val edge = laus ~> gen ## 40 does not seem to works, use EdgeRoad[Intersection](laus, gen, 40) instead
 
 /** We can make a class as it will be initialized in the main, before getting called by "agents" */
-object RoadNetwork/*roadData: Any */ /** Define type when data on road will be available */ {
+class RoadNetwork(data: Any)/*roadData: Any */ /** Define type when data on road will be available */ {
 
   //val roadNetwork = scalax.collection.mutable.Graph(EdgeRoad[Node](new Node("a"),new Node("b"), "a", 1, 1))
   val roadNetwork: scalax.collection.mutable.Graph[Node, EdgeRoad] = scalax.collection.mutable.Graph[Node, EdgeRoad]()
   /** add(Node),add(EdgeRoad)m remove(EdgeRoad), remove(Node) already implemented */ 
+
+  def createGraph(data: Any) = {}
 
   def addNodes(nodes: List[Node]): Boolean = {
     var check: Boolean = true
