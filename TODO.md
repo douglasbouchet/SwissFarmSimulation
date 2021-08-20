@@ -119,3 +119,10 @@ TODO See if adding caracterstics about the crops etc inside the LandOverlay
 Parcelle -> CadastralParcel, parcelles -> cadastral_parcels, parcelle -> cadastral_parcel
 
 ASK KOCH !!!!!!!!!! Change Parcelle by LandLot, parcelles = landlots
+
+# Caching:
+Currently, path for example are requires from one parcel to another. Unlikely that this path will be ask by other simulated entities. -> should be cache locally inside the entity that ask it. (WeakHashMap or HashMap)
+But some info could be asked by more people: 
+This info could be cache in concurrent Map, at the ...Administrator level
+
+change cadastral_parcels_aggregation to landLot

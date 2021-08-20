@@ -4,21 +4,22 @@
 
 //package roadNetwork{
 
-  import scalax.collection.Graph // or 
-  import scalax.collection.mutable.Graph
-  import scalax.collection.GraphPredef._
-  import scalax.collection.GraphEdge._
-  
-  import scalax.collection.edge.WUnDiEdge
-  import scalax.collection.edge.Implicits._
-  import scalax.collection.GraphTraversal._
-  
-  import landAdministrator.CadastralParcel
-  import Owner._
+import scalax.collection.Graph 
+import scalax.collection.mutable.Graph
+import scalax.collection.GraphPredef._
+import scalax.collection.GraphEdge._
 
-  class Node(val id: String){
-  override def toString = s"$id "
-  }
+import scalax.collection.edge.WUnDiEdge
+import scalax.collection.edge.Implicits._
+import scalax.collection.GraphTraversal._
+
+import landAdministrator.CadastralParcel
+import Owner._
+
+
+class Node(val id: String){
+override def toString = s"$id "
+}
 
 /** Represent an intersection between multiples roads. A node in the graph
 * We might not want to store in/out going edges, as it will be stored in the graph
@@ -27,7 +28,7 @@ case class Intersection(override val id: String) extends Node(id){}
 
 /** The point where parcels are connected to the network 
 TODO do we have to store connectedParcels, or maybe having this info only inside each parcel is sufficient ? */
-//case class ParcelAccess(override val id: String, var connectedParcels: List[CadastralParcel]) extends Node(id) {}
+case class ParcelAccess(override val id: String, var connectedParcels: List[CadastralParcel]) extends Node(id) {}
 
 /** weight of edges could be computing as the length of road/avg speed */
 case class EdgeRoad[+N](fromNode: N, toNode: N, name: String, roadWeight: Double, maxWeight: Int)
@@ -41,7 +42,6 @@ case class EdgeRoad[+N](fromNode: N, toNode: N, name: String, roadWeight: Double
   }
   def keyAttributes = Seq(roadWeight)
   override def copy[NN](newNodes: Product) = new EdgeRoad[NN](newNodes, name, roadWeight, maxWeight)
-  //override protected def attributesToString = s" ($roadWeight) + max weight: + ($maxWeight)"
   override protected def attributesToString = s" $name " 
 } 
 object EdgeRoad {
@@ -64,10 +64,27 @@ object RoadNetwork/*roadData: Any */ /** Define type when data on road will be a
     nodes.foreach { node => {check &= roadNetwork.add(node)}}
     check
   }
-  def addEdges(edges: List[Node]): Boolean = {
+  def addRoads(edges: List[EdgeRoad[Node]]): Boolean = {
     var check: Boolean = true
     edges.foreach { edge => {check &= roadNetwork.add(edge)}}
     check
+  }
+
+  /** Assume constant roadSpeed over all the road atm, afterwards change Double -> List[(Double(distance), Int(speed))]*/
+  def CreateRoad(fromNode: Node, toNode: Node, name: String, roadLenght: Double, roadSpeed: Int, roadMaxWeight: Int): Boolean ={
+    val road = new EdgeRoad[Node](fromNode, toNode, name, roadLenght/roadSpeed, roadMaxWeight)
+    roadNetwork.add(road) match {
+      case true => true
+      case false => {println("The road couldn't be added to the network"); false}
+    }
+  }
+
+  def CreateNode(id: String): Boolean = {
+    val node = new Node(id)
+    roadNetwork.add(node) match {
+      case true => true
+      case false => {println("The node couldn't be added to the network"); false}
+    }
   }
 
   def n(outer: Node): roadNetwork.NodeT = roadNetwork get outer
