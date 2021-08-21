@@ -15,7 +15,11 @@ libraryDependencies  ++= Seq(
   "org.scalactic" %% "scalactic" % "3.2.9", 
   "org.scalatest" %% "scalatest" % "3.2.9" % "test", 
   //Added for scalax 
-  "org.scala-graph" %% "graph-core" % "1.13.2"
+  "org.scala-graph" %% "graph-core" % "1.13.2",
+
+  /** Used to import excel files */
+  "org.apache.poi" % "poi" % "3.17",
+  "org.apache.poi" % "poi-ooxml" % "3.17"
 
   
 
