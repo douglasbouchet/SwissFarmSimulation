@@ -1,5 +1,6 @@
 import landAdministrator.CadastralParcel
 import Owner._
+import farmpackage._
 /** 
 * @note This class is in charge of generating data for the simulation engine
 * The area are in ha
@@ -37,7 +38,7 @@ val sheet = workbook.getSheetAt(0)
 /** this will be used to assign a number of parcels to each farm 
  * They should be store as variable of the class generator cause used in some of its methods
 */
-var nbFarmPerCanton, nbFarmMore30ha, nbFarmMore10Less30, nbFarmMoreLess10: List[(String, Int)] = List()
+var nbFarmPerCanton, nbFarmMore30ha, nbFarmMore10Less30, nbFarmLess10: List[(String, Int)] = List()
 
 /** this will be used to determine the land overlays */ 
 var totalCropsArea: List[(String, Int)] = List()
@@ -49,20 +50,14 @@ for (i <- 1 to 27) {
   nbFarmPerCanton = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(1).toString().toDouble).toInt) :: nbFarmPerCanton
   nbFarmMore30ha = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(2).toString().toDouble).toInt) :: nbFarmMore30ha
   nbFarmMore10Less30 = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(3).toString().toDouble).toInt) :: nbFarmMore10Less30
-  nbFarmMoreLess10 = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(4).toString().toDouble).toInt) :: nbFarmMoreLess10
+  nbFarmLess10 = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(4).toString().toDouble).toInt) :: nbFarmLess10
   /** This numbers seems a bit low, check afterwards total use for agricultural purpose */
   totalCropsArea = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(6).toString().toDouble).toInt) :: totalCropsArea
   totalWheatCropsArea = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(10).toString().toDouble).toInt) :: totalWheatCropsArea
-  totalSurface = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(14).toString().toDouble).toInt*100) :: totalWheatCropsArea
+  totalSurface = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(14).toString().toDouble).toInt*100) :: totalSurface
 }
 
 nbFarmPerCanton
-nbFarmMore30ha
-nbFarmMore10Less30
-nbFarmMoreLess10 
-totalCropsArea
-totalWheatCropsArea
-totalSurface
 
 /** Next we construct the parcels 
  * We differentiate 2 types of parcels, the agricultural ones, the other
@@ -95,10 +90,6 @@ def generateRdmArea(min: Double, max: Double, mean: Double, variance: Double, un
   return areas
 }
 
-var x = List(2)
-x ::= 3
-x
-
 def generateParcels(canton: String): (List[CadastralParcel],List[CadastralParcel]) = {
   val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
   val totalArea: Double = totalSurface.filter(_._1 == canton).head._2
@@ -108,18 +99,89 @@ def generateParcels(canton: String): (List[CadastralParcel],List[CadastralParcel
 
   (agriculturalParcels,otherParcels)
 }
-generateRdmArea(0.03,2,0.06,2.4,1000000)
 
-generateParcels("Bale-Ville")._1.length
-generateParcels("Bale-Ville")._2.length
-// TODO method
+/** Assign in a round robin manner an amount of parcels to a small, medium, big farm.
+ * Repeat until there is no parcels remaining
+ * For each farm: 
+ *  Choose a number of ha as following:
+ *    small farm: from 2 to 9 (Uniform)
+ *    medium farm: from 10 to 29 (Uniform)
+ *    big farm: from 30 to 60 (Uniform)
+ *  Assign parcels until area reach the number of ha
+ */ 
+def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel]): List[Farm] = {
+
+  var parcels : List[CadastralParcel]= _parcels
+  var nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
+  var nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
+  var nBigFarms:   Int = nbFarmMore30ha.filter(_._1 == canton).head._2
+
+  var assignedSmallFarms:List[Farm] = List()
+  var assignedMedFarms  :List[Farm] = List()
+  var assignedBigFarms  :List[Farm] = List()
+
+  var farm: Farm = new Farm
+  var sum: Double = 0 
+  val smallUni  = distributions.Uniform(1,10)
+  var area: Double = 0.0
+  var i: Int = 0
+  while(parcels.length > 0){
+    if(i%3 == 0){
+      if(assignedSmallFarms.length < nSmallFarms){
+        area = 2 + scala.util.Random.nextInt(7)
+        farm = new Farm
+        // TODO put inside a method of Land administrator or whaterver
+        // degeu faire ca propre
+        while(sum < area){
+          farm.parcels ::= parcels(0)
+          sum = 0.0
+          farm.parcels.foreach(parcel => (sum += parcel.area))
+        }
+        assignedSmallFarms ::= farm
+      }
+      
+    }
+    else if (i%3 == 1){
+      if(assignedMedFarms.length < nMedFarms){
+        area = 10 + scala.util.Random.nextInt(20)
+        farm = new Farm
+        while(sum < area){
+          farm.parcels ::= parcels(0)
+          sum = 0.0
+          farm.parcels.foreach(parcel => (sum += parcel.area))
+        }
+        assignedMedFarms ::= farm
+
+      }
+    }
+    else {
+      if(assignedBigFarms.length < nBigFarms){
+        area = 30 + scala.util.Random.nextInt(31)
+        farm = new Farm
+        while(sum < area){
+          farm.parcels ::= parcels(0)
+          sum = 0.0
+          farm.parcels.foreach(parcel => (sum += parcel.area))
+        }
+        assignedBigFarms ::= farm
+      }
+    }
+    parcels = parcels.tail
+    i += 1
+    sum = 0.0 // TODO a modifier moche
+  }
+  assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
+}
+
+assignParcelsToFarms("Jura", generateParcels("Jura")._1)(100).parcels.length
 
 
-/** Next we create a number of farms, and assign them parcels of agricultural purpose in order to reach statistics about number of farms
- * and surface per farm (assign farms in order to have adjacent parcels) */
+
+/** We know the number of farms per canton. We assign them a random number of parcels of agricultural purpose */
 
 /** How to assign some land overlays ? TBD */
 
+//TODO erreur: prendre en compte le fait que c'est pas A REVOIR 
 
 
  //TODO ajouter le nombre d'emploi ? dispo dans les excels 
