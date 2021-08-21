@@ -14,3 +14,7 @@
 * Each generated type of data is stored inside one excel file 
 */
 
+
+class Generator {
+
+}
