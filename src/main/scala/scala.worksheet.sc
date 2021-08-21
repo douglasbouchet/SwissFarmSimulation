@@ -1,5 +1,5 @@
 import landAdministrator.CadastralParcel
-import Owner
+import Owner._
 /** 
 * @note This class is in charge of generating data for the simulation engine
 * The area are in ha
@@ -17,13 +17,12 @@ import Owner
 * Each generated type of data is stored inside one excel file 
 */
 
-
 import breeze.stats.distributions
 
-class Generator {
-
-  //def getStastisticalDataFromExcel(excel: )
-}
+//class Generator {
+//
+//  //def getStastisticalDataFromExcel(excel: )
+//}
 import org.apache.poi.ss.usermodel.{ DataFormatter, WorkbookFactory, Row }
 import java.io.File
 import scala.jdk.CollectionConverters._
@@ -103,15 +102,16 @@ x
 def generateParcels(canton: String): (List[CadastralParcel],List[CadastralParcel]) = {
   val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
   val totalArea: Double = totalSurface.filter(_._1 == canton).head._2
-  var agriculturalParcels, otherParcels = List()
-
-  generateRdmArea(2,10,5,2.4,cropAreas).foreach(area => agriculturalParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area))
-  generateRdmArea(0.03,2,0.06,2.4,cropAreas).foreach(area => otherParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area))
+  var agriculturalParcels, otherParcels: List[CadastralParcel] = List()
+  generateRdmArea(2,10,5,2.4,cropAreas).foreach(area => {agriculturalParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area)})
+  generateRdmArea(0.03,2,0.06,2.4,cropAreas).foreach(area => {otherParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area)})
 
   (agriculturalParcels,otherParcels)
 }
-generateRdmArea(0.03,2,0.06,2.4,1)
+generateRdmArea(0.03,2,0.06,2.4,1000000)
 
+generateParcels("Bale-Ville")._1.length
+generateParcels("Bale-Ville")._2.length
 // TODO method
 
 
