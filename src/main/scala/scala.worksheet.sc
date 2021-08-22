@@ -112,11 +112,12 @@ def generateParcels(canton: String): (List[CadastralParcel],List[CadastralParcel
  *  Assign parcels until area reach the number of ha
  */ 
 def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel]): List[Farm] = {
-  
+
   var parcels : List[CadastralParcel] = _parcels
-  var nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
-  var nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
-  var nBigFarms:   Int = nbFarmMore30ha.filter(_._1 == canton).head._2
+  val nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
+  val nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
+  val nBigFarms:   Int = nbFarmMore30ha.filter(_._1 == canton).head._2
+  val nFarms:      Int = nbFarmPerCanton.filter(_._1 == canton).head._2
 
   var assignedSmallFarms:List[Farm] = List()
   var assignedMedFarms  :List[Farm] = List()
@@ -165,23 +166,19 @@ def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel]): List[
     }
     sum = 0.0 
   }
-  assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
+  val farms: List[Farm] = assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
+  /** we reached the expected number of farm for the canton
+   * if some parcels remain, add them to some farm randomly  */
+  if(!parcels.isEmpty){
+    parcels.foreach(parcel => (farms(scala.util.Random.nextInt(nFarms)).parcels ::= parcel))
+  }
+  scala.util.Random.shuffle(farms)
 }
 
-val x = scala.util.Random.shuffle(assignParcelsToFarms("Jura", generateParcels("Jura")._1))
+// assignParcelsToFarms("Jura", generateParcels("Jura")._1)(0).parcels.length
 
-x(0).parcels.length
-x(1).parcels.length
-x(2).parcels.length
-x(3).parcels.length
-x(4).parcels.length
-x(5).parcels.length
-x(6).parcels.length
-x(7).parcels.length
-x(8).parcels.length
-x(9).parcels.length
-x(10).parcels.length
-x(11).parcels.length
+/** next step is to create some land overlays */
+
 
 
 /** We know the number of farms per canton. We assign them a random number of parcels of agricultural purpose */
