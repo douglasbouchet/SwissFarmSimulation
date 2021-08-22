@@ -125,28 +125,29 @@ def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel]): List[
   val smallUni  = distributions.Uniform(1,10)
   var area: Double = 0.0
   var i: Int = 0
-  while(parcels.length > 0){
+  while(!parcels.isEmpty){
     if(i%3 == 0){
       if(assignedSmallFarms.length < nSmallFarms){
         area = 2 + scala.util.Random.nextInt(7)
         farm = new Farm
         // TODO put inside a method of Land administrator or whaterver
         // degeu faire ca propre
-        while(sum < area){
-          farm.parcels ::= parcels(0)
+        while(sum < area && !parcels.isEmpty){
+          farm.parcels ::= parcels.head
+          parcels = parcels.tail
           sum = 0.0
           farm.parcels.foreach(parcel => (sum += parcel.area))
         }
         assignedSmallFarms ::= farm
       }
-      
     }
     else if (i%3 == 1){
       if(assignedMedFarms.length < nMedFarms){
         area = 10 + scala.util.Random.nextInt(20)
         farm = new Farm
-        while(sum < area){
-          farm.parcels ::= parcels(0)
+        while(sum < area && !parcels.isEmpty){
+          farm.parcels ::= parcels.head
+          parcels = parcels.tail
           sum = 0.0
           farm.parcels.foreach(parcel => (sum += parcel.area))
         }
@@ -158,25 +159,29 @@ def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel]): List[
       if(assignedBigFarms.length < nBigFarms){
         area = 30 + scala.util.Random.nextInt(31)
         farm = new Farm
-        while(sum < area){
-          farm.parcels ::= parcels(0)
+        while(sum < area && !parcels.isEmpty){
+          farm.parcels ::= parcels.head
+          parcels = parcels.tail
           sum = 0.0
           farm.parcels.foreach(parcel => (sum += parcel.area))
         }
         assignedBigFarms ::= farm
       }
     }
-    parcels = parcels.tail
     i += 1
     sum = 0.0 // TODO a modifier moche
   }
   assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
 }
 
-assignParcelsToFarms("Jura", generateParcels("Jura")._1)(100).parcels.length
+assignParcelsToFarms("Jura", generateParcels("Jura")._1).length
+//assignParcelsToFarms("Jura", generateParcels("Jura")._1)
 
 
-
+var x = List(1)
+val a = x.head
+x = x.tail
+!x.isEmpty
 /** We know the number of farms per canton. We assign them a random number of parcels of agricultural purpose */
 
 /** How to assign some land overlays ? TBD */
