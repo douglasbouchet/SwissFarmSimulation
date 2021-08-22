@@ -1,6 +1,5 @@
-import landAdministrator.CadastralParcel
-import Owner._
-import farmpackage._
+import Simulation.Sim
+
 /** 
 * @note This class is in charge of generating data for the simulation engine
 * The area are in ha
@@ -15,8 +14,15 @@ import farmpackage._
     TODO comment distancer les villes ? inclure une dimension spatiale ? 
   - People based on these cities
   - Other entities than farms involved in food supply chain
+* For the moment we do not have any spatial locality, so no ways to known which parcels are neighbors
 * Each generated type of data is stored inside one excel file 
 */
+
+import landAdministrator.CadastralParcel
+import Owner._
+import farmpackage._
+import Simulation.Person
+import Simulation.Simulation
 
 import breeze.stats.distributions
 
@@ -24,7 +30,7 @@ import breeze.stats.distributions
 //
 //  //def getStastisticalDataFromExcel(excel: )
 //}
-import org.apache.poi.ss.usermodel.{ DataFormatter, WorkbookFactory, Row }
+import org.apache.poi.ss.usermodel.WorkbookFactory
 import java.io.File
 import scala.jdk.CollectionConverters._
  
@@ -41,9 +47,10 @@ val sheet = workbook.getSheetAt(0)
 var nbFarmPerCanton, nbFarmMore30ha, nbFarmMore10Less30, nbFarmLess10: List[(String, Int)] = List()
 
 /** this will be used to determine the land overlays */ 
-var totalCropsArea: List[(String, Int)] = List()
+var totalCropsArea:      List[(String, Int)] = List()
 var totalWheatCropsArea: List[(String, Int)] = List()
-var totalSurface: List[(String, Int)] = List()
+var totalSurface:        List[(String, Int)] = List()
+var population:          List[(String, Int)] = List()
 
 
 for (i <- 1 to 27) {
@@ -55,12 +62,16 @@ for (i <- 1 to 27) {
   totalCropsArea = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(6).toString().toDouble).toInt) :: totalCropsArea
   totalWheatCropsArea = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(10).toString().toDouble).toInt) :: totalWheatCropsArea
   totalSurface = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(14).toString().toDouble).toInt*100) :: totalSurface
+  population = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(15).toString().toDouble).toInt) :: population
 }
 
 nbFarmPerCanton
 nbFarmMore30ha
 nbFarmMore10Less30
 nbFarmLess10
+population
+totalCropsArea
+totalSurface
 /** Next we construct the parcels 
  * We differentiate 2 types of parcels, the agricultural ones, the other
  * agricultural parcels range from 2 to 10 ha, following gaussian distribution of mean 5, var TBD (rm external values)
@@ -92,6 +103,8 @@ def generateRdmArea(min: Double, max: Double, mean: Double, variance: Double, un
   return areas
 }
 
+/** TODO add some statistics about each commune in switzerland 
+ * generate parcels for each of this communes based on these statististics (to give id to parcels) */ 
 def generateParcels(canton: String): (List[CadastralParcel],List[CadastralParcel]) = {
   val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
   val totalArea: Double = totalSurface.filter(_._1 == canton).head._2
@@ -112,7 +125,6 @@ def generateParcels(canton: String): (List[CadastralParcel],List[CadastralParcel
  *  Assign parcels until area reach the number of ha
  */ 
 def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel]): List[Farm] = {
-
   var parcels : List[CadastralParcel] = _parcels
   val nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
   val nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
@@ -168,16 +180,26 @@ def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel]): List[
   }
   val farms: List[Farm] = assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
   /** we reached the expected number of farm for the canton
-   * if some parcels remain, add them to some farm randomly  */
+   * if some parcels remain, add them to some farm randomly */
   if(!parcels.isEmpty){
     parcels.foreach(parcel => (farms(scala.util.Random.nextInt(nFarms)).parcels ::= parcel))
   }
   scala.util.Random.shuffle(farms)
 }
 
-// assignParcelsToFarms("Jura", generateParcels("Jura")._1)(0).parcels.length
+// assignParcelsToFarms("Jura", generateParcels("Jura")._1)
 
-/** next step is to create some land overlays */
+/** next step is to create some land overlays
+ * TODO see how to do 
+ */
+
+/** generate people for each canton */
+def generatePeople(canton: String, sim: Simulation): List[Person] = {
+  (for (i <- 1 to population.filter(_._1 == canton).head._2) yield new Person(sim, false)).toList
+}  
+
+
+
 
 
 
