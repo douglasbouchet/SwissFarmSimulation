@@ -1,5 +1,6 @@
-import Simulation.Sim
-
+import scalax.collection.GraphTraversal
+import scalax.collection.State
+import scalax.collection.mutable.GraphLike
 /** 
 * @note This class is in charge of generating data for the simulation engine
 * The area are in ha
@@ -23,20 +24,14 @@ import Owner._
 import farmpackage._
 import Simulation.Person
 import Simulation.Simulation
+import Simulation.Sim
 
 import breeze.stats.distributions
 
-//class Generator {
-//
-//  //def getStastisticalDataFromExcel(excel: )
-//}
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import java.io.File
 import scala.jdk.CollectionConverters._
  
-
-
-//def getStastisticalDataFromExcel()
 val f = new File("/Users/douglasbouchet/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
 val workbook = WorkbookFactory.create(f)
 val sheet = workbook.getSheetAt(0)  
@@ -198,9 +193,35 @@ def generatePeople(canton: String, sim: Simulation): List[Person] = {
   (for (i <- 1 to population.filter(_._1 == canton).head._2) yield new Person(sim, false)).toList
 }  
 
+import scalax.collection.generator._
+import scalax.collection.Graph
+import roadNetwork._
 
+//val generator = new GraphGen[Node, EdgeRoad]
 
+/** Next we generate the road network 
+ * Idea: get data for generating national roads in switzerland 
+ * Next generate as an Ldiagram growing from the highway the others roads 
+*/
 
+val network = new RoadNetwork
+
+network.getEdges
+
+/** Should generate the nodes based on some stats about canton/communes 
+ */
+def generateNodes(number: Int) = {
+
+}
+
+/** If nodes are between the same communes, give small length, otw give bigger size 
+ * The graph should be connected. 
+ * 
+*/
+
+def generateEdges(nodes: List[Node]) = {
+
+}
 
 
 /** We know the number of farms per canton. We assign them a random number of parcels of agricultural purpose */

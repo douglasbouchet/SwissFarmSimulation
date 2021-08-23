@@ -2,7 +2,7 @@ lazy val root = (project in file(".")).settings(
   name := "economic_simulations",
   organization := "ch.epfl.data",
   version := "1.0",
-  //scalaVersion := "2.11.8"
+  //scalaVersion := "2.11.1"
   scalaVersion := "2.13.1"
 )
 
@@ -19,9 +19,11 @@ libraryDependencies  ++= Seq(
 
   /** Used to import excel files */
   "org.apache.poi" % "poi" % "3.17",
-  "org.apache.poi" % "poi-ooxml" % "3.17"
+  "org.apache.poi" % "poi-ooxml" % "3.17",
 
-  
+  /** Used to pickle objects */
+
+
 
 )
 

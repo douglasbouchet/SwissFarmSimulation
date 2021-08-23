@@ -168,6 +168,8 @@ def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel]): List[
  * TODO see how to do 
  */
 
+/** Next we generate the road network */
+
 /** generate people for each canton */
 def generatePeople(canton: String, sim: Simulation): List[Person] = {
   (for (i <- 1 to population.filter(_._1 == canton).head._2) yield new Person(sim, false)).toList
@@ -187,4 +189,14 @@ def generatePeople(canton: String, sim: Simulation): List[Person] = {
 class Sauvegarde {
   //TODO see how to save the data
   // maybe do not save entires object but rather infos on them 
+
+
+  /** Possibilities:
+   * Save states of objects inside Json files
+   * Save on an SQL database */
+
+   // we may want to be able to quicly retrieve some objects 
+
+   // Do we need to have an organization for objects storing ? 
+
 }
