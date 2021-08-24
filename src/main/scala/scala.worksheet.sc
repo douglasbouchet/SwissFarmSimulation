@@ -1,3 +1,4 @@
+import scala.collection.mutable
 import org.apache.xmlgraphics.util.dijkstra
 import org.apache.commons.math3.geometry.spherical.twod.Edge
 import scalax.collection.GraphTraversal
@@ -264,39 +265,42 @@ def generateEdges(roadNetworkInstance: RoadNetwork) = {
  * Apply the algo
  * */  
 
-def minSpanningTree(graph: scalax.collection.mutable.Graph[Intersection, EdgeRoad]): scalax.collection.mutable.Graph[Intersection, EdgeRoad] = {
-  var addedNodes: Set[graph.NodeT] = Set()
-  var remainingNodes: Set[graph.NodeT] = Set()
-
-  graph.nodes.toList.foreach(node => addedNodes += node)
-  graph 
-}
-
-var addedNodes: Set[network.NodeT] = Set()
-var remainingNodes: Set[network.NodeT] = Set()
-var nodeKeys: List[(network.NodeT, Int)] = List()
-
-network.nodes.toList.foreach(node => remainingNodes += node)
-remainingNodes.foreach(node => nodeKeys ::= (node, Int.MaxValue))
-
-val startingNode = (nodeKeys(0)._1, 0)
-nodeKeys = nodeKeys.updated(0, startingNode)
-
-/** Next we perform the Prim's algorithm to create a minimum spanning tree */
-//while(!remainingNodes.isEmpty){
-//  val maxKeys = nodeKeys.minBy(_._2)
+//def minSpanningTree(graph: scalax.collection.mutable.Graph[Intersection, EdgeRoad]): scalax.collection.mutable.Graph[Intersection, EdgeRoad] = {
+//  var addedNodes: List[Intersection] = List()
+//  var remainingNodes: List[Intersection] = List()
+//
+//  graph.nodes.toList.foreach(node => addedNodes ::= node)
+//  graph 
 //}
-/** we select the node with lower key */
-val minKey: network.NodeT = nodeKeys.minBy(_._2)._1
-/** we update keys of its adjency nodes */
-val candidates: Set[network.NodeT] = minKey.diSuccessors
+//
+//var addedNodes: List[Intersection] = List()
+//var remainingNodes: List[Intersection] = List()
+//var nodeKeys: List[(Intersection, Int)] = List()
+//
+//network.nodes.toList.foreach(node => remainingNodes ::= node)
+//remainingNodes.foreach(node => nodeKeys ::= (node, Int.MaxValue))
+//
+//val startingNode = (nodeKeys(0)._1, 0)
+//nodeKeys = nodeKeys.updated(0, startingNode)
+//nodeKeys
+///** Next we perform the Prim's algorithm to create a minimum spanning tree */
+////while(!remainingNodes.isEmpty){
+////  val maxKeys = nodeKeys.minBy(_._2)
+////}
+///** we select the node with lower key */
+//var minKey: Intersection = nodeKeys.minBy(_._2)._1
+///** we update keys of its adjency nodes */
+//var candidates: Set[EdgeRoad[Intersection]]
+//
 
-candidates
 
-minKey.incoming
+//nodeKeys = nodeKeys.updated(minKey.incoming.head._2, nodeKeys.filter(tup => tup._1 == minKey.incoming.head._2))
+
+//minKey.incoming.foreach(edge => {
+//  nodeKeys = nodekeys.updated(edge._, nodeKeys.filter(tup => tup._1 == minKey.incoming.head._2))
+//})
 
 
-minSpanningTree(network)
 
 // generateEdges(networkClass)
 
