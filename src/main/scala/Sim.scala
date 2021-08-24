@@ -53,6 +53,11 @@ trait SimpleSim extends Sim {
   override def algo = __forever(action, __wait(1))
 }
 
+trait MultipleActionsSim extends Sim {
+  def actions: List[(Instruction, Int)]
+  //override def algo = __forever(actions(0)._1, __wait(actions(0)._2))
+}
+
 
 abstract class SimO(
   shared: Simulation,

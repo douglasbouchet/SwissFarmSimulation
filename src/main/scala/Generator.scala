@@ -16,7 +16,7 @@
 * Each generated type of data is stored inside one excel file 
 */
 
-import Simulation.Sim
+import Simulation._
 import landAdministrator.CadastralParcel
 import Owner._
 import farmpackage._
@@ -105,7 +105,7 @@ def generateParcels(canton: String): (List[CadastralParcel],List[CadastralParcel
  *    big farm: from 30 to (60?) (Uniform)
  *  Assign parcels until area reach the number of ha
  */ 
-def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel]): List[Farm] = {
+def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel], s: Simulation): List[Farm] = {
   var parcels : List[CadastralParcel] = _parcels
   val nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
   val nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
@@ -132,19 +132,19 @@ def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel]): List[
   while(!parcels.isEmpty && (ended == false)){
     if(assignedSmallFarms.length < nSmallFarms){
       area = 2 + scala.util.Random.nextInt(7)
-      var farm: Farm = new Farm
+      var farm: Farm = new Farm(s)
       assignAreas(farm)
       assignedSmallFarms ::= farm
     }
     else if(assignedMedFarms.length < nMedFarms){
       area = 10 + scala.util.Random.nextInt(20)
-      var farm = new Farm
+      var farm = new Farm(s)
       assignAreas(farm)
       assignedMedFarms ::= farm
     }
     else if(assignedBigFarms.length < nBigFarms){
       area = 30 + scala.util.Random.nextInt(31)
-      var farm = new Farm
+      var farm = new Farm(s)
       assignAreas(farm)
       assignedBigFarms ::= farm
     }
