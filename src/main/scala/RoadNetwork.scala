@@ -17,18 +17,18 @@ import landAdministrator.CadastralParcel
 import Owner._
 
 
-class Node(val id: String){
+class Intersection(val id: String){
 override def toString = s"$id "
 }
 
 /** Represent an intersection between multiples roads. A node in the graph
 * We might not want to store in/out going edges, as it will be stored in the graph
 Constructor's arguments depend on data, hard to know what is necessary at the moment */ 
-case class Intersection(override val id: String) extends Node(id){}
+//case class Intersection(override val id: String) extends Node(id){}
 
 /** The point where parcels are connected to the network 
 TODO do we have to store connectedParcels, or maybe having this info only inside each parcel is sufficient ? */
-case class ParcelAccess(override val id: String, var connectedParcels: List[CadastralParcel]) extends Node(id) {}
+//case class ParcelAccess(override val id: String, var connectedParcels: List[CadastralParcel]) extends Node(id) {}
 
 /** weight of edges could be computing as the length of road/avg speed */
 case class EdgeRoad[+N](fromNode: N, toNode: N, name: String, roadWeight: Double, maxWeight: Int)
@@ -45,7 +45,7 @@ case class EdgeRoad[+N](fromNode: N, toNode: N, name: String, roadWeight: Double
   override protected def attributesToString = s" $name " 
 } 
 object EdgeRoad {
-  implicit final class ImplicitEdge[A <: Node](val e: WUnDiEdge[A]) extends AnyVal {
+  implicit final class ImplicitEdge[A <: Intersection](val e: WUnDiEdge[A]) extends AnyVal {
     def ##(name: String, roadWeight: Double, maxWeight: Int) = new EdgeRoad[A](e._1, e._2, name, roadWeight, maxWeight)
   } 
 }
@@ -56,25 +56,15 @@ object EdgeRoad {
 class RoadNetwork(/**data: Any*/)/*roadData: Any */ /** Define type when data on road will be available */ {
 
   //val roadNetwork = scalax.collection.mutable.Graph(EdgeRoad[Node](new Node("a"),new Node("b"), "a", 1, 1))
-  val roadNetwork: scalax.collection.mutable.Graph[Node, EdgeRoad] = scalax.collection.mutable.Graph[Node, EdgeRoad]()
+  val roadNetwork: scalax.collection.mutable.Graph[Intersection, EdgeRoad] = scalax.collection.mutable.Graph[Intersection, EdgeRoad]()
   /** add(Node),add(EdgeRoad)m remove(EdgeRoad), remove(Node) already implemented */ 
 
   def createGraph(/**data: Any*/) = {}
 
-  def addNodes(nodes: List[Node]): Boolean = {
-    var check: Boolean = true
-    nodes.foreach { node => {check &= roadNetwork.add(node)}}
-    check
-  }
-  def addRoads(edges: List[EdgeRoad[Node]]): Boolean = {
-    var check: Boolean = true
-    edges.foreach { edge => {check &= roadNetwork.add(edge)}}
-    check
-  }
-
+  
   /** Assume constant roadSpeed over all the road atm, afterwards change Double -> List[(Double(distance), Int(speed))]*/
-  def CreateRoad(fromNode: Node, toNode: Node, name: String, roadLenght: Double, roadSpeed: Int, roadMaxWeight: Int): Boolean ={
-    val road = new EdgeRoad[Node](fromNode, toNode, name, roadLenght/roadSpeed, roadMaxWeight)
+  def CreateRoad(fromNode: Intersection, toNode: Intersection, name: String, roadLenght: Double, roadSpeed: Int, roadMaxWeight: Int): Boolean ={
+    val road = new EdgeRoad[Intersection](fromNode, toNode, name, roadLenght/roadSpeed, roadMaxWeight)
     roadNetwork.add(road) match {
       case true => true
       case false => {println("The road couldn't be added to the network"); false}
@@ -82,33 +72,29 @@ class RoadNetwork(/**data: Any*/)/*roadData: Any */ /** Define type when data on
   }
 
   def CreateNode(id: String): Boolean = {
-    val node = new Node(id)
+    val node = new Intersection(id)
     roadNetwork.add(node) match {
       case true => true
       case false => {println("The node couldn't be added to the network"); false}
     }
   }
 
-  def n(outer: Node): roadNetwork.NodeT = roadNetwork get outer
+  def n(outer: Intersection): roadNetwork.NodeT = roadNetwork get outer
 
   /** TODO find how to define the type "Path" */
-  def findPath(start: Node, end: Node)/** Define Type */ = {
+  def findPath(start: Intersection, end: Intersection)/** Define Type */ = {
     n(start) shortestPathTo n(end) match {
       case Some(path) => path
       case None => {println("No path was found"); null}
     }
   }
   /** TODO find how to define the type "Path" */
-  def findPathWeightConstraint(start: Node, end: Node, weightConstraint: Int) /** Define Type */ = {
+  def findPathWeightConstraint(start: Intersection, end: Intersection, weightConstraint: Int) /** Define Type */ = {
     n(start).withSubgraph(edges = _.maxWeight > weightConstraint) shortestPathTo n(end) match {
       case Some(path) => path
       case None => {println("No path was found"); null /** return Empty "Path" instead */}
     }
   }
-
-  def getEdges = roadNetwork.edges
-
-  def getNodes = roadNetwork.nodes
 
   
   // def pathWeight(path: Any /** TODO define with "Path" type */): Double = path.weight

@@ -187,8 +187,14 @@ def generatePeople(canton: String, sim: Simulation): List[Person] = {
 
 
 class Sauvegarde {
-  //TODO see how to save the data
+
+  // Should use an SQL database instead of raw json/csv files, in order to target the changes ? 
+
+  // Supppose we have a new type of farms, we can just get the only necessary data to change 
   // maybe do not save entires object but rather infos on them 
+
+  // advantages of Json, may be easier if for example we want to model the fact that each farm can have its own network.
+  // can we do such a thing in sql ? 
 
 
   /** Possibilities:

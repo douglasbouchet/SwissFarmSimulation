@@ -1,3 +1,5 @@
+import org.apache.xmlgraphics.util.dijkstra
+import org.apache.commons.math3.geometry.spherical.twod.Edge
 import scalax.collection.GraphTraversal
 import scalax.collection.State
 import scalax.collection.mutable.GraphLike
@@ -182,7 +184,7 @@ def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel]): List[
   scala.util.Random.shuffle(farms)
 }
 
-// assignParcelsToFarms("Jura", generateParcels("Jura")._1)
+//assignParcelsToFarms("Jura", generateParcels("Jura")._1)(0).parcels
 
 /** next step is to create some land overlays
  * TODO see how to do 
@@ -197,6 +199,7 @@ import scalax.collection.generator._
 import scalax.collection.Graph
 import roadNetwork._
 
+
 //val generator = new GraphGen[Node, EdgeRoad]
 
 /** Next we generate the road network 
@@ -204,25 +207,98 @@ import roadNetwork._
  * Next generate as an Ldiagram growing from the highway the others roads 
 */
 
-val network = new RoadNetwork
+val networkClass = new RoadNetwork
 
-network.getEdges
+val network: scalax.collection.mutable.Graph[Intersection, EdgeRoad] = networkClass.roadNetwork
+
+val node0 = new Intersection("0")
+val node1 = new Intersection("1")
+val node2 = new Intersection("2")
+val node3 = new Intersection("3")
+network.add(node0)
+network.add(node1)
+network.add(node2)
+network.add(node3)
+
+val r01 = new EdgeRoad[Intersection](node0, node1, "road 01", 10, 10)
+val r02 = new EdgeRoad[Intersection](node0, node2, "road 02", 10, 10)
+val r03 = new EdgeRoad[Intersection](node0, node3, "road 03", 10, 10)
+val r12 = new EdgeRoad[Intersection](node1, node2, "road 12", 20, 10)
+val r13 = new EdgeRoad[Intersection](node1, node3, "road 13", 15, 10)
+
+
+network.find(node0)
+
+network.add(r01)
+network.add(r02)
+network.add(r03)
+network.add(r12)
+network.add(r13)
 
 /** Should generate the nodes based on some stats about canton/communes 
+ * The idea is to get some clusters representing the cities. 
+ * and some intermediates nodes between the cities to make junction between them
  */
-def generateNodes(number: Int) = {
+def generateNodes(n: Int): List[Intersection] = (for (i <- 0 to n-1) yield new Intersection(i.toString())).toList
 
+
+/** add edges in a random way. If graph not connected until a certain amount of iteration, connect the remaining 
+ * isolated nodes */
+def generateEdges(roadNetworkInstance: RoadNetwork) = {
+  var road = null
+  val networkGraph: scalax.collection.mutable.Graph[Intersection, EdgeRoad] = roadNetworkInstance.roadNetwork
+  val nNodes = networkGraph.nodes.length
+  var nRoads: Int = 0
+  while(!networkGraph.isConnected && nRoads < 100){
+    val fromNode: Intersection = networkGraph.nodes.toList(scala.util.Random.nextInt(nNodes))
+    val toNode: Intersection = networkGraph.nodes.toList(scala.util.Random.nextInt(nNodes))
+    //check if node != 
+    roadNetworkInstance.CreateRoad(fromNode, toNode,"name TBD", 10, 80, 35)
+    nRoads += 1
+  }
 }
 
-/** If nodes are between the same communes, give small length, otw give bigger size 
- * The graph should be connected. 
- * 
-*/
+/** we make edges on the graph until it is connected, add random edge 
+ * Then we create an empty Set. 
+ * Create tuple in the form (Node, Int), the node and its key
+ * Apply the algo
+ * */  
 
-def generateEdges(nodes: List[Node]) = {
+def minSpanningTree(graph: scalax.collection.mutable.Graph[Intersection, EdgeRoad]): scalax.collection.mutable.Graph[Intersection, EdgeRoad] = {
+  var addedNodes: Set[graph.NodeT] = Set()
+  var remainingNodes: Set[graph.NodeT] = Set()
 
+  graph.nodes.toList.foreach(node => addedNodes += node)
+  graph 
 }
 
+var addedNodes: Set[network.NodeT] = Set()
+var remainingNodes: Set[network.NodeT] = Set()
+var nodeKeys: List[(network.NodeT, Int)] = List()
+
+network.nodes.toList.foreach(node => remainingNodes += node)
+remainingNodes.foreach(node => nodeKeys ::= (node, Int.MaxValue))
+
+val startingNode = (nodeKeys(0)._1, 0)
+nodeKeys = nodeKeys.updated(0, startingNode)
+
+/** Next we perform the Prim's algorithm to create a minimum spanning tree */
+//while(!remainingNodes.isEmpty){
+//  val maxKeys = nodeKeys.minBy(_._2)
+//}
+/** we select the node with lower key */
+val minKey: network.NodeT = nodeKeys.minBy(_._2)._1
+/** we update keys of its adjency nodes */
+val candidates: Set[network.NodeT] = minKey.diSuccessors
+
+candidates
+
+minKey.incoming
+
+
+minSpanningTree(network)
+
+// generateEdges(networkClass)
 
 /** We know the number of farms per canton. We assign them a random number of parcels of agricultural purpose */
 
