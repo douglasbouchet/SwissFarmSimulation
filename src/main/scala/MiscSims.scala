@@ -76,43 +76,19 @@ case class Buyer(commodity: Commodity,
 }
 
 
- 
-class Farm(s: Simulation) extends Factory(
-  ProductionLineSpec(1, List((Land, 1)), List(), (Wheat, 20), 4), s)
 
-
-//Not working, just an example
-//def trivialProdFunction(cereals: List[SimCommodities]) : (SimCommodity, Int) = {
-//  val saleable = cereals.filter(c => c.state == harvestable & c.weight > 1.5)
-//  return (Wheat, saleable.size)
-//}
-
-//Really Basic
-//class Farm(s: Simulation) extends Factory(
-//  List(
-//    ProductionLineSpec(1, List((Land, 1)), List(WheatSeeds, 1000), for i in range(1000) yield Wheat(), trivial_prod_function, 10),
-//    ProductionLineSpec(1, List((Land, 1)), List(BarleySeeds, 500), for i in range(500) yield Barley(), trivial_prod_function, 9)
-//  /** parameters in ProductionLineSpec like number of wheat, could be obtained as a function
-//  of land's area */ 
-//)
-//{
-//  val fertilize: Action = {
-//    
-//  }
-//}
-
-class Mill(s: Simulation) extends Factory(
-  ProductionLineSpec(1, List(), List((Wheat, 10)), (Flour, 10), 1), s)
-
-class Cinema(s: Simulation) extends Factory(
-  ProductionLineSpec(2, List(), List(), (MovieTicket, 2000), 1), s)
-
-class CattleFarm(s: Simulation) extends Factory(
-  ProductionLineSpec(1, List((Land, 1)), List(), (Beef, 5), 6), s)
-
-class McDonalds(s: Simulation) extends Factory(
-  ProductionLineSpec(1, List(), List((Flour, 10), (Beef, 5)),
-                 (Burger, 10), 2), s)
+//class Mill(s: Simulation) extends Factory(
+//  ProductionLineSpec(1, List(), List((Wheat, 10)), (Flour, 10), 1), s)
+//
+//class Cinema(s: Simulation) extends Factory(
+//  ProductionLineSpec(2, List(), List(), (MovieTicket, 2000), 1), s)
+//
+//class CattleFarm(s: Simulation) extends Factory(
+//  ProductionLineSpec(1, List((Land, 1)), List(), (Beef, 5), 6), s)
+//
+//class McDonalds(s: Simulation) extends Factory(
+//  ProductionLineSpec(1, List(), List((Flour, 10), (Beef, 5)),
+//                 (Burger, 10), 2), s)
 
 
 

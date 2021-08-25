@@ -123,7 +123,8 @@ case class HR(private val shared: Simulation,
 
 
 class Factory(pls: ProductionLineSpec,
-              shared: Simulation
+              shared: Simulation,
+              o: Owner
 ) extends SimO(shared) {
 
   var pl : List[ProductionLine] = List()
@@ -156,7 +157,7 @@ class Factory(pls: ProductionLineSpec,
   }
   def mycopy(_shared: Simulation,
              _substitution: collection.mutable.Map[SimO, SimO]) = {
-    val f = new Factory(pls, _shared);
+    val f = new Factory(pls, _shared, o);
     copy_state_to(f, _shared, _substitution);
     f
   }
@@ -352,7 +353,7 @@ class Factory(pls: ProductionLineSpec,
       {
         prev_mgmt_action = shared.timer; // call before tactics to avoid
           // immediate recursion in nested simulation.
-        tactics(); // changes goal_num_pl
+        //tactics(); // changes goal_num_pl
       }
 
       for(i <- (pl.length + 1) to goal_num_pl)

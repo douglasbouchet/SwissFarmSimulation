@@ -62,7 +62,7 @@ class Person(
   );
 
   override def stat {
-    print("(Person@" + happiness + " " + capital/100 + ")  ");
+    //print("(Person@" + happiness + " " + capital/100 + ")  ");
   }
 }
 

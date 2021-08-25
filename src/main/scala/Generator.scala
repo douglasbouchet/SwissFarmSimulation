@@ -23,6 +23,9 @@ import farmpackage._
 import Simulation.Person
 import Simulation.Simulation
 
+import Simulation.Factory._
+
+
 import breeze.stats.distributions
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import java.io.File
