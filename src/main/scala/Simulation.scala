@@ -147,9 +147,11 @@ class Simulation {
     val allParcels = generator.generateParcels(canton)
     landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
     println("The number of cadastral parcels is: " + landAdministrator.cadastralParcels.length)
-    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
+    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(3)
     println(farms.length + " farms created: ")
-    sims ++= farms.take(3)
+    println("assigning land overlays")
+    generator.createAndAssignLandOverlays(farms, landAdministrator)
+    sims ++= farms
   }
 
   private def initPerson {

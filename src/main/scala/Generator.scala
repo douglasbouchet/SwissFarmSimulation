@@ -30,6 +30,9 @@ import breeze.stats.distributions
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import java.io.File
 import scala.jdk.CollectionConverters._
+import landAdministrator.LandOverlay
+import landAdministrator.LandAdministrator
+import landAdministrator.LandOverlayPurpose._
 
 class Generator {
  
@@ -171,16 +174,55 @@ class Generator {
 
   /**
     * Create the land overlays for each farm (i.e which crops/paddoc/meadow it will have)
-    * Select a number between 1 and 3 land overlays per farm (randomly chosen)
+    * Select a number between 1 and 3 land overlays per farm (depending on number of parcels)
+    * Assign each overlay between 1 parcel and 1/3 of total parcels of the farm
+    * If the farm possess only 1 parcel, reduce the number of landOverlays
     * For each land overlay assign purpose:
-    *   WheatField with proba 0.7
-    *   Paddoc with proba 0.15
+    *   WheatField with proba 0.75
+    *   Paddoc with proba 0.2
     *   Meadow with proba 0.05
     * @param farms: the farms on which we want to assign land overlays
-    * @note for the moment, farm is the only possessor of a land overlay. But this can change by time
+    * @note farm is the only possessor of a land overlay. But this can change by time
     */
-  def createAndAssignLandOverlays(farms: List[Farm]) = {
-    
+  def createAndAssignLandOverlays(farms: List[Farm], landAdministrator: LandAdministrator) = {
+    farms.foreach{farm => {
+      val nParcels = farm.parcels.length
+      var landOverlays: List[LandOverlay] = List()
+      if(nParcels == 1){
+        //Assign only one landOverlay over 50% of the parcel
+        landOverlays ::= new LandOverlay(List((farm.parcels.head, 50.0)))
+      }
+      else if(nParcels == 2){
+        landOverlays ::= new LandOverlay(List((farm.parcels(0), 70.0)))
+        landOverlays ::= new LandOverlay(List((farm.parcels(1), 70.0)))
+      }
+      else {
+        //Split the parcels into 3 groups. Each Land overlay will be on 70% of each parcel
+        var splittedParcels = farm.parcels.grouped(farm.parcels.length/3 + 1).toList.map(list => {
+          list.map(elem => (elem, 70.0))
+        })
+        landOverlays ::= new LandOverlay(splittedParcels(0))
+        landOverlays ::= new LandOverlay(splittedParcels(1))
+        landOverlays ::= new LandOverlay(splittedParcels(2))
+      }
+      
+      //randomly select a purpose to each landOverlay
+      landOverlays.foreach {overlay => {
+          val n = scala.util.Random.nextInt(100)
+          if (n < 75) {
+            landAdministrator.changePurpose(overlay, wheatField)
+          }
+          else if (n > 75 && n < 95){
+            landAdministrator.changePurpose(overlay, paddoc)
+          }
+          else{
+            landAdministrator.changePurpose(overlay, meadow)
+          }
+        }
+      }
+      farm.landOverlays :::= landOverlays
+    }
+    }
   }
 
   /** Next we generate the road network */

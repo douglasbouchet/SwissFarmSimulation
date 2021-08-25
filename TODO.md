@@ -126,3 +126,10 @@ But some info could be asked by more people:
 This info could be cache in concurrent Map, at the ...Administrator level
 
 change cadastral_parcels_aggregation to landLot
+
+
+
+
+
+TODO
+Change cadastral parcel owner inside generator when assigning to some farm

@@ -1,3 +1,5 @@
+import landAdministrator.LandOverlayPurpose
+import landAdministrator.LandOverlay
 import scala.collection.mutable
 import org.apache.xmlgraphics.util.dijkstra
 import org.apache.commons.math3.geometry.spherical.twod.Edge
@@ -24,7 +26,7 @@ import scalax.collection.mutable.GraphLike
 
 import landAdministrator.CadastralParcel
 import Owner._
-import farmpackage._
+import farmpackage.Farm
 import Simulation.Person
 import Simulation.Simulation
 import Simulation.Sim
@@ -186,12 +188,40 @@ def generateParcels(canton: String): (List[CadastralParcel],List[CadastralParcel
 // }
 
 val s = new Simulation
-val farm0 = new Farm(s)
-val farm1 = new Farm(s)
-val farm2 = new Farm(s)
-val farms: List[Farm] = List(n)
-//assignParcelsToFarms("Jura", generateParcels("Jura")._1)(0).parcels
+val farm0: Farm = new Farm(s)
+val farm1: Farm = new Farm(s)
+val farm2: Farm = new Farm(s)
+val farms: List[Farm] = List(farm0,farm1,farm2)
 
+val parcel0 = new CadastralParcel(("parcel0",1), new Owner,List(), 10)
+val parcel1 = new CadastralParcel(("parcel1",1), new Owner,List(), 20)
+val parcel2 = new CadastralParcel(("parcel2",1), new Owner,List(), 5)
+val parcel3 = new CadastralParcel(("parcel3",1), new Owner,List(), 5)
+val parcel4 = new CadastralParcel(("parcel4",1), new Owner,List(), 10)
+
+val parcels = List(parcel0,parcel1,parcel2,parcel3,parcel4)
+
+farm0.addParcels(parcels)
+
+var nLandOverlays = scala.util.Random.nextInt(3)
+
+
+var list = List(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17)
+//var sliced = list.sliding(list.length/3, 3).toList
+list.length /3 + 1
+var sliced = list.grouped(list.length /3 + 1).toList
+sliced(0)
+sliced(1)
+sliced(2)
+sliced.map(list => {
+  list.map(elem => (elem, 50.0))
+})
+
+import landAdministrator.LandOverlayPurpose._
+
+wheatField 
+
+//assignParcelsToFarms("Jura", generateParcels("Jura")._1)(0).parcel
 /** next step is to create some land overlays
  * TODO see how to do 
  */

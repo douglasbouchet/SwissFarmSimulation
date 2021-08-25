@@ -3,6 +3,7 @@ package farmpackage{
   import Simulation._
   import Simulation.Factory._
   import landAdministrator.CadastralParcel
+  import landAdministrator.LandOverlay
   import code._
   import Securities.Commodities._
 
@@ -15,6 +16,7 @@ import scala.collection.mutable
   case class Farm(s: Simulation) extends SimO(s){
 
     var parcels: List[CadastralParcel] = List()
+    var landOverlays: List[LandOverlay] = List()
     var name = "farm"
     var rpt: Int = 0
     var crops: List[Factory] = List()

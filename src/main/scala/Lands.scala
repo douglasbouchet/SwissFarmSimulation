@@ -105,21 +105,24 @@ class LandOverlay(aggregation: List[(CadastralParcel, Double)]) {
   }
 }
 
+object LandOverlayPurpose extends Enumeration {
+    type LandOverlayPurpose = Value
+    val wheatField = Value("Wheat field")
+    val paddoc = Value("Paddoc")
+    val meadow = Value("Meadow")
+  }
+
 /** Used to perform operation on LandOverlay (split, merge, add/remove parcelles)
 and get informations (find specific type of landOverlay) */
 class LandAdministrator(parcelsData: Any, landOverlaysData: Any) {
   
   var cadastralParcels: List[CadastralParcel] = List()
   var landOverlays : List[LandOverlay] = List()
-  var purposeOfLandOverlay: collection.mutable.Map[LandOverlay, LandOverlayPurpose] = collection.mutable.Map[LandOverlay, LandOverlayPurpose]()
+  //var purposeOfLandOverlay: collection.mutable.Map[LandOverlay, LandOverlayPurpose] = collection.mutable.Map[LandOverlay, LandOverlayPurpose]()
+  var purposeOfLandOverlay: collection.mutable.Map[LandOverlay, LandOverlayPurpose.Value] = collection.mutable.Map[LandOverlay, LandOverlayPurpose.Value]()
 
   /** Declare as an inner object, not stored inside the LandOverlay, cause each time we access a LandOverlay
   we should pass by the LandAdministrator */ 
-  class LandOverlayPurpose() extends Enumeration {
-    type LandOverlayPurpose = Value
-    val WheatField, Paddoc, Meadow = Value /** + some other types of cereals to add */
-  }
-
   /** Constructor */
   {
     /** Create all parcelles, given data
@@ -147,7 +150,7 @@ class LandAdministrator(parcelsData: Any, landOverlaysData: Any) {
   * into must only contain CadastralParcels belonging to current, and each CadastralParcel can appear in one and only one 
   * LandOverlay
   */
-  def splitLandOverlay(current: LandOverlay, into: List[(LandOverlay, LandOverlayPurpose)]): Boolean = {
+  def splitLandOverlay(current: LandOverlay, into: List[(LandOverlay, LandOverlayPurpose.Value)]): Boolean = {
     
     assert(landOverlays.contains(current))
 
@@ -173,7 +176,7 @@ class LandAdministrator(parcelsData: Any, landOverlaysData: Any) {
     return true
   }
 
-  def mergeLandOverlay(toMerge: List[LandOverlay], newPurpose: LandOverlayPurpose): Boolean = {
+  def mergeLandOverlay(toMerge: List[LandOverlay], newPurpose: LandOverlayPurpose.Value): Boolean = {
 
     var mergedLandOverlay = new LandOverlay(toMerge.map(_.landsLot).flatten)
 
@@ -194,7 +197,7 @@ class LandAdministrator(parcelsData: Any, landOverlaysData: Any) {
     return true
   }
 
-  def changePurpose(landOverlay: LandOverlay, newPurpose: LandOverlayPurpose) = {
+  def changePurpose(landOverlay: LandOverlay, newPurpose: LandOverlayPurpose.Value) = {
     purposeOfLandOverlay.get(landOverlay) match {
       case Some(purpose) => {
         purposeOfLandOverlay += (landOverlay -> newPurpose)
@@ -207,7 +210,7 @@ class LandAdministrator(parcelsData: Any, landOverlaysData: Any) {
   /** def get_land_overlay_of_purpose(purpose: LandOverlayPurpose, region: Canton or district,...)
     Could be interesting if want to have some stats per canton/....
   */
-  def getLandOverlayOfPurpose(purpose: LandOverlayPurpose): List[LandOverlay] = {
+  def getLandOverlayOfPurpose(purpose: LandOverlayPurpose.Value): List[LandOverlay] = {
     return purposeOfLandOverlay.filter(_._2 == purpose).toList.map(_._1)
   }
     
