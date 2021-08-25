@@ -125,7 +125,7 @@ class LandAdministrator(parcelsData: Any, landOverlaysData: Any) {
     /** Create all parcelles, given data
     Set Owner to ""
     */
-    def createCadastralParcels(data: Any): List[CadastralParcel] = ???
+    def createCadastralParcels(data: Any): List[CadastralParcel] = List()
 
     /** 
     For each paddoc/field/meadow:
@@ -133,7 +133,7 @@ class LandAdministrator(parcelsData: Any, landOverlaysData: Any) {
       In function of area of parcelles + perc of CadastralParcel inside overlay + owner find 
       how much does each owner of overlay possess of it (usefull for computing crops income of grouped farmers)
     */
-    def createLandOverlays(data: Any): List[LandOverlay] = ???
+    def createLandOverlays(data: Any): List[LandOverlay] = List()
 
   
     cadastralParcels = createCadastralParcels(parcelsData)

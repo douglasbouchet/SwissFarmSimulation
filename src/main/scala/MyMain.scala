@@ -1,14 +1,14 @@
 package Simulation
 import SimLib._
 import Securities.Commodities._
-import farmpackage._
+import farmpackage.Farm
 import Simulation.Factory._
 
 
 object MainExample {
   val s = new Simulation;
 
-  val f   = new farmpackage.Farm(s);
+  val seedsSeller = new Source(WheatSeeds, 1000,1, s);
   // val m   = new Mill(s);
   //val c   = new Cinema(s);
   //val rf  = new CattleFarm(s);
@@ -26,9 +26,8 @@ object MainExample {
     //landlord,
     //silo,
     // silo2, flour_trader, cattle_farmer,
-    f,
-    //f.bonjour,
-    f.wheatFactory//, m,
+    //f.crops(0),
+    //f.crops(1)//, m,
     // c, rf, mcd,
     //flour_buyer
   ) ++ people.toList);
@@ -40,7 +39,7 @@ object MainExample {
   //    s.run(argv(0).toInt);
   //}
   def main(argv: Array[String]) {
-    s.run(20);
+    s.run(2);
   }
 }
 

@@ -41,29 +41,10 @@
 
 
 
-Comment inclure une list de plantes de blé dans la production line ?  ou est ce que ca doit être ajouter autre part ? -> peut-être directement dans la ferme, -> une methode interactWithAgents for each intermediate/optional step 
-
-class IntermediateStep {
-    def InteractWithAgents(List[Sim]) {
-        //pesticide -> n_insects on wheat -- 
-        //fertilizant -> cereals grows ++
-    }
-}
-
-
-production line have a list of Actions 
-each Action: 
-    - have some requires
-    - have some effects on productivity and/or other sim objects
-
-Action(requires:List[Commodities], effect: (List[Agents]) => (return nothing))
 
 
 
 
-!!!!!! How to models each cereals inside the Farm ? 
--> new type of Sim, ones that are linked with some others:
-    e.g a silos is linked with each cereals that are simulated inside it. 
-Farm extends SimO: 
-- inventaire {monai, tracteur, champ de blé, champ de maïs}
-- List[factory] (make sens to have sim0 inside sim0), represent multiple crops,...
+
+
+Factory now possess an owner (of type SimO, should be able to sell on market, and own stuff)

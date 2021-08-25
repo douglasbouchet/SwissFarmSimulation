@@ -3,10 +3,14 @@ import Markets._
 import Owner._
 import Securities._
 import Commodities._
-
+import generator.Generator
+import landAdministrator.LandAdministrator
+import landAdministrator.CadastralParcel
 
 class Simulation {
   var timer = 0;
+
+  val canton = "Glaris"
 
   val market = collection.mutable.Map[Commodity, SellersMarket]();
   for(c <- Commodities.all_commodities) {
@@ -24,6 +28,11 @@ class Simulation {
   */
   var sims = List[SimO]()
 
+  // Manage the lands 
+  val landAdministrator = new LandAdministrator(0,0)
+  // The Generator for the data 
+  val generator = new Generator
+
 
   /** This is not a constructor since we first need to create the Simulation
       to hand it over to the sims, and then hand
@@ -38,6 +47,13 @@ class Simulation {
     println("INIT Simulation " + this);
     sims = _sims;
     for(s <- sims) if(s.isInstanceOf[Person]) labour_market.push(s);
+
+    
+    //Create parcels and farm. Assign parcels to each farm.
+    initLandsAndFarms
+
+    // We should create the farms, give them parcels, and call their init method (production of factory)
+    // depending on their areas + other caracteristics....
 
     if(! GLOBAL.silent) {
       for(s <- sims) { s.stat; }
@@ -125,6 +141,19 @@ class Simulation {
 
     new_sim.run(it);
     old2new
+  }
+
+  private def initLandsAndFarms {
+    val allParcels = generator.generateParcels(canton)
+    landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
+    println("The number of cadastral parcels is: " + landAdministrator.cadastralParcels.length)
+    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
+    println(farms.length + " farms created: ")
+    sims ++= farms.take(3)
+  }
+
+  private def initPerson {
+    
   }
 }
 
