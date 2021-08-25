@@ -133,3 +133,5 @@ change cadastral_parcels_aggregation to landLot
 
 TODO
 Change cadastral parcel owner inside generator when assigning to some farm
+
+maybe add a landoverlaypuprose for growing cows and wich create a factory of meat

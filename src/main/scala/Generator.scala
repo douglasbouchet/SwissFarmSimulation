@@ -186,19 +186,27 @@ class Generator {
     */
   def createAndAssignLandOverlays(farms: List[Farm], landAdministrator: LandAdministrator) = {
     farms.foreach{farm => {
+      println("starting " + farm)
       val nParcels = farm.parcels.length
       var landOverlays: List[LandOverlay] = List()
+      println(nParcels + " = nParcels")
       if(nParcels == 1){
+        println("1 Parcel")
         //Assign only one landOverlay over 50% of the parcel
         landOverlays ::= new LandOverlay(List((farm.parcels.head, 50.0)))
       }
       else if(nParcels == 2){
+        println("2 Parcel")
         landOverlays ::= new LandOverlay(List((farm.parcels(0), 70.0)))
         landOverlays ::= new LandOverlay(List((farm.parcels(1), 70.0)))
       }
       else {
-        //Split the parcels into 3 groups. Each Land overlay will be on 70% of each parcel
-        var splittedParcels = farm.parcels.grouped(farm.parcels.length/3 + 1).toList.map(list => {
+        println("more Parcel")
+        //Split the parcels into 3 groups. Each each parcel is assigned 70% of its area to land overlay
+        var sliced0 = farm.parcels.slice(0,nParcels/3).toList
+        var sliced1 = farm.parcels.slice(nParcels/3,2*nParcels/3).toList
+        var sliced2 = farm.parcels.slice(2*nParcels/3,nParcels).toList
+        var splittedParcels = List(sliced0,sliced1,sliced2).map(list => {
           list.map(elem => (elem, 70.0))
         })
         landOverlays ::= new LandOverlay(splittedParcels(0))
@@ -208,15 +216,16 @@ class Generator {
       
       //randomly select a purpose to each landOverlay
       landOverlays.foreach {overlay => {
+          landAdministrator.landOverlays ::= overlay
           val n = scala.util.Random.nextInt(100)
           if (n < 75) {
-            landAdministrator.changePurpose(overlay, wheatField)
+            landAdministrator.purposeOfLandOverlay += (overlay -> wheatField)
           }
           else if (n > 75 && n < 95){
-            landAdministrator.changePurpose(overlay, paddoc)
+            landAdministrator.purposeOfLandOverlay += (overlay -> paddoc)
           }
           else{
-            landAdministrator.changePurpose(overlay, meadow)
+            landAdministrator.purposeOfLandOverlay += (overlay -> meadow)
           }
         }
       }

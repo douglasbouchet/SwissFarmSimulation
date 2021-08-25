@@ -4,6 +4,7 @@ package farmpackage{
   import Simulation.Factory._
   import landAdministrator.CadastralParcel
   import landAdministrator.LandOverlay
+  import landAdministrator.LandOverlayPurpose._
   import code._
   import Securities.Commodities._
 
@@ -33,7 +34,8 @@ import scala.collection.mutable
     def actions: List[(Instruction, Int)] = ???
 
     override def stat = {
-      println(s"$name \n " + inventory_to_string() + "end")
+      //println(s"$name \n " + inventory_to_string() + " end")
+      println(s"$name \n " + landOverlays+  " end")
     }
     override def algo = __forever(__wait(1))
     // override def algo = __forever(
@@ -51,20 +53,22 @@ import scala.collection.mutable
     // )
 
     override def mycopy(_shared: Simulation, _substitution: mutable.Map[SimO,SimO]): SimO = ???
+
+    /**Create a factory for each landOverlay of purpose the farm has
+     * ProductionLineSpec is determined in function of area, and purpose of LandOverlay
+     */
+    def init = {
+      landOverlays.foreach(lOver => {
+        if(lOver.purpose == wheatField){
+          //after we can add more complex attributs for productivity
+          val area: Double = lOver.getSurface
+          val prodSpec = new ProductionLineSpec(math.round((area/3).toFloat), List((WheatSeeds, math.round((area/10).toFloat))), List(), (WheatSeeds, math.round((area*10).toFloat)), 6)
+          crops ::= new Factory(prodSpec,s, this)
+        }
+      })
+      s.sims :::= crops
+    }
   }
 
-
-//
-//  override def algo = 
-//    __do{
-//        println("starting the wheat production")
-//      __dowhile(
-//        __wait(1),
-//        __do(rpt += 1)
-//        )(rpt < 5)
-//        make(Wheat, 20, 1)
-//        println("wheat production ended")
-//    }
-//        
-//  override def mycopy(_shared: Simulation, _substitution: mutable.Map[SimO,SimO]): SimO = ???
+  
 }

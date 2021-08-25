@@ -219,7 +219,7 @@ sliced.map(list => {
 
 import landAdministrator.LandOverlayPurpose._
 
-wheatField 
+wheatField == paddoc
 
 //assignParcelsToFarms("Jura", generateParcels("Jura")._1)(0).parcel
 /** next step is to create some land overlays

@@ -49,13 +49,15 @@ class LandOverlay(aggregation: List[(CadastralParcel, Double)]) {
   /** How much percentage of the aggregated lands each owner has */
   var ownershipDistrib : List[(Owner, Double)] = cmptOwnershipDistrib(landsLot)
 
+  var purpose: LandOverlayPurpose.Value = LandOverlayPurpose.wheatField
+
   /** Store the characteristics of fields inside the landOverlay class 
   depending on the purpose of the LandOverlay */
 
 
   def cmptOwnershipDistrib(newLandsLot: List[(CadastralParcel, Double)]): List[(Owner, Double)] = {
 
-    val totalArea: Double = getSurface(newLandsLot)
+    val totalArea: Double = getSurface
 
     val ownerAreaUse: List[(Owner, Double)] = newLandsLot.map(tup => (tup._1.owner, tup._1.area * tup._2))
     var areaPerOwner = collection.mutable.Map[Owner, Double]()
@@ -84,7 +86,7 @@ class LandOverlay(aggregation: List[(CadastralParcel, Double)]) {
 
   def getCadastralParcels() : List[CadastralParcel] = landsLot.map(_._1).toList
 
-  def getSurface(lands: List[(CadastralParcel, Double)]): Double = lands.foldLeft(0.0){(acc, tup) => acc + tup._1.area * tup._2}
+  def getSurface:Double = landsLot.foldLeft(0.0){(acc, tup) => acc + tup._1.area * tup._2}
 
   class Crops {
   //val type : CropsType
@@ -110,6 +112,7 @@ object LandOverlayPurpose extends Enumeration {
     val wheatField = Value("Wheat field")
     val paddoc = Value("Paddoc")
     val meadow = Value("Meadow")
+    val noPurpose = Value("no purpose")
   }
 
 /** Used to perform operation on LandOverlay (split, merge, add/remove parcelles)
@@ -183,6 +186,8 @@ class LandAdministrator(parcelsData: Any, landOverlaysData: Any) {
     toMerge.foreach(l_over => assert(landOverlays.contains(l_over)))
       
     changePurpose(mergedLandOverlay, newPurpose)
+
+    toMerge.foreach(lOver => {lOver.purpose = newPurpose} )
 
     /** remove old land overlay in partOf inside each parcel */
     toMerge.foreach(land_overlay => 

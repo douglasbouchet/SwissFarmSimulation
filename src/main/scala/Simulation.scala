@@ -144,13 +144,19 @@ class Simulation {
   }
 
   private def initLandsAndFarms {
+
+    //Init generate parcels, and assign them to farms
     val allParcels = generator.generateParcels(canton)
     landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
     println("The number of cadastral parcels is: " + landAdministrator.cadastralParcels.length)
     var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(3)
     println(farms.length + " farms created: ")
     println("assigning land overlays")
+    //assign land overlays to farms
     generator.createAndAssignLandOverlays(farms, landAdministrator)
+    // init the farm (make a factory for each landOverlay)
+    farms.foreach(_.init)
+
     sims ++= farms
   }
 
