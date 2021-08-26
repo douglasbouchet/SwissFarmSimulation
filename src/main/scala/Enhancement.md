@@ -48,3 +48,5 @@
 
 
 Factory now possess an owner (of type SimO, should be able to sell on market, and own stuff)
+
+Owner will now have a Network (on which he will look before making any purchases)

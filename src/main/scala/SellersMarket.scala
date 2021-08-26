@@ -94,15 +94,6 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
   /** returns (#unmatched, List[(#matched with this seller, seller)]).  */
   private def best_match(units: Int,
                          exclude: Owner) : (Int, List[(Int, Seller)]) = {
-    //println("best_match sellers: " + sellers);
-
-    if(sellers.length >1){
-      var x = sellers(0).price(commodity)
-      var y =  sellers(1).price(commodity)
-    }
-
-    
-
     // lowest price first
     val asks = sellers.filter((s: Seller) =>
       (s.price(commodity) != None) && (s != exclude)).sorted(

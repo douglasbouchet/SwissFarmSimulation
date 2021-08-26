@@ -95,8 +95,8 @@ class Owner {
       inventory_avg_cost(item) = (inventory_total_cost(item) +
         units_added * unit_cost) / (inventory(item) + units_added)
 
-    println("recalculate_inv_avg_cost: " + units_added + " " + unit_cost +
-      " " + inventory_avg_cost(item));
+    //println("recalculate_inv_avg_cost: " + units_added + " " + unit_cost +
+    //  " " + inventory_avg_cost(item));
   }
 
   /** This is the number of units in the inventory available for taking;

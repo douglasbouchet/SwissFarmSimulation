@@ -137,9 +137,20 @@ Change cadastral parcel owner inside generator when assigning to some farm
 maybe add a landoverlaypuprose for growing cows and wich create a factory of meat
 
 
-This afternoon: 
-- Implement Mills
+Tonight or Tomorrow: 
+- 1: replace factory par production line dans la ferme (owner of production line = type farm)
+- 2: Par example besoin authorization de l'owner pour lancer la production (if par example)
+- 3: Le owner (la ferme) sait quand sa production line a fini. Et avise ensuite de combien de temps attendre etc..
+- Ajouter petit emision de CO2 + dégradation de la qualité du champ -> faire également une fonction de la productivité qui dépend des qualités du landOverlay (ou des parcelles membres)
+- 4: ensuite, on peut complexifier notre modèle de production des fermes a l'infini: changer la prodLineSpec d'un landoverlay, faire du bio etc.. Ces actions peuvent être prises de manière random ou délibérée
+
+
+
+
 - Implement the fact that farmer can add the mill they already treated with to their network. And pass by it to sell further product. 
 
 
+Voir si regrouper factories of 1 farm producing same commodity 
 
+
+implémenter bakery + consumption for people

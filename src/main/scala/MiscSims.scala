@@ -85,6 +85,7 @@ case class Mill(s: Simulation) extends OwnerLessFactory(
   (Flour, math.round((100*CONSTANTS.CONVERSION_WHEAT_FLOUR).toFloat)),
   1), s)
 
+  
 //class Cinema(s: Simulation) extends Factory(
 //  ProductionLineSpec(2, List(), List(), (MovieTicket, 2000), 1), s)
 //

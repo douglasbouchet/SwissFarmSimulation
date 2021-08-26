@@ -25,18 +25,10 @@ package farmpackage{
     def addParcels(newParcels: List[CadastralParcel]) {
       parcels :::= newParcels
     }
-
-    def actions: List[(Instruction, Int)] = ???
-
     
     override def price(dummy: Commodity) : Option[Double] = {
-    if(crops.length > 0){
-      if(available(dummy) > 0){
+    if(crops.length > 0 && (available(dummy) > 0))
         Some(1.0 * inventory_avg_cost.getOrElse(dummy, 0.0))
-      }
-      else None
-    }
-    
     else None
     }
 
