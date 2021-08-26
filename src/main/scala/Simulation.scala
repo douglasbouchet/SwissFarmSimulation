@@ -46,16 +46,14 @@ class Simulation {
     assert(timer == 0);
     println("INIT Simulation " + this);
     sims = _sims;
-    for(s <- sims) if(s.isInstanceOf[Person]) labour_market.push(s);
-
+    //for(s <- sims) if(s.isInstanceOf[Person]) labour_market.push(s);
     
     //Create parcels and farm. Assign parcels to each farm.
     initLandsAndFarms
     //Create the people inside the canton
     initPerson
 
-    // We should create the farms, give them parcels, and call their init method (production of factory)
-    // depending on their areas + other caracteristics....
+    println("Number of sims = " + sims.length)
 
     if(! GLOBAL.silent) {
       for(s <- sims) { s.stat; }
@@ -166,6 +164,7 @@ class Simulation {
     val people = generator.generatePeople(canton, this)
     println("Generating " + people.length + " people" )
     sims ++= people
+    labour_market.pushAll(people)
   }
 }
 

@@ -17,9 +17,10 @@ package object GLOBAL {
 
 package object CONSTANTS {
 
-  final val WHEAT_SEEDS_PER_HA: Double = 0.15
-  final val WHEAT_PRODUCED_PER_HA: Double = 6.0
-  final val HA_PER_WORKER: Int = 5 
+  val WHEAT_SEEDS_PER_HA: Double = 0.15
+  val WHEAT_PRODUCED_PER_HA: Double = 6.0
+  val HA_PER_WORKER: Int = 5 
+  val CONVERSION_WHEAT_FLOUR: Double = 0.8
   var workercounter: Int = 0
 }
 

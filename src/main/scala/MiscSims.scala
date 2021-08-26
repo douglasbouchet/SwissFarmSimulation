@@ -1,7 +1,8 @@
 package Simulation.SimLib
 import code._
 import Simulation._
-import Simulation.Factory._
+import Simulation.Factory.OwnerLessFactory
+import Simulation.Factory.ProductionLineSpec
 import Markets._
 import Securities.Commodities._
 
@@ -77,9 +78,13 @@ case class Buyer(commodity: Commodity,
 
 
 
-//class Mill(s: Simulation) extends Factory(
-//  ProductionLineSpec(1, List(), List((Wheat, 10)), (Flour, 10), 1), s)
-//
+case class Mill(s: Simulation) extends OwnerLessFactory(
+  ProductionLineSpec(5,
+  List(),
+  List((Wheat, 20)),
+  (Flour, math.round((20*CONSTANTS.CONVERSION_WHEAT_FLOUR).toFloat)),
+  1), s)
+
 //class Cinema(s: Simulation) extends Factory(
 //  ProductionLineSpec(2, List(), List(), (MovieTicket, 2000), 1), s)
 //

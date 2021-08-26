@@ -20,10 +20,6 @@ package farmpackage{
     var name = "farm"
     var rpt: Int = 0
     var crops: List[Factory] = List()
-    //val wheatCrop1 = new Factory(new ProductionLineSpec(1, List(),List((WheatSeeds,10)), (Wheat,10),6), s, this)
-    //val wheatCrop2 = new Factory(new ProductionLineSpec(1, List(),List((WheatSeeds,20)), (Wheat,20),6), s, this)
-    //crops ::= wheatCrop1
-    //crops ::= wheatCrop2
 
 
     def addParcels(newParcels: List[CadastralParcel]) {

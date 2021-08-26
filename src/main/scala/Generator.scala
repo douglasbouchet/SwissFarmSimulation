@@ -33,6 +33,8 @@ import scala.jdk.CollectionConverters._
 import landAdministrator.LandOverlay
 import landAdministrator.LandAdministrator
 import landAdministrator.LandOverlayPurpose._
+import Simulation.SimLib.Mill
+
 
 class Generator {
  
@@ -236,12 +238,21 @@ class Generator {
     (for (i <- 1 to population.filter(_._1 == canton).head._2) yield new Person(sim, false)).toList
   }  
 
+  /** Generate Mills based on production of a canton
+   *  The production if mills is a pure guess. Change it afterwards
+   * @param canton
+   */
+  def generateMills(canton: String, s: Simulation): List[Mill] = {
+    val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
+    val tonnesOfWheat: Int = math.round((cropAreas*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)
+    /** Next we generate a number of Mills based on the tonned of Wheat produced. 
+     * Assum Mill handle 20T of wheat per turn */
+    val nMills = tonnesOfWheat/20  
+    (for (i <- 1 to nMills) yield Mill(s)).toList
+  }
+
   // TODO after
   //def generateSources()
-
-  /** How to assign some land overlays ? TBD */
-
-  //TODO ajouter le nombre d'emploi ? dispo dans les excels 
 
   //https://www.atlas.bfs.admin.ch/maps/13/fr/15467_75_3501_70/24217.html
 }

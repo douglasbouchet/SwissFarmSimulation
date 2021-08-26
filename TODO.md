@@ -135,3 +135,8 @@ TODO
 Change cadastral parcel owner inside generator when assigning to some farm
 
 maybe add a landoverlaypuprose for growing cows and wich create a factory of meat
+
+
+This afternoon: 
+- Implement Mills
+- Implement the fact that farmer can add the mill they already treated with to their network. And pass by it to sell further product. 

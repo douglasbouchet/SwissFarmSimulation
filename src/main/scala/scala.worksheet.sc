@@ -217,12 +217,12 @@ sliced.map(list => {
   list.map(elem => (elem, 50.0))
 })
 
-import landAdministrator.LandOverlayPurpose._
 
-wheatField == paddoc
-
-val x = if (true) 5 else 2
-
+var x = List[Int]()
+for (i <- 0 to 10){
+  x ::= i
+}
+x
 //assignParcelsToFarms("Jura", generateParcels("Jura")._1)(0).parcel
 /** next step is to create some land overlays
  * TODO see how to do 
