@@ -54,7 +54,7 @@ class Simulation {
     initPerson
 
     initMills
-
+    market.foreach(a => println(a._2.sellers))
     println("Number of sims = " + sims.length)
 
     if(! GLOBAL.silent) {
@@ -150,7 +150,7 @@ class Simulation {
     //Init generate parcels, and assign them to farms
     val allParcels = generator.generateParcels(canton)
     landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
-    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(2)
+    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(10)
     println(farms.length + " farms created: ")
     println("assigning land overlays")
     //assign land overlays to farms
@@ -170,7 +170,7 @@ class Simulation {
   }
 
   private def initMills {
-    val mills = generator.generateMills(canton, this).take(2)
+    val mills = generator.generateMills(canton, this).take(1)
     println(mills.length + "Mills generated")
     sims ++= mills
   }

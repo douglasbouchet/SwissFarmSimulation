@@ -338,7 +338,8 @@ class Factory(pls: ProductionLineSpec,
 
   // This is the cost-based price of product on stock
   override def price(dummy: Commodity) : Option[Double] = {
-    if(available(pls.produced._1) > 0)
+    println("Entering price call")
+    if(o.available(pls.produced._1) > 0)
       Some(1.0 * inventory_avg_cost.getOrElse(pls.produced._1, 0.0))
     else None
   }
@@ -356,9 +357,9 @@ class Factory(pls: ProductionLineSpec,
         //tactics(); // changes goal_num_pl
       }
 
-      for(i <- (pl.length + 1) to goal_num_pl)
+      for(i <- (pl.length + 1) to goal_num_pl){
         add_production_line();
-
+      }
         
       for(i <- (goal_num_pl + 1) to pl.length)
         remove_production_line();
@@ -385,7 +386,7 @@ class Factory(pls: ProductionLineSpec,
 
 
 class OwnerLessFactory(pls: ProductionLineSpec,
-              shared: Simulation, 
+              shared: Simulation
 ) extends SimO(shared) {
 
   var pl : List[ProductionLine] = List()
@@ -434,9 +435,11 @@ class OwnerLessFactory(pls: ProductionLineSpec,
       (t._1, amount)
     });
 
-    def successfully_bought(line: (Commodity, Int)) =
-       (shared.market(line._1).
+    def successfully_bought(line: (Commodity, Int)) = 
+      (shared.market(line._1).
           market_buy_order_now(shared.timer, this, line._2) == 0);
+    
+       
        // nothing missing
 
     l.forall(successfully_bought)

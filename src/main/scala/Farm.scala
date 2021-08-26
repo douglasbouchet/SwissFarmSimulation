@@ -28,6 +28,18 @@ package farmpackage{
 
     def actions: List[(Instruction, Int)] = ???
 
+    
+    override def price(dummy: Commodity) : Option[Double] = {
+    if(crops.length > 0){
+      if(available(dummy) > 0){
+        Some(1.0 * inventory_avg_cost.getOrElse(dummy, 0.0))
+      }
+      else None
+    }
+    
+    else None
+    }
+
     override def stat = {
       //println(s"$name \n " + inventory_to_string() + " end")
       //println(s"$name \n")
@@ -69,7 +81,7 @@ package farmpackage{
             worker,
             List((WheatSeeds, math.round((area*CONSTANTS.WHEAT_SEEDS_PER_HA).toFloat))),
             List(),
-            (WheatSeeds, math.round((area*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)),
+            (Wheat, math.round((area*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)),
             6)
           crops ::= new Factory(prodSpec,s, this)
         }

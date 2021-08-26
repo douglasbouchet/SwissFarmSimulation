@@ -16,7 +16,7 @@ object MainExample {
   //val landlord        = new Source(Land,  20, 100000*100, s);
   //val cattle_farmer = new Source(Beef,   100,  26000*100, s);
   //val silo          = new Source(Wheat, 1000,   6668*100, s);
-  //val silo2         = new Trader(Wheat, 100, s);
+  //val silo         = new Trader(Wheat, 100, s);
   //val flour_trader  = new Trader(Flour, 50, s);
   // val flour_buyer     = new Buyer(Flour, () => 40, s);
 
@@ -24,8 +24,9 @@ object MainExample {
 
   s.init(List(
     //landlord,
-    //silo,
-    // silo2, flour_trader, cattle_farmer,
+    //temp
+    // silo2,
+    //flour_trader, cattle_farmer,
     //f.crops(0),
     //f.crops(1)//, m,
     // c, rf, mcd,
@@ -39,7 +40,7 @@ object MainExample {
   //    s.run(argv(0).toInt);
   //}
   def main(argv: Array[String]) {
-    s.run(13);
+    s.run(10);
   }
 }
 
