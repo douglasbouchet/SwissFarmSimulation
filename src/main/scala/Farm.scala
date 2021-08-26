@@ -35,7 +35,7 @@ import scala.collection.mutable
 
     override def stat = {
       //println(s"$name \n " + inventory_to_string() + " end")
-      println(s"$name \n " + landOverlays+  " end")
+      //println(s"$name \n")
     }
     override def algo = __forever(__wait(1))
     // override def algo = __forever(
@@ -56,14 +56,28 @@ import scala.collection.mutable
 
     /**Create a factory for each landOverlay of purpose the farm has
      * ProductionLineSpec is determined in function of area, and purpose of LandOverlay
+     * @note ProductionLineSpec number are chosen randomly for the moment
+     * e.g a worker can handle at most 5ha of crops
+     * https://donnees.banquemondiale.org/indicateur/AG.YLD.CREL.KG -> 1 area produces 6tonnes of wheat
+     * 1 area of wheat needs 0.15 tonnes of wheatSeeds
+     * These numbers should be updated afterwards
      */
     def init = {
       landOverlays.foreach(lOver => {
         if(lOver.purpose == wheatField){
-          //after we can add more complex attributs for productivity
+          //afterwards we could add more complex attributs for productivity
           val area: Double = lOver.getSurface
-          val prodSpec = new ProductionLineSpec(math.round((area/3).toFloat), List((WheatSeeds, math.round((area/10).toFloat))), List(), (WheatSeeds, math.round((area*10).toFloat)), 6)
+          var nWorker = math.round((area/CONSTANTS.HA_PER_WORKER).toFloat)
+          val worker = if(nWorker > 0) nWorker else 1
+          val prodSpec = new ProductionLineSpec(
+            worker,
+            List((WheatSeeds, math.round((area*CONSTANTS.WHEAT_SEEDS_PER_HA).toFloat))),
+            List(),
+            (WheatSeeds, math.round((area*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)),
+            6)
           crops ::= new Factory(prodSpec,s, this)
+          println("area:" + area)
+          println("people required:" + worker)
         }
       })
       s.sims :::= crops

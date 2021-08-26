@@ -376,6 +376,8 @@ class Factory(pls: ProductionLineSpec,
     // this ordering is important, so that bulk buying
     // happens before consumption.
     val nxt1 = super.run_until(until).get;
+    println("The production lines are:" + pl.toList + "\n")
+    println("Next 2 = " + pl.map(_.run_until(until).get))
     val nxt2 = pl.map(_.run_until(until).get).min;
     Some(math.min(nxt1, nxt2)) // compute a meaningful next time
   }
@@ -451,6 +453,7 @@ class OwnerLessFactory(pls: ProductionLineSpec,
       success = bulk_buy_missing(pls.required, pl.length + 1);
       if(success) {
         hr.hire(pls.employees_needed);
+        println("adding a production line")
         pl = new ProductionLine(pls, this, hr.salary, shared.timer) :: pl;
         //pl.head.init(shared.timer);
       }
@@ -635,7 +638,7 @@ class OwnerLessFactory(pls: ProductionLineSpec,
     // this ordering is important, so that bulk buying
     // happens before consumption.
     val nxt1 = super.run_until(until).get;
-    val nxt2 = pl.map(_.run_until(until).get).min;
+    val nxt2 = pl.map(_.run_until(until).get).min; //TODO Sometimes the pl list is empty. see why 
     Some(math.min(nxt1, nxt2)) // compute a meaningful next time
   }
 }

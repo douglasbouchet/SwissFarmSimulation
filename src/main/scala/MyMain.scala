@@ -8,7 +8,7 @@ import Simulation.Factory._
 object MainExample {
   val s = new Simulation;
 
-  val seedsSeller = new Source(WheatSeeds, 1000,1, s);
+  val seedsSeller = new Source(WheatSeeds, 100000,1, s);
   // val m   = new Mill(s);
   //val c   = new Cinema(s);
   //val rf  = new CattleFarm(s);
@@ -39,7 +39,7 @@ object MainExample {
   //    s.run(argv(0).toInt);
   //}
   def main(argv: Array[String]) {
-    s.run(2);
+    s.run(8);
   }
 }
 

@@ -186,28 +186,23 @@ class Generator {
     */
   def createAndAssignLandOverlays(farms: List[Farm], landAdministrator: LandAdministrator) = {
     farms.foreach{farm => {
-      println("starting " + farm)
       val nParcels = farm.parcels.length
       var landOverlays: List[LandOverlay] = List()
-      println(nParcels + " = nParcels")
       if(nParcels == 1){
-        println("1 Parcel")
         //Assign only one landOverlay over 50% of the parcel
-        landOverlays ::= new LandOverlay(List((farm.parcels.head, 50.0)))
+        landOverlays ::= new LandOverlay(List((farm.parcels.head, 0.5)))
       }
       else if(nParcels == 2){
-        println("2 Parcel")
-        landOverlays ::= new LandOverlay(List((farm.parcels(0), 70.0)))
-        landOverlays ::= new LandOverlay(List((farm.parcels(1), 70.0)))
+        landOverlays ::= new LandOverlay(List((farm.parcels(0), 0.7)))
+        landOverlays ::= new LandOverlay(List((farm.parcels(1), 0.7)))
       }
       else {
-        println("more Parcel")
         //Split the parcels into 3 groups. Each each parcel is assigned 70% of its area to land overlay
         var sliced0 = farm.parcels.slice(0,nParcels/3).toList
         var sliced1 = farm.parcels.slice(nParcels/3,2*nParcels/3).toList
         var sliced2 = farm.parcels.slice(2*nParcels/3,nParcels).toList
         var splittedParcels = List(sliced0,sliced1,sliced2).map(list => {
-          list.map(elem => (elem, 70.0))
+          list.map(elem => (elem, 0.7))
         })
         landOverlays ::= new LandOverlay(splittedParcels(0))
         landOverlays ::= new LandOverlay(splittedParcels(1))
