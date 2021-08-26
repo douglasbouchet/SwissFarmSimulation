@@ -20,7 +20,7 @@ object MainExample {
   //val flour_trader  = new Trader(Flour, 50, s);
   // val flour_buyer     = new Buyer(Flour, () => 40, s);
 
-  val people = for(x <- 1 to 2000) yield new Person(s, false);
+  // val people = for(x <- 1 to 2000) yield new Person(s, false);
 
   s.init(List(
     //landlord,
@@ -30,7 +30,7 @@ object MainExample {
     //f.crops(1)//, m,
     // c, rf, mcd,
     //flour_buyer
-  ) ++ people.toList);
+  ) /** ++ people.toList */);
 
   //def main(argv: Array[String]) {
   //  if((argv.length != 1) || (argv(0).toInt < 1))
@@ -39,10 +39,11 @@ object MainExample {
   //    s.run(argv(0).toInt);
   //}
   def main(argv: Array[String]) {
-    s.run(1);
+    s.run(13);
   }
 }
 
+//ADD MOULIN DANS SIMULATION ET VOIR SI CA MARCHE
 
 
 

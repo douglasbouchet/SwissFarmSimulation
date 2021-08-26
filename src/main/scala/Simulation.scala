@@ -53,6 +53,8 @@ class Simulation {
     //Create the people inside the canton
     initPerson
 
+    initMills
+
     println("Number of sims = " + sims.length)
 
     if(! GLOBAL.silent) {
@@ -165,6 +167,12 @@ class Simulation {
     println("Generating " + people.length + " people" )
     sims ++= people
     labour_market.pushAll(people)
+  }
+
+  private def initMills {
+    val mills = generator.generateMills(canton, this).take(2)
+    println(mills.length + "Mills generated")
+    sims ++= mills
   }
 }
 

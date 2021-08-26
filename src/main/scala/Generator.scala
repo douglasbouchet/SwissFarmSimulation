@@ -245,9 +245,8 @@ class Generator {
   def generateMills(canton: String, s: Simulation): List[Mill] = {
     val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
     val tonnesOfWheat: Int = math.round((cropAreas*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)
-    /** Next we generate a number of Mills based on the tonned of Wheat produced. 
-     * Assum Mill handle 20T of wheat per turn */
-    val nMills = tonnesOfWheat/20  
+    /** Assum Mill handle 100T of wheat per turn */
+    val nMills = tonnesOfWheat/100  
     (for (i <- 1 to nMills) yield Mill(s)).toList
   }
 
