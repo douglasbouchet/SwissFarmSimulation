@@ -20,7 +20,7 @@ object MainExample {
   //val flour_trader  = new Trader(Flour, 50, s);
   // val flour_buyer     = new Buyer(Flour, () => 40, s);
 
-  val people = for(x <- 1 to 12) yield new Person(s, false);
+  val people = for(x <- 1 to 1000) yield new Person(s, false);
 
   s.init(List(
     //landlord,
@@ -39,7 +39,7 @@ object MainExample {
   //    s.run(argv(0).toInt);
   //}
   def main(argv: Array[String]) {
-    s.run(8);
+    s.run(1);
   }
 }
 
