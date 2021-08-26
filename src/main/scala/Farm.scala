@@ -7,8 +7,7 @@ package farmpackage{
   import landAdministrator.LandOverlayPurpose._
   import code._
   import Securities.Commodities._
-
-import scala.collection.mutable
+  import scala.collection.mutable
 
   /** extends seller, owner */ 
   //case class Farm(s: Simulation) extends SimO(s,0) with MultipleActionsSim {
@@ -69,6 +68,7 @@ import scala.collection.mutable
           val area: Double = lOver.getSurface
           var nWorker = math.round((area/CONSTANTS.HA_PER_WORKER).toFloat)
           val worker = if(nWorker > 0) nWorker else 1
+          CONSTANTS.workercounter += worker
           val prodSpec = new ProductionLineSpec(
             worker,
             List((WheatSeeds, math.round((area*CONSTANTS.WHEAT_SEEDS_PER_HA).toFloat))),
@@ -76,8 +76,6 @@ import scala.collection.mutable
             (WheatSeeds, math.round((area*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)),
             6)
           crops ::= new Factory(prodSpec,s, this)
-          println("area:" + area)
-          println("people required:" + worker)
         }
       })
       s.sims :::= crops

@@ -51,6 +51,8 @@ class Simulation {
     
     //Create parcels and farm. Assign parcels to each farm.
     initLandsAndFarms
+    //Create the people inside the canton
+    initPerson
 
     // We should create the farms, give them parcels, and call their init method (production of factory)
     // depending on their areas + other caracteristics....
@@ -148,8 +150,7 @@ class Simulation {
     //Init generate parcels, and assign them to farms
     val allParcels = generator.generateParcels(canton)
     landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
-    println("The number of cadastral parcels is: " + landAdministrator.cadastralParcels.length)
-    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(10)
+    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(2)
     println(farms.length + " farms created: ")
     println("assigning land overlays")
     //assign land overlays to farms
@@ -158,10 +159,13 @@ class Simulation {
     farms.foreach(_.init)
 
     sims ++= farms
+    println("Number of worker = " + CONSTANTS.workercounter)
   }
 
   private def initPerson {
-    
+    val people = generator.generatePeople(canton, this)
+    println("Generating " + people.length + " people" )
+    sims ++= people
   }
 }
 

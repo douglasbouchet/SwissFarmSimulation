@@ -346,7 +346,6 @@ class Factory(pls: ProductionLineSpec,
 
   override protected def algo = __forever(
     __do {
-      println("entering algo of " + this)
       val mgmt_step_size = 6;
 
       if(prev_mgmt_action + mgmt_step_size < shared.timer)
@@ -357,10 +356,9 @@ class Factory(pls: ProductionLineSpec,
         //tactics(); // changes goal_num_pl
       }
 
-      for(i <- (pl.length + 1) to goal_num_pl){
-        println("entering prod line algo of " + this)
+      for(i <- (pl.length + 1) to goal_num_pl)
         add_production_line();
-      }
+
         
       for(i <- (goal_num_pl + 1) to pl.length)
         remove_production_line();
