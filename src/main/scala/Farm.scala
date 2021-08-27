@@ -19,7 +19,10 @@ package farmpackage{
     var landOverlays: List[LandOverlay] = List()
     var name = "farm"
     var rpt: Int = 0
-    var crops: List[Factory] = List()
+    //var crops: List[Factory] = List()
+    var crops: List[ProductionLine] = List[ProductionLine]()
+
+    protected var hr : HR = new HR(s, this)
 
 
     def addParcels(newParcels: List[CadastralParcel]) {
@@ -36,20 +39,19 @@ package farmpackage{
       //println(s"$name \n " + inventory_to_string() + " end")
       //println(s"$name \n")
     }
-    override def algo = __forever(__wait(1))
-    // override def algo = __forever(
-    //  __dowhile(
-    //    __wait(1),
-    //    __do{
-    //      println("Je dis bonjour ");
-    //      rpt += 1;
-    //      println(s"rpt = $rpt")
-    //    }
-    //  )({ rpt < 6}),
-    //  __wait(1),
-    //  __do(this.rpt = 0),
-    //  __do(println("Starting over"))
-    // )
+    override def algo = __forever(
+    __do {
+      println("Buying the suppplies")
+      crops.foreach(crop => bulk_buy_missing(crop.pls.consumed, 1))
+      //val still_missing = bulk_buy_missing(pls.consumed, pl.length);
+    },
+    __wait(1),
+    __do {
+      assert(hr.employees.length == crops.map(_.pls.employees_needed).sum)
+      hr.pay_workers();
+      //assert(hr.employees.length == pl.length * pls.employees_needed);
+    }
+  )
 
     override def mycopy(_shared: Simulation, _substitution: mutable.Map[SimO,SimO]): SimO = ???
 
@@ -75,10 +77,46 @@ package farmpackage{
             List(),
             (Wheat, math.round((area*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)),
             6)
-          crops ::= new Factory(prodSpec,s, this)
+          println()
+          println("Starting to hire")
+          hr.hire(prodSpec.employees_needed)
+          val prodL = new ProductionLine(prodSpec, this, hr.salary, s.timer)
+          crops ::= prodL
+          //crops ::= new ProductionLine(prodSpec,s, this)
+          s.market(prodSpec.produced._1).add_seller(this);
+          //  goal_num_pl = 1; // have one production line
+          
         }
       })
-      s.sims :::= crops
+      //s.sims :::= crops
+    }
+
+    /** Returns whether everything was sucessfully bought. */
+    protected def bulk_buy_missing(_l: List[(Commodity, Int)],
+                                 multiplier: Int) : Boolean = {
+    val l = _l.map(t => {
+      // DANGER: if we have shorted his position, this amount is
+      // not sufficient.
+      val amount = math.max(0, t._2 * multiplier - available(t._1));
+      (t._1, amount)
+    });
+
+    def successfully_bought(line: (Commodity, Int)) = 
+      (s.market(line._1).
+          market_buy_order_now(s.timer, this, line._2) == 0);
+    
+       
+       // nothing missing
+
+    l.forall(successfully_bought)
+    }
+
+    override def run_until(until: Int) : Option[Int] = {
+    // this ordering is important, so that bulk buying
+    // happens before consumption.
+    val nxt1 = super.run_until(until).get;
+    val nxt2 = crops.map(_.run_until(until).get).min; 
+    Some(math.min(nxt1, nxt2)) // compute a meaningful next time
     }
   }
 

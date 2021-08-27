@@ -218,10 +218,9 @@ sliced.map(list => {
 })
 
 
-var x = List[Int]()
-for (i <- 0 to 10){
-  x ::= i
-}
+var x = List[(Int, String)]((1,"a"),(2,"b"))
+x.map(_._1).sum
+
 x
 //assignParcelsToFarms("Jura", generateParcels("Jura")._1)(0).parcel
 /** next step is to create some land overlays

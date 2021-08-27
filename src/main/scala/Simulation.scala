@@ -47,12 +47,12 @@ class Simulation {
     println("INIT Simulation " + this);
     sims = _sims;
     //for(s <- sims) if(s.isInstanceOf[Person]) labour_market.push(s);
-    
+
+    //Create the people inside the canton (call before initFarms cause farm needs worker inside labourMarket)
+    initPerson
     //Create parcels and farm. Assign parcels to each farm.
     initLandsAndFarms
-    //Create the people inside the canton
-    initPerson
-
+    
     initMills
 
     println("Number of sims = " + sims.length)

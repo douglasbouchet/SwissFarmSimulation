@@ -137,7 +137,7 @@ Change cadastral parcel owner inside generator when assigning to some farm
 maybe add a landoverlaypuprose for growing cows and wich create a factory of meat
 
 
-Tonight or Tomorrow: 
+Today: 
 - 1: replace factory par production line dans la ferme (owner of production line = type farm)
 - 2: Par example besoin authorization de l'owner pour lancer la production (if par example)
 - 3: Le owner (la ferme) sait quand sa production line a fini. Et avise ensuite de combien de temps attendre etc..
