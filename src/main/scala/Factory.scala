@@ -348,15 +348,15 @@ class OwnerLessFactory(pls: ProductionLineSpec,
   override def stat {
     val zombie_cost = pl.map(_.lost_runs_cost).sum.toInt;
 
-    println((
-      (assets + goodwill + liabilities)/100,
-      ((assets + goodwill)/100, (assets/100, goodwill/100),
-       liabilities/100),
-      zombie_cost.toInt/100,
-      zombie_cost2.toInt/100,
-      inventory_to_string(),
-      pl.length
-    ))
+    // println((
+    //   (assets + goodwill + liabilities)/100,
+    //   ((assets + goodwill)/100, (assets/100, goodwill/100),
+    //    liabilities/100),
+    //   zombie_cost.toInt/100,
+    //   zombie_cost2.toInt/100,
+    //   inventory_to_string(),
+    //   pl.length
+    // ))
   }
 
   protected def tactics() = {
