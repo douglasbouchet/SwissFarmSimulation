@@ -3,6 +3,7 @@ import code._
 import Owner._
 import Simulation._
 import Securities.Commodities._
+import landAdministrator.LandOverlay
 
 
 case class ProductionLineSpec(employees_needed: Int,
@@ -37,6 +38,7 @@ case class ProductionLine(
   private var costs_consumables : Double = 0.0 // of current production run
 
 ) extends Sim {
+
   init(start_time);
 
   def mycopy(_o: Owner) = {
@@ -99,6 +101,78 @@ case class ProductionLine(
   )
 }
 
+/** add an access to a landOverlay 
+ * Used to model the influence of culture on the land 
+ */
+class CropProductionLine(
+  lOver: LandOverlay,
+  pls: ProductionLineSpec,
+  o: Owner,
+  salary: Int,
+  start_time: Int,
+  //goodwill : Double = 0.0,
+  //lost_runs_cost : Double = 0.0,
+  private var rpt : Int = 0,
+  private var frac : Double = 1.0,
+  private var costs_consumables : Double = 0.0) extends ProductionLine(pls,o,salary,start_time) {
+
+    var Co2Emitted: Double = 0.0
+
+    override def algo = __forever(
+      __do { // start of production run
+        costs_consumables = 0;
+        //print("buying consumables: " + o + " " + this + ". ");
+        frac = 1.0;
+        for(x <- pls.consumed) {
+          val n = math.min(o.available(x._1), x._2); // requested and available
+          costs_consumables += o.destroy(x._1, n);
+          frac = math.min(frac, n.toDouble / x._2);
+        }
+        goodwill = costs_consumables;
+        if((frac < 1.0) && (! GLOBAL.silent))
+          println(o + " " + " starts low-efficiency run.");
+
+        rpt = 0;
+      },
+      __dowhile(
+        __wait(1),
+        __do{
+          //print("paying salaries. ");
+          // salaries are paid globally (by the factory)
+          goodwill += pls.employees_needed * salary;
+          rpt += 1;
+        }
+      )({ rpt < pls.time_to_complete }),
+      __do{
+        //print("production complete! ");
+        val units_produced = (pls.produced._2  * frac).toInt; // here to influence quantity produced 
+        val personnel_costs = pls.employees_needed * salary *
+                              pls.time_to_complete;
+        val total_cost : Double = costs_consumables + personnel_costs;
+        val unit_cost = total_cost / units_produced;
+        //It will be reset by the farm(owner) once take into account
+        Co2Emitted += lOver.getSurface * CONSTANTS.KG_CO2_PER_WHEAT_CROP_HA
+
+        if(units_produced > 0) {
+         o.make(pls.produced._1, units_produced, unit_cost);
+
+          if(! GLOBAL.silent)
+          println(o + " produces " + units_produced + "x " +
+            pls.produced._1 + " at efficiency " + frac +
+            " and " + (unit_cost/100).toInt + "/unit.");
+        }
+        else {
+          lost_runs_cost += total_cost;
+
+          if(! GLOBAL.silent)
+          println(o + " had a production line with zero efficiency.");
+        }
+//        log = (get_time, frac) :: log;
+      }
+    )
+
+  }
+
 
 
 // TODO: different capabilities and salaries per employee
@@ -122,9 +196,9 @@ case class HR(private val shared: Simulation,
 }
 
 
+
 class Factory(pls: ProductionLineSpec,
-              shared: Simulation,
-              o: SimO 
+              shared: Simulation
 ) extends SimO(shared) {
 
   var pl : List[ProductionLine] = List()
@@ -135,7 +209,7 @@ class Factory(pls: ProductionLineSpec,
 
   // constructor
   {
-    shared.market(pls.produced._1).add_seller(o);
+    shared.market(pls.produced._1).add_seller(this);
     goal_num_pl = 1; // have one production line
   }
 
@@ -157,139 +231,7 @@ class Factory(pls: ProductionLineSpec,
   }
   def mycopy(_shared: Simulation,
              _substitution: collection.mutable.Map[SimO, SimO]) = {
-    val f = new Factory(pls, _shared, o);
-    copy_state_to(f, _shared, _substitution);
-    f
-  }
-
-
-  /** Returns whether everything was sucessfully bought. */
-  protected def bulk_buy_missing(_l: List[(Commodity, Int)],
-                                 multiplier: Int) : Boolean = {
-    val l = _l.map(t => {
-      // DANGER: if we have shorted his position, this amount is
-      // not sufficient.
-      val amount = math.max(0, t._2 * multiplier - o.available(t._1));
-      (t._1, amount)
-    });
-
-    def successfully_bought(line: (Commodity, Int)) =
-       (shared.market(line._1).
-          market_buy_order_now(shared.timer, o, line._2) == 0);
-       // nothing missing
-
-    l.forall(successfully_bought)
-  }
-
-
-  protected def add_production_line() : Boolean = {
-    var success = true;
-
-    if(shared.labour_market.length >= pls.employees_needed)
-    {
-      // buy only what we require. We may still have it from
-      // previous production reductions.
-      success = bulk_buy_missing(pls.required, pl.length + 1);
-      if(success) {
-        hr.hire(pls.employees_needed);
-        pl = new ProductionLine(pls, o, hr.salary, shared.timer) :: pl;
-        //pl.head.init(shared.timer);
-      }
-    }
-    else success = false;
-    success
-  }
-
-  // We don't sell required items (land, etc.) but only fire people.
-  protected def remove_production_line() {
-    if(pl.length > 0) {
-      hr.fire(pls.employees_needed);
-      zombie_cost2 += pl.head.goodwill;
-      pl = pl.tail;
-    }
-  }
-
-  protected def goodwill: Int = pl.map(_.goodwill).sum.toInt
-
-  override def stat {
-    val zombie_cost = pl.map(_.lost_runs_cost).sum.toInt;
-
-    //println((
-    //  (assets + goodwill + liabilities)/100,
-    //  ((assets + goodwill)/100, (assets/100, goodwill/100),
-    //   liabilities/100),
-    //  zombie_cost.toInt/100,
-    //  zombie_cost2.toInt/100,
-    //  inventory_to_string(),
-    //  pl.length
-    //))
-  }
-
-  override protected def algo = __forever(
-    __do {
-      for(i <- (pl.length + 1) to goal_num_pl){
-        add_production_line();
-      }
-        
-      for(i <- (goal_num_pl + 1) to pl.length)
-        remove_production_line();
-
-      // TODO: buy more to get better prices?
-      //println("Factory.algo: this=" + this);
-      val still_missing = bulk_buy_missing(pls.consumed, pl.length);
-    },
-    __wait(1),
-    __do {
-      assert(hr.employees.length == pl.length * pls.employees_needed);
-      hr.pay_workers();
-    }
-  )
-
-  override def run_until(until: Int) : Option[Int] = {
-    // this ordering is important, so that bulk buying
-    // happens before consumption.
-    val nxt1 = super.run_until(until).get;
-    val nxt2 = pl.map(_.run_until(until).get).min;
-    Some(math.min(nxt1, nxt2)) // compute a meaningful next time
-  }
-}
-
-
-class OwnerLessFactory(pls: ProductionLineSpec,
-              shared: Simulation
-) extends SimO(shared) {
-
-  var pl : List[ProductionLine] = List()
-  private var zombie_cost2 : Double = 0.0 // cost from canceled prod. runs
-  var prev_mgmt_action : Int = 0
-  protected var hr : HR = new HR(shared, this)
-  protected var goal_num_pl = 0;
-
-  // constructor
-  {
-    shared.market(pls.produced._1).add_seller(this);
-    goal_num_pl = 1; // have one production line
-  }
-
-  protected def copy_state_to(_to: OwnerLessFactory) { assert(false); } // don't call
-  protected def copy_state_to(_to: OwnerLessFactory,
-      _shared: Simulation,
-      old2new: collection.mutable.Map[SimO, SimO]) {
-
-    //println("Factory.copy_state_to: " + this);
-    super.copy_state_to(_to);
-
-    _to.pl = pl.map(_.mycopy(_to));
-    _to.zombie_cost2 = zombie_cost2;
-    _to.prev_mgmt_action = prev_mgmt_action;
-    _to.hr = new HR(_shared, _to, hr.salary,
-       hr.employees.map(old2new(_).asInstanceOf[Person])
-       );
-    _to.goal_num_pl = goal_num_pl;
-  }
-  def mycopy(_shared: Simulation,
-             _substitution: collection.mutable.Map[SimO, SimO]) = {
-    val f = new OwnerLessFactory(pls, _shared);
+    val f = new Factory(pls, _shared);
     copy_state_to(f, _shared, _substitution);
     f
   }
@@ -446,7 +388,7 @@ class OwnerLessFactory(pls: ProductionLineSpec,
       println(this + ": First nested simulation starts.");
       goal_num_pl = suitable_num_pl;
       val old2new1 = shared.run_sim(10);
-      val future_self1 = old2new1(this).asInstanceOf[OwnerLessFactory];
+      val future_self1 = old2new1(this).asInstanceOf[Factory];
       future_self1.stat;
       println(this + ": First nested simulation ends.");
 
@@ -454,12 +396,12 @@ class OwnerLessFactory(pls: ProductionLineSpec,
       //run simulation to see whether this is better.
       goal_num_pl -= 1;
       val old2new2 = shared.run_sim(10);
-      val future_self2 = old2new2(this).asInstanceOf[OwnerLessFactory];
+      val future_self2 = old2new2(this).asInstanceOf[Factory];
       future_self2.stat;
       goal_num_pl += 1;
       println(this + ": Second nested simulation ends.");
 
-      def valuation(f: OwnerLessFactory) = f.assets + f.goodwill + f.liabilities;
+      def valuation(f: Factory) = f.assets + f.goodwill + f.liabilities;
 
       if(valuation(future_self1) < valuation(future_self2))
         println("ONE LESS WOULD BE BETTER");

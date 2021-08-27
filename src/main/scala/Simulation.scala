@@ -3,13 +3,15 @@ import Markets._
 import Owner._
 import Securities._
 import Commodities._
-import Simulation.Factory.{OwnerLessFactory, ProductionLineSpec}
+import Simulation.Factory.{Factory, ProductionLineSpec}
 import generator.Generator
 import landAdministrator.LandAdministrator
 import landAdministrator.CadastralParcel
 
 class Simulation {
   var timer = 0;
+
+  val observator = new Observator
 
   val canton = "Glaris"
 
@@ -44,7 +46,6 @@ class Simulation {
     assert(timer == 0);
     println("INIT Simulation " + this);
     sims = _sims;
-    //for(s <- sims) if(s.isInstanceOf[Person]) labour_market.push(s);
 
     //Create the people inside the canton (call before initFarms cause farm needs worker inside labourMarket)
     initPerson
@@ -52,7 +53,7 @@ class Simulation {
     initLandsAndFarms
 
     initMills
-    
+
     println("Number of sims = " + sims.length)
 
     if (!GLOBAL.silent) {
@@ -122,6 +123,9 @@ class Simulation {
       timer += 1;
     }
     println("STOP Simulation " + this);
+    
+    observator.stats
+    
   }
   def run(steps: Int) {
     run_until(timer + steps - 1);

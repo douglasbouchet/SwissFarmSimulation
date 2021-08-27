@@ -13,7 +13,10 @@ package farmpackage {
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
-    var crops: List[ProductionLine] = List[ProductionLine]()
+    var crops: List[CropProductionLine] = List[CropProductionLine]()
+
+    //use afterwards to model other co2 emission
+    var Co2: Double = 0
 
     protected var hr: HR = new HR(s, this)
 
@@ -27,6 +30,8 @@ package farmpackage {
       else None
     }
 
+    //private def changeActivity(newState: Boolean, prodL: ProductionLine) {prodL.active = newState}
+
     override def stat = {
       //println(s"$name \n " + inventory_to_string())
       //println(s"$name \n")
@@ -34,7 +39,9 @@ package farmpackage {
     override def algo = __forever(
       __do {
         crops.foreach(crop => bulk_buy_missing(crop.pls.consumed, 1))
-        //val still_missing = bulk_buy_missing(pls.consumed, pl.length);
+        s.observator.Co2 += crops.map(_.Co2Emitted).sum
+        crops.foreach(crop => {crop.Co2Emitted = 0.0})
+        //crops.foreach(crop => changeActivity(false, crop))
       },
       __wait(1),
       __do {
@@ -80,7 +87,7 @@ package farmpackage {
             6
           )
           hr.hire(prodSpec.employees_needed)
-          val prodL = new ProductionLine(prodSpec, this, hr.salary, s.timer)
+          val prodL = new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
           crops ::= prodL
           s.market(prodSpec.produced._1).add_seller(this);
         }

@@ -1,7 +1,7 @@
 package Simulation.SimLib
 import code._
 import Simulation._
-import Simulation.Factory.OwnerLessFactory
+import Simulation.Factory.Factory
 import Simulation.Factory.ProductionLineSpec
 import Markets._
 import Securities.Commodities._
@@ -78,7 +78,7 @@ case class Buyer(commodity: Commodity,
 
 
 
-case class Mill(s: Simulation) extends OwnerLessFactory(
+case class Mill(s: Simulation) extends Factory(
   ProductionLineSpec(5,
   List(),
   List((Wheat, 100)),

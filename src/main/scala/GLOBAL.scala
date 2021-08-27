@@ -5,7 +5,7 @@ class Dummy;
 }
 
 package object GLOBAL {
-  var silent = false
+  var silent = true
   val rnd = util.Random
 
   def mapopt[A,B](l: List[A], f: A => Option[B]) : List[B] =
@@ -22,5 +22,6 @@ package object CONSTANTS {
   val HA_PER_WORKER: Int = 5 
   val CONVERSION_WHEAT_FLOUR: Double = 0.8
   var workercounter: Int = 0
+  val KG_CO2_PER_WHEAT_CROP_HA: Double = 1900
 }
 

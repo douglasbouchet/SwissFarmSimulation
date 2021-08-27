@@ -6,3 +6,4 @@ project/
 .metals/
 .vscode/
 .idea/
+.scalafmt.conf
