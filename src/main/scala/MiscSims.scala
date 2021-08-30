@@ -81,8 +81,8 @@ case class Buyer(commodity: Commodity,
 case class Mill(s: Simulation) extends Factory(
   ProductionLineSpec(5,
   List(),
-  List((Wheat, 100)),
-  (Flour, math.round((100*CONSTANTS.CONVERSION_WHEAT_FLOUR).toFloat)),
+  List((Wheat, 100000)),
+  (Flour, math.round((100000*CONSTANTS.CONVERSION_WHEAT_FLOUR).toFloat)),
   1), s)
 
   

@@ -1,7 +1,3 @@
-
-val z = (2.3 * 1.2).toInt 
-z
-
 import landAdministrator.LandOverlayPurpose
 import landAdministrator.LandOverlay
 import scala.collection.mutable

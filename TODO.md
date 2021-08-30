@@ -115,12 +115,19 @@ Today:
 - 4: ensuite, on peut complexifier notre modèle de production des fermes a l'infini: changer la prodLineSpec d'un landoverlay, faire du bio etc.. Ces actions peuvent être prises de manière random ou délibérée
 
 
-
-
 - Implement the fact that farmer can add the mill they already treated with to their network. And pass by it to sell further product. 
-
-
 Voir si regrouper factories of 1 farm producing same commodity 
-
-
 implémenter bakery + consumption for people
+
+
+
+
+
+
+Questions:
+- What are the differences in the means used (pesticides, fertilisers) between conventional and organic farming? 
+- What are the effects on agricultural production of a polluted soil (after use of pesticide, fertiliser)
+- What are the benefits/disadvantages of polyculture compared to monoculture
+- A quelle fréquence une polyculture change de type de culture
+- Est ce que le passage d'une agriculture classique à biologique requiert plus de travail pour la même surface cultivé
+- Quels sont les autres types de culture, ormis biologique, plus respectueuses de l'environnement, que l'agriculture classique.

@@ -18,17 +18,17 @@ Factory
 ## Wholesaler
 trader
 
-## Packaging compagny 
+## Packaging company 
 factory
 
-## transport compagny 
+## transport company 
 
 
-## Agriculure cooperative
+## Agriculture cooperative
 factory (required mill for example) otw Trader (stocks cereals and sell them to mill, or buy seeds)
 
 ## cattle farmer cooperative
-In charge of finding vaccins, controlling health of cows
+In charge of finding vaccines, controlling health of cows
 
 ## Mills
 factory

@@ -185,7 +185,7 @@ class CropProductionLine(
           lost_runs_cost += total_cost;
 
           if(! GLOBAL.silent)
-          println(o + " had a production line with zero efficiency.");
+          println(this + " had a production line with zero efficiency.");
         }
 //        log = (get_time, frac) :: log;
       }
