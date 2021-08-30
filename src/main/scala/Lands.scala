@@ -65,6 +65,8 @@ package landAdministrator {
 
     var purpose: LandOverlayPurpose.Value = LandOverlayPurpose.wheatField
 
+    var soilQuality: Double = 1.0
+
     /** Store the characteristics of fields inside the landOverlay class
       * depending on the purpose of the LandOverlay
       */
@@ -113,6 +115,7 @@ package landAdministrator {
     def getSurface: Double = landsLot.foldLeft(0.0) { (acc, tup) =>
       acc + tup._1.area * tup._2
     }
+
 
     class Crops {
       //val type : CropsType

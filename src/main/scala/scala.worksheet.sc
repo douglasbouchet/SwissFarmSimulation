@@ -1,3 +1,7 @@
+
+val z = (2.3 * 1.2).toInt 
+z
+
 import landAdministrator.LandOverlayPurpose
 import landAdministrator.LandOverlay
 import scala.collection.mutable
@@ -401,3 +405,4 @@ def generateEdges(roadNetworkInstance: RoadNetwork) = {
 //TODO ajouter le nombre d'emploi ? dispo dans les excels
 
 //https://www.atlas.bfs.admin.ch/maps/13/fr/15467_75_3501_70/24217.html
+

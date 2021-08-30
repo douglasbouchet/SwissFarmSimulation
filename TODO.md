@@ -110,10 +110,8 @@ maybe add a landoverlaypuprose for growing cows and wich create a factory of mea
 
 
 Today: 
-- 1: replace factory par production line dans la ferme (owner of production line = type farm) OK
-- 2: Par example besoin authorization de l'owner pour lancer la production (if par example) ~
-- 3: Le owner (la ferme) sait quand sa production line a fini. Et avise ensuite de combien de temps attendre etc.. ~
-- Ajouter petit emision de CO2 + dégradation de la qualité du champ -> faire également une fonction de la productivité qui dépend des qualités du landOverlay (ou des parcelles membres)
+- Ajouter dégradation de la qualité du champ -> faire également une fonction de la productivité qui dépend des qualités du landOverlay (ou des parcelles membres)
+- Roulement aléatoire sur le type de culture (aucune ou différent) de manière random 
 - 4: ensuite, on peut complexifier notre modèle de production des fermes a l'infini: changer la prodLineSpec d'un landoverlay, faire du bio etc.. Ces actions peuvent être prises de manière random ou délibérée
 
 

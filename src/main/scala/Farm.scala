@@ -24,6 +24,10 @@ package farmpackage {
       parcels :::= newParcels
     }
 
+    def fertilize(crop: CropProductionLine, state: Boolean = true) {
+      crop.fertilized = state 
+    }
+
     override def price(dummy: Commodity): Option[Double] = {
       if (crops.length > 0 && (available(dummy) > 0))
         Some(1.0 * inventory_avg_cost.getOrElse(dummy, 0.0))
@@ -36,11 +40,23 @@ package farmpackage {
       //println(s"$name \n " + inventory_to_string())
       //println(s"$name \n")
     }
+
+    //TODO add here the fact to change the type of agriculture 
     override def algo = __forever(
       __do {
-        crops.foreach(crop => bulk_buy_missing(crop.pls.consumed, 1))
         s.observator.Co2 += crops.map(_.Co2Emitted).sum
-        crops.foreach(crop => {crop.Co2Emitted = 0.0})
+
+        crops.foreach(crop => {
+          bulk_buy_missing(crop.pls.consumed, 1);
+          crop.Co2Emitted = 0.0;
+          //if quality of soil is not to low, we can use fertilizer
+          if(crop.lOver.soilQuality > 1.0) fertilize(crop);
+          else fertilize(crop, false);
+          //Update the state of the ground to impact it according to actions taken
+          //if(crop.fertilized) crop.lOver.soilQuality = Math.max(crop.lOver.soilQuality - 0.03, 0.5) 
+          //else crop.lOver.soilQuality = Math.min(crop.lOver.soilQuality + 0.02, 1.0)
+        })
+        
         //crops.foreach(crop => changeActivity(false, crop))
       },
       __wait(1),
@@ -70,21 +86,20 @@ package farmpackage {
         if (lOver.purpose == wheatField) {
           //afterwards we could add more complex attributs for productivity
           val area: Double = lOver.getSurface
-          var nWorker = math.round((area / CONSTANTS.HA_PER_WORKER).toFloat)
+          val nWorker = math.round((area / CONSTANTS.HA_PER_WORKER).toFloat)
           val worker = if (nWorker > 0) nWorker else 1
           CONSTANTS.workercounter += worker
           val prodSpec = new ProductionLineSpec(
             worker,
-            List((
+            List(/** (
                 WheatSeeds,
-                math.round((area * CONSTANTS.WHEAT_SEEDS_PER_HA).toFloat))
-            ),
-            List(( WheatSeeds, math.round((area * CONSTANTS.WHEAT_SEEDS_PER_HA).toFloat))),
+                (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt)*/),
+            List(( WheatSeeds, (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt)),
             (
               Wheat,
-              math.round((area * CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)
+              (area * CONSTANTS.WHEAT_PRODUCED_PER_HA).toInt
             ),
-            6
+            12
           )
           hr.hire(prodSpec.employees_needed)
           val prodL = new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)

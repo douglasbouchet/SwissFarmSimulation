@@ -40,7 +40,7 @@ object MainExample {
   //    s.run(argv(0).toInt);
   //}
   def main(argv: Array[String]) {
-    s.run(10);
+    s.run(40);
   }
 }
 

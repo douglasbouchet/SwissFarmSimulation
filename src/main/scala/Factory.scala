@@ -4,6 +4,7 @@ import Owner._
 import Simulation._
 import Securities.Commodities._
 import landAdministrator.LandOverlay
+import farmpackage.Farm
 
 
 case class ProductionLineSpec(employees_needed: Int,
@@ -101,13 +102,13 @@ case class ProductionLine(
   )
 }
 
-/** add an access to a landOverlay 
+/** Add an access to a landOverlay 
  * Used to model the influence of culture on the land 
  */
 class CropProductionLine(
-  lOver: LandOverlay,
+  _lOver: LandOverlay,
   pls: ProductionLineSpec,
-  o: Owner,
+  o: Farm,
   salary: Int,
   start_time: Int,
   //goodwill : Double = 0.0,
@@ -117,6 +118,25 @@ class CropProductionLine(
   private var costs_consumables : Double = 0.0) extends ProductionLine(pls,o,salary,start_time) {
 
     var Co2Emitted: Double = 0.0
+    var fertilized: Boolean = false 
+    var efficiency: Double = 1.0
+    var lOver: LandOverlay = _lOver
+
+    /** Compute the performance of the production line. Influenced by product used, ground quality
+      * 1.0 means normal productivity. 
+      * @return the performance of the production Line
+      */
+    def efficiencyFunc: Double = {
+      //These values are random. Find true statistics afterward
+      if(fertilized){
+        efficiency = Math.min(efficiency + 0.2, 1.5)
+      }
+      else{
+        efficiency = Math.max(efficiency - 0.2, 1.0)
+      }
+      //efficiency * lOver.soilQuality * frac
+      frac
+    }
 
     override def algo = __forever(
       __do { // start of production run
@@ -145,12 +165,12 @@ class CropProductionLine(
       )({ rpt < pls.time_to_complete }),
       __do{
         //print("production complete! ");
-        val units_produced = (pls.produced._2  * frac).toInt; // here to influence quantity produced 
+        val units_produced = (pls.produced._2  * efficiencyFunc).toInt; // here to influence quantity produced 
         val personnel_costs = pls.employees_needed * salary *
                               pls.time_to_complete;
         val total_cost : Double = costs_consumables + personnel_costs;
         val unit_cost = total_cost / units_produced;
-        //It will be reset by the farm(owner) once take into account
+        //It will be reset by the farm(owner) once taken into account
         Co2Emitted += lOver.getSurface * CONSTANTS.KG_CO2_PER_WHEAT_CROP_HA
 
         if(units_produced > 0) {
