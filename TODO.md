@@ -119,15 +119,3 @@ Today:
 Voir si regrouper factories of 1 farm producing same commodity 
 implémenter bakery + consumption for people
 
-
-
-
-
-
-Questions:
-- What are the differences in the means used (pesticides, fertilisers) between conventional and organic farming? 
-- What are the effects on agricultural production of a polluted soil (after use of pesticide, fertiliser)
-- What are the benefits/disadvantages of polyculture compared to monoculture
-- A quelle fréquence une polyculture change de type de culture
-- Est ce que le passage d'une agriculture classique à biologique requiert plus de travail pour la même surface cultivé
-- Quels sont les autres types de culture, ormis biologique, plus respectueuses de l'environnement, que l'agriculture classique.

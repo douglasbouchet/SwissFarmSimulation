@@ -246,7 +246,7 @@ class Generator {
     val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
     val tonnesOfWheat: Int = math.round((cropAreas*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)
     /** Assum Mill handle 100T of wheat per turn */
-    val nMills = tonnesOfWheat/100  
+    val nMills = tonnesOfWheat/100000  
     //(for (i <- 1 to nMills) yield Mill(s)).toList
     (for (i <- 1 to 2) yield Mill(s)).toList
   }

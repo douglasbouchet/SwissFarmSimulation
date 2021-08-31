@@ -153,7 +153,7 @@ class Simulation {
     //Init generate parcels, and assign them to farms
     val allParcels = generator.generateParcels(canton)
     landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
-    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(2)
+    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
     //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
     println(farms.length + " farms created: ")
     println("assigning land overlays")
@@ -167,7 +167,7 @@ class Simulation {
   }
 
   private def initPerson {
-    val people = generator.generatePeople(canton, this).take(40)
+    val people = generator.generatePeople(canton, this)
     println("Generating " + people.length + " people")
     sims ++= people
     labour_market.pushAll(people)
