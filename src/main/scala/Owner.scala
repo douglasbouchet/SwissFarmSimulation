@@ -1,5 +1,6 @@
 package object Owner {
 import Securities._
+import contact._
 
 type ITEM_T = Security
 
@@ -7,6 +8,8 @@ type ITEM_T = Security
 
 
 package Owner {
+
+import contact.ContactNetwork
 
 
 case class BalanceSheet(
@@ -64,6 +67,8 @@ class Owner {
   protected var inventory_avg_cost : collection.mutable.Map[ITEM_T, Double] =
                                      collection.mutable.Map[ITEM_T, Double]()
   private var total_value_destroyed : Double = 0.0
+
+  val contactNetwork = new ContactNetwork
 
   /** The probability of bankruptcy, as a basis of a credit rating.
       TODO: In which time frame?
@@ -177,6 +182,10 @@ class Owner {
           inventory(item) -= units;
 
     buyer.transfer_money_to(this, math.ceil(units * unit_price).toInt);
+
+    /** add buyer to seller contactNetwork and vice-versa */
+    this.contactNetwork.increaseScore(buyer.asInstanceOf[Seller])
+    buyer.asInstanceOf[Seller].contactNetwork.increaseScore(this.asInstanceOf[Seller])
 
     // println("Now buyer = " + buyer + " and seller = " + this);
   }

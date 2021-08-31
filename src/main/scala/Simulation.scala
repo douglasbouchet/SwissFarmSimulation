@@ -153,8 +153,8 @@ class Simulation {
     //Init generate parcels, and assign them to farms
     val allParcels = generator.generateParcels(canton)
     landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
-    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
     //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
+    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(1)
     println(farms.length + " farms created: ")
     println("assigning land overlays")
     //assign land overlays to farms
@@ -174,7 +174,6 @@ class Simulation {
   }
 
   private def initMills {
-    //val mills = generator.generateMills(canton, this).take(1)
     val mills = generator.generateMills(canton, this)
     println(mills.length + " Mills generated")
     sims ++= mills

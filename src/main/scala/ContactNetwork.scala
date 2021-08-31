@@ -27,15 +27,23 @@ class ContactNetwork {
     }
   }
 
+  /** automatically add the contact if does not exists yet */
   def increaseScore(contact: Seller): Unit = {
     val oldScore = getContactScore(contact)
     contacts -= ((contact,oldScore))
     contacts += ((contact, Math.min(oldScore + 1,10)))
   }
 
+  /** remove the contact if its score reach -1 */
   def decreaseScore(contact: Seller): Unit = {
     val oldScore = getContactScore(contact)
     contacts -= ((contact,oldScore))
-    contacts += ((contact, Math.max(oldScore - 1,0)))
+    if(oldScore  > 0) {
+      contacts += ((contact, oldScore - 1))
+    }
+  }
+
+  def stats: Unit = {
+    println("Contacts are: " + contacts.toString())
   }
 }

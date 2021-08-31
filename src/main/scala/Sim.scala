@@ -74,8 +74,5 @@ abstract class SimO(
              _substitution: collection.mutable.Map[SimO, SimO]): SimO
 }
 
-/** Declared as a trait, otw cannot extend SimCommodities with it */
-trait InteractiveSim extends Sim {
-}
 
 

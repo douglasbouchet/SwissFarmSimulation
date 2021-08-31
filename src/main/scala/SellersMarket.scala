@@ -94,12 +94,16 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
   /** returns (#unmatched, List[(#matched with this seller, seller)]).  */
   private def best_match(units: Int,
                          exclude: Owner) : (Int, List[(Int, Seller)]) = {
-    // lowest price first
-    val asks = sellers.filter((s: Seller) =>
-      (s.price(commodity) != None) && (s != exclude)).sorted(
-                 Ordering.by[Seller, Double](
-                   (s: Seller) => s.price(commodity).get));
-
+    /** lowest price first + in function of the clientScore of the seller (substract clientscore% to price for selecting)
+     *for example: selling at 100 unit with client score of 5 yield to selling at 100 - 5%of100 = 95 
+     * TODO might need something else afterwards than only - some % */
+    val asks = sellers.filter((s: Seller) => 
+      (s.price(commodity) != None) && (s != exclude))
+      .sorted(Ordering.by[Seller, Double](
+              (s: Seller) => {
+                s.price(commodity).get - s.contactNetwork.getContactScore(exclude.asInstanceOf[Seller])/100 * s.price(commodity).get
+              }))
+    
     greedy_match(asks, ((s: Seller) => s.available(commodity)), units)
   }
 

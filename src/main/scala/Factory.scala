@@ -442,6 +442,7 @@ class Factory(pls: ProductionLineSpec,
 
   override protected def algo = __forever(
     __do {
+
       val mgmt_step_size = 6;
 
       if(prev_mgmt_action + mgmt_step_size < shared.timer)
