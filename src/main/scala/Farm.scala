@@ -124,8 +124,10 @@ package farmpackage {
 
       
       def successfully_bought(line: (Commodity, Int)) = {
-
-        s.market(line._1).market_buy_order_now(s.timer, this, line._2) == 0
+        
+        val notalreadyBy = contactNetwork.contacts.map(_._1).toList
+        //println("Already buy to")
+        s.market(line._1).market_buy_order_now(s.timer, this, line._2,notalreadyBy) == 0
       }
 
       // nothing missing

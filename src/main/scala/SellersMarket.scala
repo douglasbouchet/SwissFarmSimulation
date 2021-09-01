@@ -92,19 +92,31 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
 
   def add_seller(s: Seller) { sellers = s :: sellers; }
 
-  /** returns (#unmatched, List[(#matched with this seller, seller)]).  */
+  /** returns (#unmatched, List[(#matched with this seller, seller)]). 
+   * @param usualTrader: are placed at head of asks list, thus selected first.
+   */
   private def best_match(units: Int,
-                         exclude: Owner) : (Int, List[(Int, Seller)]) = {
+                         exclude: Owner, usualSellers: List[Seller] = List[Seller]()) : (Int, List[(Int, Seller)]) = {
     /** lowest price first + in function of the clientScore of the seller (substract clientscore% to price for selecting)
      *for example: selling at 100 unit with client score of 5 yield to selling at 100 - 5%of100 = 95 
      * TODO might need something else afterwards than only - some % */
-    val asks = sellers.filter((s: Seller) => 
+
+    //start by sorting the usualSellers by order of price & clientScore
+    var asks = usualSellers.filter((s: Seller) => 
       (s.price(commodity) != None) && (s != exclude))
       .sorted(Ordering.by[Seller, Double](
               (s: Seller) => {
                 s.price(commodity).get - s.contactNetwork.getContactScore(exclude.asInstanceOf[Seller])/100 * s.price(commodity).get
               }))
-    
+  
+    // Then add the others sellers
+      asks = asks ::: sellers.diff(usualSellers).filter((s: Seller) => 
+      (s.price(commodity) != None) && (s != exclude))
+      .sorted(Ordering.by[Seller, Double](
+              (s: Seller) => {
+                s.price(commodity).get - s.contactNetwork.getContactScore(exclude.asInstanceOf[Seller])/100 * s.price(commodity).get
+              })) 
+    //may require some checks like the fact that price is not taken into account between usualTraders and others
     greedy_match(asks, ((s: Seller) => s.available(commodity)), units)
   }
 
@@ -122,9 +134,9 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
   }
 
   /** execute immediately, partial fulfillment possible. */
-  def market_buy_order_now(time: Int, buyer: Owner, units: Int) : Int = {
+  def market_buy_order_now(time: Int, buyer: Owner, units: Int, usualSellers: List[Seller] = List()) : Int = {
     //println("SellersMarket.market_buy_order_now " + this);
-    val (left_over, l) = best_match(units, buyer);
+    val (left_over, l) = best_match(units, buyer, usualSellers);
     //println("Buying " + units + " on market: " + l + " " + left_over);
     val p = compute_price(l); // can't reorder this line and the next
     for((u, s) <- l) { s.sell_to(time, buyer, commodity, u) };
@@ -135,7 +147,7 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
   }
 
   /** not implemented */
-  def limit_buy_order_now(time: Int, buyer: Owner, units: Int) : Int = {
+  def limit_buy_order_now(time: Int, buyer: Owner, units: Int, usualSellers: List[Seller]= List()) : Int = {
     assert(false);
     0
   }
