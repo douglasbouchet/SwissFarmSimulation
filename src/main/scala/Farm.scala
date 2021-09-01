@@ -122,8 +122,11 @@ package farmpackage {
         (t._1, amount)
       })
 
-      def successfully_bought(line: (Commodity, Int)) =
+      
+      def successfully_bought(line: (Commodity, Int)) = {
+
         s.market(line._1).market_buy_order_now(s.timer, this, line._2) == 0
+      }
 
       // nothing missing
 

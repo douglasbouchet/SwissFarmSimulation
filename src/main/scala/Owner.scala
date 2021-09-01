@@ -1,6 +1,5 @@
 package object Owner {
 import Securities._
-import contact._
 
 type ITEM_T = Security
 
@@ -9,7 +8,7 @@ type ITEM_T = Security
 
 package Owner {
 
-import contact.ContactNetwork
+import contact.{ContactNetwork, LocalMarket}
 
 
 case class BalanceSheet(
@@ -69,7 +68,6 @@ class Owner {
   private var total_value_destroyed : Double = 0.0
 
   val contactNetwork = new ContactNetwork
-
   /** The probability of bankruptcy, as a basis of a credit rating.
       TODO: In which time frame?
   */

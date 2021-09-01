@@ -2,6 +2,7 @@ package Owner {
 import Timeseries._
 import Securities._
 import Commodities._
+import contact.LocalMarket
 
 
 case class SalesRecord(

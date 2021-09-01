@@ -119,3 +119,9 @@ Today:
 Voir si regrouper factories of 1 farm producing same commodity 
 implémenter bakery + consumption for people
 
+
+
+
+- add the fact that don't sell to someone we were selling at make decrease score 
+
+
