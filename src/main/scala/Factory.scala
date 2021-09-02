@@ -164,7 +164,7 @@ class CropProductionLine(
         }
       )({ rpt < pls.time_to_complete }),
       __do{
-        //print("production complete! ");
+        print("production complete! ");
         val units_produced = (pls.produced._2  * efficiencyFunc).toInt; // here to influence quantity produced 
         val personnel_costs = pls.employees_needed * salary *
                               pls.time_to_complete;

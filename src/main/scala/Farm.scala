@@ -51,7 +51,8 @@ import javax.lang.model.`type`.NullType
         s.observator.Co2 += crops.map(_.Co2Emitted).sum
 
         crops.foreach(crop => {
-          bulk_buy_missing(crop.pls.consumed, 1)
+          buyMissingFromCoop(crop.pls.consumed)
+          //bulk_buy_missing(crop.pls.consumed, 1)
           crop.Co2Emitted = 0.0
           //if quality of soil is not to low, we can use fertilizer
           if(crop.lOver.soilQuality > 1.0) fertilize(crop)
@@ -149,11 +150,15 @@ import javax.lang.model.`type`.NullType
 
     /** The commodities asks may not be available immediatly
      * order is pass to the coop, which sells them back to this when products are buy by coop */ 
-    def buyFromCoop(toBuy: List[(Commodity, Int)]): Unit = {
+    def buyMissingFromCoop(toBuy: List[(Commodity, Int)]): Unit = {
       cooperative match {
         case None => println("Farm: " + this + "should be part of a cooperative to buy from it")
         case Some(coop) => {
-          toBuy.foreach(tup => coop.buyLogs.update(this, coop.buyLogs(this) :+ tup)) 
+          toBuy.foreach{
+            case(com: Commodity, unit: Int) => (
+              coop.buyLogs.update(this, coop.buyLogs(this) :+ (com, math.max(0, unit - available(com))))
+            )
+          }
         }
       }
     }
@@ -208,10 +213,16 @@ package cooperative {
     
     //init
     members.foreach(addMember(_))
-    saleableCommodities.foreach(com => s.market(com).add_seller(this))
+    saleableCommodities.foreach(com => {
+      s.market(com).add_seller(this)
+    })
+    commoditiesToBuy.put(WheatSeeds, 0) //TODO faire mieux que hardcoder
+    
+
     //end init
     def addMember(member: Farm): Unit = {
       members ::= member
+      member.cooperative = Some(this)
       sellLogs.put(member, List[(Commodity, Int)]())
       buyLogs.put(member, List[(Commodity, Int)]())
     }
@@ -243,6 +254,7 @@ package cooperative {
         }
       )
       buyLogs.keys.foreach(farm => buyLogs.put(farm, List[(Commodity, Int)]()))
+      commoditiesToBuy.keys.foreach(com => commoditiesToBuy.update(com, 0))
     }
 
     override def mycopy(
@@ -279,7 +291,6 @@ package cooperative {
     //Each turn, check if some commodities need to be purchased
     override def algo: __forever = __forever(
       __do{
-        println("Je dois acheter des trucs")
         updateCommoditiesToBuy
         //Now that things have been bought, we can sell them back to each farm that ask for
         bulkBuyMissing(commoditiesToBuy.toList) //TODO check condition if some buy couldn't be made
