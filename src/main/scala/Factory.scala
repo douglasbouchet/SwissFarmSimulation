@@ -187,6 +187,13 @@ class CropProductionLine(
           println(o + " produces " + units_produced + "x " +
             pls.produced._1 + " at efficiency " + frac +
             " and " + (unit_cost/100).toInt + "/unit.");
+
+          //if farm is part of a cooperative, sell to it. Else sell itself
+          o.cooperative match {
+            case Some(_) => o.sellFromCoop(List((pls.produced._1, units_produced)))
+            case None => () //nothing to do
+          }
+          
         }
         else {
           lost_runs_cost += total_cost;

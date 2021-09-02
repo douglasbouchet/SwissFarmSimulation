@@ -51,8 +51,13 @@ import javax.lang.model.`type`.NullType
         s.observator.Co2 += crops.map(_.Co2Emitted).sum
 
         crops.foreach(crop => {
-          buyMissingFromCoop(crop.pls.consumed)
-          //bulk_buy_missing(crop.pls.consumed, 1)
+
+          //if there is a cooperative, buy from it. Else by itself
+          cooperative match {
+            case Some(_) => buyMissingFromCoop(crop.pls.consumed)
+            case None => bulk_buy_missing(crop.pls.consumed, 1)
+          }
+          //buyMissingFromCoop(crop.pls.consumed)
           crop.Co2Emitted = 0.0
           //if quality of soil is not to low, we can use fertilizer
           if(crop.lOver.soilQuality > 1.0) fertilize(crop)
