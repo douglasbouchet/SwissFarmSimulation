@@ -7,6 +7,7 @@ import Simulation.Factory.{Factory, ProductionLineSpec}
 import generator.Generator
 import landAdministrator.LandAdministrator
 import landAdministrator.CadastralParcel
+import cooperative.AgriculturalCooperative
 
 class Simulation {
   var timer = 0;
@@ -53,6 +54,10 @@ class Simulation {
     initLandsAndFarms
 
     initMills
+
+    //temporary
+    sims ++= List(new AgriculturalCooperative(List(), this))
+    //end tempo
 
     println("Number of sims = " + sims.length)
 

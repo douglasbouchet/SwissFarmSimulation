@@ -8,12 +8,16 @@ package farmpackage {
   import code._
   import Securities.Commodities._
   import scala.collection.mutable
+  import cooperative.AgriculturalCooperative
+import javax.lang.model.`type`.NullType
 
-  case class Farm(s: Simulation) extends SimO(s) {
+
+  case class Farm(s: Simulation, _cooperative: Option[AgriculturalCooperative]=None) extends SimO(s) {
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
     var crops: List[CropProductionLine] = List[CropProductionLine]()
+    var cooperative: Option[AgriculturalCooperative] = _cooperative 
 
     //use afterwards to model other co2 emission
     var Co2: Double = 0
@@ -125,9 +129,9 @@ package farmpackage {
       
       def successfully_bought(line: (Commodity, Int)) = {
         
-        val notalreadyBy = contactNetwork.contacts.map(_._1).toList
+        val alreadyBuyFrom = contactNetwork.contacts.map(_._1).toList
         //println("Already buy to")
-        s.market(line._1).market_buy_order_now(s.timer, this, line._2,notalreadyBy) == 0
+        s.market(line._1).market_buy_order_now(s.timer, this, line._2,alreadyBuyFrom) == 0
       }
 
       // nothing missing
@@ -142,6 +146,120 @@ package farmpackage {
       val nxt2 = crops.map(_.run_until(until).get).min
       Some(math.min(nxt1, nxt2)) // compute a meaningful next time
     }
-  }
 
+    /** The commodities asks may not be available immediatly
+     * order is pass to the coop, which sells them back to this when products are buy by coop */ 
+    def buyFromCoop(toBuy: List[(Commodity, Int)]): Unit = {
+      cooperative match {
+        case None => println("Farm: " + this + "should be part of a cooperative to buy from it")
+        case Some(coop) => {
+          toBuy.foreach(tup => coop.buyLogs.update(this, coop.buyLogs(this) :+ tup)) 
+        }
+      }
+    }
+
+    def sellFromCoop(toSell: List[(Commodity, Int)]): Unit = {
+      cooperative match {
+        case None => println("Farm: " + this + "should be part of a cooperative to sell from it")
+        case Some(coop) => {
+          toSell.foreach{
+            case(com: Commodity, unit: Int) => {
+              coop.sellLogs.update(this, coop.sellLogs(this) :+ (com, unit))
+              sell_to(s.timer, coop, com, unit)
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+package cooperative {
+
+  import Securities.Commodities._
+  import Simulation._
+  import farmpackage.Farm
+  import code._
+  import scala.collection.mutable.Map
+
+  /**
+    * Buy production of `members` and sells them to market
+    * Buy product for the community (e.g fertilizer, tractor,...). These products must be selled to members of the community
+    * (after cause need contract on selling price) Part of benefits should be reverse to members 
+    *
+    * @param _farms:List[farm] : The initial members of the cooperative
+    */
+  class AgriculturalCooperative(_farms: List[Farm], s: Simulation) extends SimO(s){
+
+    var members: List[Farm] = _farms
+
+    private var commoditiesToBuy = scala.collection.mutable.Map[Commodity, Int]()
+    private var commoditiesToSell = scala.collection.mutable.Map[Commodity, Int]()
+    
+    //Used as a buffer, to buy/sell all stuff together, and redestribute goods/money 
+    /** For each member, the commodities and their quantity that are sold by coop */ 
+    var sellLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
+    /** For each member, the commodities and their quantity that coop needs to buy to them */
+    var buyLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
+
+    members.foreach(addMember(_))
+    
+    
+    def addMember(member: Farm): Unit = {
+      members ::= member
+      sellLogs.put(member, List[(Commodity, Int)]())
+      buyLogs.put(member, List[(Commodity, Int)]())
+    }
+
+    def removeMember(member:Farm): Unit = {
+      assert(members.contains(member) && sellLogs.contains(member) && buyLogs.contains(member))
+      sellLogs.remove(member)
+      buyLogs.remove(member)
+      members = members.filterNot(_ == member)
+    }
+
+    /** Take the new orders from buyLogs, and put them in commoditiesToSell */ 
+    def updateCommoditiesToBuy: Unit = {
+
+    }
+    
+    //Each turn, check if some commodities need to be purchased
+    override def algo: __forever = __forever(
+      __do{
+        println("Je dois acheter des trucs")
+        commoditiesToBuy.foreach{
+          case(com: Commodity, unit: Int) => {}
+        }
+        println("Je dois vendre des trucs")
+      },
+      __wait(1),
+    )
+
+    override def mycopy(
+        _shared: Simulation,
+        _substitution: scala.collection.mutable.Map[SimO, SimO]
+    ): SimO = ???
+
+
+    protected def bulk_buy_missing(_l: List[(Commodity, Int)], multiplier: Int): Boolean = {
+      val l = _l.map(t => {
+        // DANGER: if we have shorted his position, this amount is
+        // not sufficient.
+        val amount = math.max(0, t._2 * multiplier - available(t._1))
+        (t._1, amount)
+      })
+
+      
+      def successfully_bought(line: (Commodity, Int)) = {
+        
+        val alreadyBuyFrom = contactNetwork.contacts.map(_._1).toList
+        //println("Already buy to")
+        s.market(line._1).market_buy_order_now(s.timer, this, line._2,alreadyBuyFrom) == 0
+      }
+
+      // nothing missing
+
+      l.forall(successfully_bought)
+    }
+  }
 }
