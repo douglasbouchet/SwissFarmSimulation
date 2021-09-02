@@ -164,6 +164,7 @@ import javax.lang.model.`type`.NullType
         case Some(coop) => {
           toSell.foreach{
             case(com: Commodity, unit: Int) => {
+              assert(coop.saleableCommodities.contains(com))
               coop.sellLogs.update(this, coop.sellLogs(this) :+ (com, unit))
               sell_to(s.timer, coop, com, unit)
             }
@@ -189,22 +190,26 @@ package cooperative {
     *
     * @param _farms:List[farm] : The initial members of the cooperative
     */
-  class AgriculturalCooperative(_farms: List[Farm], s: Simulation) extends SimO(s){
+  class AgriculturalCooperative(_farms: List[Farm], _saleableCommodities: List[Commodity], s: Simulation) extends SimO(s){
 
     var members: List[Farm] = _farms
 
+    // Group all commodities, in order to have better price afterwards
     private var commoditiesToBuy = scala.collection.mutable.Map[Commodity, Int]()
-    private var commoditiesToSell = scala.collection.mutable.Map[Commodity, Int]()
     
     //Used as a buffer, to buy/sell all stuff together, and redestribute goods/money 
-    /** For each member, the commodities and their quantity that are sold by coop */ 
-    var sellLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
     /** For each member, the commodities and their quantity that coop needs to buy to them */
     var buyLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
+    /** For each member, the commodities and their quantity that are sold by coop
+     * Usefull only if we do not pay immediately farmers when they give commodities to coop (not the case atm)*/ 
+    var sellLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]() 
 
+    var saleableCommodities: List[Commodity] = _saleableCommodities
+    
+    //init
     members.foreach(addMember(_))
-    
-    
+    saleableCommodities.foreach(com => s.market(com).add_seller(this))
+    //end init
     def addMember(member: Farm): Unit = {
       members ::= member
       sellLogs.put(member, List[(Commodity, Int)]())
@@ -218,48 +223,69 @@ package cooperative {
       members = members.filterNot(_ == member)
     }
 
-    /** Take the new orders from buyLogs, and put them in commoditiesToSell */ 
+    /** Take the new orders from buyLogs, and put them in commoditiesToBuy. Clear buyLogs*/ 
     def updateCommoditiesToBuy: Unit = {
-
-    }
-    
-    //Each turn, check if some commodities need to be purchased
-    override def algo: __forever = __forever(
-      __do{
-        println("Je dois acheter des trucs")
-        commoditiesToBuy.foreach{
-          case(com: Commodity, unit: Int) => {}
+      buyLogs.foreach(
+        elem => elem._2.foreach{
+          case(com: Commodity, unit: Int) => commoditiesToBuy.update(com, commoditiesToBuy(com) + unit)
         }
-        println("Je dois vendre des trucs")
-      },
-      __wait(1),
-    )
+      )
+    }
+
+    /** Sell to farms products they ordered and clear values of buyLogs */
+    //TODO atm I assume that everything was bought succesfully, so we can just sell back the ask quantity to each 
+    //member of buyLog. After include memory so if buy wasn't possible, sell it after and not now (else operation on empty inventory)
+    def sellBackToFarm: Unit = {
+      buyLogs.foreach(
+        elem => elem._2.foreach{
+          //TODO the price should be the one they paid for (almost no benefits, should be fair)
+          case(com: Commodity, unit: Int) => sell_to(s.timer, elem._1, com, unit)
+        }
+      )
+      buyLogs.keys.foreach(farm => buyLogs.put(farm, List[(Commodity, Int)]()))
+    }
 
     override def mycopy(
         _shared: Simulation,
         _substitution: scala.collection.mutable.Map[SimO, SimO]
     ): SimO = ???
 
+    //TODO
+    override def price(dummy: Commodity): Option[Double] = {
+      if (available(dummy) > 0)
+        Some(1.0 * inventory_avg_cost.getOrElse(dummy, 0.0))
+      else None
+    }
 
-    protected def bulk_buy_missing(_l: List[(Commodity, Int)], multiplier: Int): Boolean = {
+
+    protected def bulkBuyMissing(_l: List[(Commodity, Int)]): Boolean = {
       val l = _l.map(t => {
         // DANGER: if we have shorted his position, this amount is
         // not sufficient.
-        val amount = math.max(0, t._2 * multiplier - available(t._1))
+        val amount = math.max(0, t._2 - available(t._1))
         (t._1, amount)
       })
 
-      
-      def successfully_bought(line: (Commodity, Int)) = {
+      def successfullyBought(line: (Commodity, Int)) = {
         
         val alreadyBuyFrom = contactNetwork.contacts.map(_._1).toList
         //println("Already buy to")
-        s.market(line._1).market_buy_order_now(s.timer, this, line._2,alreadyBuyFrom) == 0
+        s.market(line._1).market_buy_order_now(s.timer, this, line._2, alreadyBuyFrom) == 0
       }
-
       // nothing missing
-
-      l.forall(successfully_bought)
+      l.forall(successfullyBought)
     }
+
+    //Each turn, check if some commodities need to be purchased
+    override def algo: __forever = __forever(
+      __do{
+        println("Je dois acheter des trucs")
+        updateCommoditiesToBuy
+        //Now that things have been bought, we can sell them back to each farm that ask for
+        bulkBuyMissing(commoditiesToBuy.toList) //TODO check condition if some buy couldn't be made
+        sellBackToFarm
+      },
+      __wait(1),
+    )
   }
 }

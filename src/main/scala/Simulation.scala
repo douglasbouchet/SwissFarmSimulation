@@ -56,7 +56,7 @@ class Simulation {
     initMills
 
     //temporary
-    sims ++= List(new AgriculturalCooperative(List(), this))
+    sims ++= List(new AgriculturalCooperative(List(), List(Wheat), this))
     //end tempo
 
     println("Number of sims = " + sims.length)
@@ -167,7 +167,11 @@ class Simulation {
     // init the farm (make a factory for each landOverlay)
     farms.foreach(_.init)
 
+    println("now creating a coop")
+    val coop = new AgriculturalCooperative(farms, List(Wheat), this)
+
     sims ++= farms
+    sims ++= List(coop)
     println("Number of worker = " + CONSTANTS.workercounter)
   }
 
