@@ -8,6 +8,7 @@ import generator.Generator
 import landAdministrator.LandAdministrator
 import landAdministrator.CadastralParcel
 import cooperative.AgriculturalCooperative
+import Securities.Commodities._
 
 class Simulation {
   var timer = 0;
@@ -67,6 +68,8 @@ class Simulation {
     }
 
     println("INIT Simulation complete " + this);
+
+    println("The sellers are: " + market(Wheat).sellers)
   }
 
   /** TODO: Object ids (owners) in logs don't get substituted yet. This will
@@ -170,8 +173,8 @@ class Simulation {
     println("now creating a coop")
     val coop = new AgriculturalCooperative(farms, List(Wheat), this)
 
-    sims ++= farms
     sims ++= List(coop)
+    sims ++= farms
     println("Number of worker = " + CONSTANTS.workercounter)
   }
 

@@ -62,7 +62,7 @@ case class ProductionLine(
       }
       goodwill = costs_consumables;
       if((frac < 1.0) && (! GLOBAL.silent))
-        println(o + " " + " starts low-efficiency run.");
+        //println(o + " " + " starts low-efficiency run.");
 
       rpt = 0;
     },
@@ -94,8 +94,8 @@ case class ProductionLine(
       else {
         lost_runs_cost += total_cost;
 
-        if(! GLOBAL.silent)
-        println(o + " had a production line with zero efficiency.");
+        if(! GLOBAL.silent){}
+        //println(o + " had a production line with zero efficiency.");
       }
 //      log = (get_time, frac) :: log;
     }
@@ -143,11 +143,18 @@ class CropProductionLine(
         costs_consumables = 0;
         //print("buying consumables: " + o + " " + this + ". ");
         frac = 1.0;
-        for(x <- pls.consumed) {
+
+        //wait until there are wheet seeds to start production
+        __dowhile(
+          __do{
+            for(x <- pls.consumed) {
           val n = math.min(o.available(x._1), x._2); // requested and available
           costs_consumables += o.destroy(x._1, n);
           frac = math.min(frac, n.toDouble / x._2);
+          }
+          __wait(1)
         }
+        )(frac == 0)
         goodwill = costs_consumables;
         if((frac < 1.0) && (! GLOBAL.silent))
           println(o + " " + " starts low-efficiency run.");

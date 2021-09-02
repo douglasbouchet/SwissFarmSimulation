@@ -112,7 +112,6 @@ import javax.lang.model.`type`.NullType
           s.market(prodSpec.produced._1).add_seller(this)
         }
       })
-      //s.sims :::= crops
     }
 
     /** Returns whether everything was successfully bought. */
@@ -217,9 +216,8 @@ package cooperative {
       s.market(com).add_seller(this)
     })
     commoditiesToBuy.put(WheatSeeds, 0) //TODO faire mieux que hardcoder
-    
-
     //end init
+
     def addMember(member: Farm): Unit = {
       members ::= member
       member.cooperative = Some(this)
