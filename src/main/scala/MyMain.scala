@@ -41,7 +41,7 @@ object MainExample {
   //    s.run(argv(0).toInt);
   //}
   def main(argv: Array[String]) {
-    s.run(16);
+    s.run(30);
   }
 }
 

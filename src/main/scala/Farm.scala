@@ -181,6 +181,18 @@ import javax.lang.model.`type`.NullType
         }
       }
     }
+
+    def canEqual(a: Any) = a.isInstanceOf[Farm]
+
+    override def equals(that: Any): Boolean =
+      that match {
+          case that: Farm => {
+              that.canEqual(this) &&
+              this.parcels == that.parcels
+              //See if add more comparisons
+          }
+          case _ => false
+    }
   }
 }
 
@@ -214,7 +226,7 @@ package cooperative {
     var sellLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]() 
 
     var saleableCommodities: List[Commodity] = _saleableCommodities
-    
+
     //init
     members.foreach(addMember(_))
     saleableCommodities.foreach(com => {
@@ -224,7 +236,6 @@ package cooperative {
     //end init
 
     def addMember(member: Farm): Unit = {
-      members ::= member
       member.cooperative = Some(this)
       sellLogs.put(member, List[(Commodity, Int)]())
       buyLogs.put(member, List[(Commodity, Int)]())

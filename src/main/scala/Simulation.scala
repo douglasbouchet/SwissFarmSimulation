@@ -162,7 +162,7 @@ class Simulation {
     val allParcels = generator.generateParcels(canton)
     landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
     //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
-    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(1)
+    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(2)
     println(farms.length + " farms created: ")
     println("assigning land overlays")
     //assign land overlays to farms

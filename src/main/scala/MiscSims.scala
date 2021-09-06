@@ -23,6 +23,8 @@ class Source(commodity: Commodity, units: Int, p: Int,
   }
 
   def action = __do{}
+
+  //ajouter variation dans le prix du blé + revoir comment marche le capital etc..
   override def price(dummy: Commodity) = Some(p)
 }
 

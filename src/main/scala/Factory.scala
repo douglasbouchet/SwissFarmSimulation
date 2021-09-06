@@ -143,18 +143,28 @@ class CropProductionLine(
         costs_consumables = 0;
         //print("buying consumables: " + o + " " + this + ". ");
         frac = 1.0;
-
+        //
+        
         //wait until there are wheet seeds to start production
-        __dowhile(
-          __do{
-            for(x <- pls.consumed) {
+        //__dowhile(
+        //  __do{
+        //    for(x <- pls.consumed) {
+        //      val n = math.min(o.available(x._1), x._2); // requested and available
+        //      println("Removing the consumed product:"  + x._1 + " in quantity: " + n)
+        //      costs_consumables += o.destroy(x._1, n);
+        //      frac = math.min(frac, n.toDouble / x._2);
+        //    }
+        //  },
+        //  __wait(1)
+        //)({o.available(WheatSeeds) == 0})
+
+        for(x <- pls.consumed) {
           val n = math.min(o.available(x._1), x._2); // requested and available
+          println("Removing the consumed product:"  + x._1 + " in quantity: " + n)
           costs_consumables += o.destroy(x._1, n);
           frac = math.min(frac, n.toDouble / x._2);
-          }
-          __wait(1)
         }
-        )(frac == 0)
+          
         goodwill = costs_consumables;
         if((frac < 1.0) && (! GLOBAL.silent))
           println(o + " " + " starts low-efficiency run.");
