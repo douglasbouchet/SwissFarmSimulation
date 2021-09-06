@@ -35,8 +35,10 @@ package object Commodities {
   val MovieTicket = Commodity("ticket")
   val Beef        = Commodity("beef")
   val Burger      = Commodity("burger")
+  val Fertilizer  = Commodity("fertilizer")
+  val FeedStuff   = Commodity("feedStuff")
 
-  val all_commodities = List(WheatSeeds, Wheat, Flour, Land, MovieTicket, Beef, Burger);
+  val all_commodities = List(WheatSeeds, Wheat, Flour, Land, MovieTicket, Beef, Burger, Fertilizer, FeedStuff);
 }
 
 

@@ -160,7 +160,6 @@ class CropProductionLine(
 
         for(x <- pls.consumed) {
           val n = math.min(o.available(x._1), x._2); // requested and available
-          println("Removing the consumed product:"  + x._1 + " in quantity: " + n)
           costs_consumables += o.destroy(x._1, n);
           frac = math.min(frac, n.toDouble / x._2);
         }

@@ -63,7 +63,7 @@ package landAdministrator {
     /** How much percentage of the aggregated lands each owner has */
     var ownershipDistrib: List[(Owner, Double)] = cmptOwnershipDistrib(landsLot)
 
-    var purpose: LandOverlayPurpose.Value = LandOverlayPurpose.wheatField
+    var purpose: LandOverlayPurpose.Value = LandOverlayPurpose.noPurpose
 
     var soilQuality: Double = 1.0
 

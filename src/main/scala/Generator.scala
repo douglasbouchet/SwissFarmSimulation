@@ -217,12 +217,15 @@ class Generator {
           val n = scala.util.Random.nextInt(100)
           if (n < 75) {
             landAdministrator.purposeOfLandOverlay += (overlay -> wheatField)
+            overlay.purpose = wheatField
           }
-          else if (n > 75 && n < 95){
+          else if (n >= 75 && n < 95){
             landAdministrator.purposeOfLandOverlay += (overlay -> paddoc)
+            overlay.purpose = paddoc
           }
           else{
             landAdministrator.purposeOfLandOverlay += (overlay -> meadow)
+            overlay.purpose = meadow
           }
         }
       }

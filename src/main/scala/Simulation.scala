@@ -171,7 +171,7 @@ class Simulation {
     farms.foreach(_.init)
 
     println("now creating a coop")
-    val coop = new AgriculturalCooperative(farms, List(Wheat), this)
+    val coop = new AgriculturalCooperative(farms, List(Wheat, Fertilizer), this)
 
     sims ++= List(coop)
     sims ++= farms

@@ -17,7 +17,10 @@ import javax.lang.model.`type`.NullType
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
     var crops: List[CropProductionLine] = List[CropProductionLine]()
+    //var cattles: List[CropProductionLine] = List[CropProductionLine]() // TODO maybe change name of "Crop" by something
+    //that fits cattles + crops
     var cooperative: Option[AgriculturalCooperative] = _cooperative 
+
 
     //use afterwards to model other co2 emission
     var Co2: Double = 0
@@ -104,19 +107,40 @@ import javax.lang.model.`type`.NullType
             List(/** (
                 WheatSeeds,
                 (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt)*/),
-            List(( WheatSeeds, (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt)),
+            List(
+              (WheatSeeds, (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt),
+              (Fertilizer, 1)
+               ),
             (
               Wheat,
               (area * CONSTANTS.WHEAT_PRODUCED_PER_HA).toInt
             ),
             12
           )
-          hr.hire(prodSpec.employees_needed)
+          hr.hire(worker)
           val prodL = new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
           crops ::= prodL
           s.market(prodSpec.produced._1).add_seller(this)
         }
+        //if some land overlays have paddoc purpose, add some cows inside
+        else if (lOver.purpose == paddoc){
+          println("PADDOC")
+          val nCows = 10 + scala.util.Random.nextInt(30)
+          val prodSpec = new ProductionLineSpec(
+            1, 
+            List(),
+            List((FeedStuff, nCows)),
+            (Fertilizer, nCows),
+            1 //TODO later add "List[(Commodity, Int)] instead of tuple in prod line spec 
+          )
+          hr.hire(1)
+          crops ::= new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
+          s.market(prodSpec.produced._1).add_seller(this)
+        }
       })
+
+      
+    
     }
 
     /** Returns whether everything was successfully bought. */
@@ -232,7 +256,9 @@ package cooperative {
     saleableCommodities.foreach(com => {
       s.market(com).add_seller(this)
     })
-    commoditiesToBuy.put(WheatSeeds, 0) //TODO faire mieux que hardcoder
+    commoditiesToBuy.put(WheatSeeds, 0)
+    commoditiesToBuy.put(Fertilizer, 0) //TODO faire mieux que hardcoder
+    commoditiesToBuy.put(FeedStuff, 0)
     //end init
 
     def addMember(member: Farm): Unit = {
@@ -314,3 +340,6 @@ package cooperative {
     )
   }
 }
+
+
+//Correct the fact that we are selling 0 units of fertilizer(see terminal)
