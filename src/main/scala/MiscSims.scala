@@ -5,6 +5,7 @@ import Simulation.Factory.Factory
 import Simulation.Factory.ProductionLineSpec
 import Markets._
 import Securities.Commodities._
+import breeze.stats.distributions
 
 
 class Source(commodity: Commodity, units: Int, p: Int,
@@ -15,6 +16,11 @@ class Source(commodity: Commodity, units: Int, p: Int,
     make(commodity, units, 0); // at no cost
   }
 
+  val fluct = distributions.Gaussian(0,15)
+  var flucPrice: Double = p + fluct.sample()
+  var nextTurn: Int = shared.timer + 1
+  
+
   def mycopy(_shared: Simulation,
              _substitution: collection.mutable.Map[SimO, SimO]) = {
     val n = new Source(commodity, units, p, _shared);
@@ -24,8 +30,17 @@ class Source(commodity: Commodity, units: Int, p: Int,
 
   def action = __do{}
 
-  //ajouter variation dans le prix du blé + revoir comment marche le capital etc..
-  override def price(dummy: Commodity) = Some(p)
+
+  //revoir comment marche le capital etc..
+  override def price(dummy: Commodity) = {
+    //Change the price at each turn
+    // TODO each source should have the same fluctuation of price ? 
+    if (shared.timer == nextTurn){
+      flucPrice = p + fluct.sample()
+      nextTurn += 1
+    } 
+    Some(flucPrice)
+  }
 }
 
 

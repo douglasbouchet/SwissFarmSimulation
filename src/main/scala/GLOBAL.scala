@@ -25,3 +25,22 @@ package object CONSTANTS {
   val KG_CO2_PER_WHEAT_CROP_HA: Double = 1900
 }
 
+// package price_fluctuation {
+
+//   class SourcePriceFluctuation(shared: Simulation) {
+
+//     val sourceFluctDistrib = distributions.Gaussian(0,15)
+//     var sourceFluct: Double = fluct.sample()
+//     var nextTurn: Int = shared.timer + 1
+
+//     def getFluctuation: Double = {
+//       if (shared.timer == nextTurn){
+//         sourceFluct = sourceFluctDistrib.sample()
+//         nextTurn += 1
+//       } 
+//       sourceFluct
+//     }
+//   }
+// }
+
+

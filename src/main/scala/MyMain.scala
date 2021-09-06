@@ -8,8 +8,8 @@ import Simulation.Factory._
 object MainExample {
   val s = new Simulation;
 
-  val seedsSeller = new Source(WheatSeeds, 100000,100, s);
-  val seedsSeller1 = new Source(WheatSeeds, 100000,100, s);
+  val seedsSeller = new Source(WheatSeeds, 100000,200, s);
+  val seedsSeller1 = new Source(WheatSeeds, 100000,200, s);
   // val m   = new Mill(s);
   //val c   = new Cinema(s);
   //val rf  = new CattleFarm(s);
