@@ -190,7 +190,11 @@ class CropProductionLine(
         Co2Emitted += lOver.getSurface * CONSTANTS.KG_CO2_PER_WHEAT_CROP_HA
 
         if(units_produced > 0) {
-         o.make(pls.produced._1, units_produced, unit_cost);
+          o.make(pls.produced._1, units_produced, unit_cost);
+
+          if(pls.produced._1 == Fertilizer){
+            println(units_produced + " units of fertilizer was produced")
+          }
 
           if(! GLOBAL.silent)
           println(o + " produces " + units_produced + "x " +
@@ -199,7 +203,7 @@ class CropProductionLine(
 
           //if farm is part of a cooperative, sell to it. Else sell itself
           o.cooperative match {
-            case Some(_) => o.sellFromCoop(List((pls.produced._1, units_produced)))
+            case Some(_) => o.sellFromCoop(List((pls.produced._1, units_produced - keepForFarmUse(pls.produced._1, units_produced))))
             case None => () //nothing to do
           }
           
@@ -213,6 +217,22 @@ class CropProductionLine(
 //        log = (get_time, frac) :: log;
       }
     )
+
+
+    private def keepForFarmUse(com: Commodity, units_produced: Int): Int = {
+      var ownUse: Int = 0
+      if(pls.produced._1 == com){
+        o.crops.foreach(crop => {
+            crop.pls.consumed.filter(elem => elem._1 == com) match {
+              case head :: next => ownUse = Math.min(ownUse + head._2, units_produced)
+              case Nil => {}
+            }
+        })
+      }
+      println("The ownUse for " + com + " is: " + ownUse)
+      ownUse
+    }
+
 
   }
 

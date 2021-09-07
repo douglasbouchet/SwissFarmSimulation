@@ -287,10 +287,15 @@ package cooperative {
     //TODO atm I assume that everything was bought succesfully, so we can just sell back the ask quantity to each 
     //member of buyLog. After include memory so if buy wasn't possible, sell it after and not now (else operation on empty inventory)
     def sellBackToFarm: Unit = {
+      //println("The buy Logs is: " + buyLogs)
       buyLogs.foreach(
         elem => elem._2.foreach{
           //TODO the price should be the one they paid for (almost no benefits, should be fair)
-          case(com: Commodity, unit: Int) => sell_to(s.timer, elem._1, com, unit)
+          //case(com: Commodity, unit: Int) => sell_to(s.timer, elem._1, com, unit)
+          case(com: Commodity, unit: Int) => {
+            if(unit > 0) sell_to(s.timer, elem._1, com, unit)
+            //else println("The supplies " + com + "in quantity " + unit + " couldn't be bought")
+          }
         }
       )
       buyLogs.keys.foreach(farm => buyLogs.put(farm, List[(Commodity, Int)]()))
