@@ -170,30 +170,24 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
     Fertilizer -> 80//No Idea
   ) //constant
   var comPrices = scala.collection.mutable.Map[Commodity, Int](
-      WheatSeeds -> baseComPrices(WheatSeeds).get,
-      Wheat -> baseComPrices(Wheat).get,
-      Flour -> baseComPrices(Flour).get,
-      FeedStuff -> baseComPrices(FeedStuff).get,
-      Fertilizer -> baseComPrices(Fertilizer).get
+      WheatSeeds -> baseComPrices(WheatSeeds),
+      Wheat -> baseComPrices(Wheat),
+      Flour -> baseComPrices(Flour),
+      FeedStuff -> baseComPrices(FeedStuff),
+      Fertilizer -> baseComPrices(Fertilizer)
   ) //fluctuate
 
-  val timeStep: Double = Math.PI / (12 * 2) // For a period of 2 years, if each timestep is 1 month
+  val timeStep: Double = 2*Math.PI / (12 * 2) // For a period of 2 years, if each timestep is 1 month
   var counter: Int = 0
-  val sin = Math.sin(timeStep * i)
 
-
-  {
-    println("Enteting the initialize functions")
-    println(baseComPrices)
-  }
-
+  //Change it with a sinus of amplitude 20% of base price
   def updatePrice(com: Commodity): Unit = {
-
-    comPrices.update(com, baseComPrices)
+    comPrices.update(com, (baseComPrices(com)*(1 + 0.2*Math.sin(timeStep * counter))).toInt)
   }
 
-  def updatePrices: Unit = {
-
+  def updateAllPrices: Unit = {
+    comPrices.keySet.foreach(updatePrice(_))
+    counter += 1
   }
 }
 

@@ -129,6 +129,8 @@ class Simulation {
         println(); println();
       }
       //updtate the global Prices
+      println("The prices are: " + prices.comPrices)
+      prices.updateAllPrices
       timer += 1;
     }
     println("STOP Simulation " + this);
