@@ -22,6 +22,8 @@ class Simulation {
     market += (c -> new SellersMarket(c));
   };
 
+  val prices = new Prices(market)
+
   var labour_market = collection.mutable.Stack[SimO](); // all Persons
 
   var chicago = collection.mutable.Map[Security, OrderBook]();
@@ -68,8 +70,6 @@ class Simulation {
     }
 
     println("INIT Simulation complete " + this);
-
-    println("The sellers are: " + market(Wheat).sellers)
   }
 
   /** TODO: Object ids (owners) in logs don't get substituted yet. This will
@@ -128,6 +128,7 @@ class Simulation {
         for (s <- sims) s.stat;
         println(); println();
       }
+      //updtate the global Prices
       timer += 1;
     }
     println("STOP Simulation " + this);
@@ -162,16 +163,14 @@ class Simulation {
     val allParcels = generator.generateParcels(canton)
     landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
     //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
-    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(2)
+    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(3)
     println(farms.length + " farms created: ")
-    println("assigning land overlays")
     //assign land overlays to farms
     generator.createAndAssignLandOverlays(farms, landAdministrator)
     // init the farm (make a factory for each landOverlay)
     farms.foreach(_.init)
 
-    println("now creating a coop")
-    val coop = new AgriculturalCooperative(farms, List(Wheat, Fertilizer), this)
+    val coop = new AgriculturalCooperative(farms.take(2), List(Wheat, Fertilizer), this)
 
     sims ++= List(coop)
     sims ++= farms

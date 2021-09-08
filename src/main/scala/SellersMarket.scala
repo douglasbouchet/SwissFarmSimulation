@@ -153,6 +153,49 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
   }
 }
 
+/**
+  * Give the base price of commodities
+  * First milestone, only use a sinus to represent fluctuation.
+  * Second milestone: use demand and production based on the SellersMarket to give base price
+  * @param markets
+  */
+  class Prices(markets: scala.collection.mutable.Map[Commodity, SellersMarket]){
+
+  //The base price for each commodity. In euros/Tons
+  var baseComPrices = scala.collection.mutable.Map[Commodity, Int](
+    WheatSeeds -> 100, //No Idea 
+    Wheat -> 240, 
+    Flour -> 280, //No Idea
+    FeedStuff -> 300, //No Idea
+    Fertilizer -> 80//No Idea
+  ) //constant
+  var comPrices = scala.collection.mutable.Map[Commodity, Int](
+      WheatSeeds -> baseComPrices(WheatSeeds).get,
+      Wheat -> baseComPrices(Wheat).get,
+      Flour -> baseComPrices(Flour).get,
+      FeedStuff -> baseComPrices(FeedStuff).get,
+      Fertilizer -> baseComPrices(Fertilizer).get
+  ) //fluctuate
+
+  val timeStep: Double = Math.PI / (12 * 2) // For a period of 2 years, if each timestep is 1 month
+  var counter: Int = 0
+  val sin = Math.sin(timeStep * i)
+
+
+  {
+    println("Enteting the initialize functions")
+    println(baseComPrices)
+  }
+
+  def updatePrice(com: Commodity): Unit = {
+
+    comPrices.update(com, baseComPrices)
+  }
+
+  def updatePrices: Unit = {
+
+  }
+}
 
 } // package Markets
 

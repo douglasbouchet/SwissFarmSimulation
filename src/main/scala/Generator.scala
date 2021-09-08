@@ -219,14 +219,15 @@ class Generator {
             landAdministrator.purposeOfLandOverlay += (overlay -> wheatField)
             overlay.purpose = wheatField
           }
-          else if (n >= 75 && n < 95){
+          //else if (n >= 75 && n < 95){
+          else{
             landAdministrator.purposeOfLandOverlay += (overlay -> paddoc)
             overlay.purpose = paddoc
           }
-          else{
-            landAdministrator.purposeOfLandOverlay += (overlay -> meadow)
-            overlay.purpose = meadow
-          }
+          //else{
+          //  landAdministrator.purposeOfLandOverlay += (overlay -> meadow)
+          //  overlay.purpose = meadow
+          //}
         }
       }
       farm.landOverlays :::= landOverlays

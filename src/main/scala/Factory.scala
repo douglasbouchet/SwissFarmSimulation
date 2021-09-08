@@ -180,7 +180,7 @@ class CropProductionLine(
         }
       )({ rpt < pls.time_to_complete }),
       __do{
-        print("production complete! ");
+        //print("production complete! ");
         val units_produced = (pls.produced._2  * efficiencyFunc).toInt; // here to influence quantity produced 
         val personnel_costs = pls.employees_needed * salary *
                               pls.time_to_complete;
@@ -191,10 +191,6 @@ class CropProductionLine(
 
         if(units_produced > 0) {
           o.make(pls.produced._1, units_produced, unit_cost);
-
-          if(pls.produced._1 == Fertilizer){
-            println(units_produced + " units of fertilizer was produced")
-          }
 
           if(! GLOBAL.silent)
           println(o + " produces " + units_produced + "x " +
@@ -229,7 +225,6 @@ class CropProductionLine(
             }
         })
       }
-      println("The ownUse for " + com + " is: " + ownUse)
       ownUse
     }
 

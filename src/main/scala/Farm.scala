@@ -12,14 +12,14 @@ package farmpackage {
 import javax.lang.model.`type`.NullType
 
 
-  case class Farm(s: Simulation, _cooperative: Option[AgriculturalCooperative]=None) extends SimO(s) {
+  case class Farm(s: Simulation) extends SimO(s) {
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
     var crops: List[CropProductionLine] = List[CropProductionLine]()
     //var cattles: List[CropProductionLine] = List[CropProductionLine]() // TODO maybe change name of "Crop" by something
     //that fits cattles + crops
-    var cooperative: Option[AgriculturalCooperative] = _cooperative 
+    var cooperative: Option[AgriculturalCooperative] = None 
 
 
     //use afterwards to model other co2 emission
@@ -31,21 +31,21 @@ import javax.lang.model.`type`.NullType
       parcels :::= newParcels
     }
 
-    def fertilize(crop: CropProductionLine, state: Boolean = true): Unit = {
-      crop.fertilized = state 
-    }
 
     override def price(dummy: Commodity): Option[Double] = {
+      //make 5% benefits on selling
       if (crops.nonEmpty && (available(dummy) > 0))
-        Some(1.0 * inventory_avg_cost.getOrElse(dummy, 0.0))
+        Some(1.05 * inventory_avg_cost.getOrElse(dummy, 0.0))
       else None
     }
 
     //private def changeActivity(newState: Boolean, prodL: ProductionLine) {prodL.active = newState}
 
     override def stat: Unit = {
-      //println(s"$name \n " + inventory_to_string())
-      //println(s"$name \n")
+      //println(this + " " + inventory_to_string())
+
+      //Voir combien on pait pour les ressources car 40000 enormes ?
+      println(this + " capital = " + capital/100)
     }
 
     //TODO add here the fact to change the type of agriculture 
@@ -63,8 +63,8 @@ import javax.lang.model.`type`.NullType
           //buyMissingFromCoop(crop.pls.consumed)
           crop.Co2Emitted = 0.0
           //if quality of soil is not to low, we can use fertilizer
-          if(crop.lOver.soilQuality > 1.0) fertilize(crop)
-          else fertilize(crop, state = false)
+          //if(crop.lOver.soilQuality > 1.0) fertilize(crop)
+          //else fertilize(crop, state = false)
           //Update the state of the ground to impact it according to actions taken
           //if(crop.fertilized) crop.lOver.soilQuality = Math.max(crop.lOver.soilQuality - 0.03, 0.5) 
           //else crop.lOver.soilQuality = Math.min(crop.lOver.soilQuality + 0.02, 1.0)
@@ -95,6 +95,9 @@ import javax.lang.model.`type`.NullType
       *   wheatSeeds These numbers should be updated afterwards
       */
     def init(): Unit = {
+      //give some capital to start
+      capital += 20000000
+      make(WheatSeeds, 3000, 10) //free wheat seeds to start
       landOverlays.foreach(lOver => {
         if (lOver.purpose == wheatField) {
           //afterwards we could add more complex attributes for productivity
@@ -109,7 +112,7 @@ import javax.lang.model.`type`.NullType
                 (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt)*/),
             List(
               (WheatSeeds, (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt),
-              (Fertilizer, 1)
+              //(Fertilizer, 1)
                ),
             (
               Wheat,
@@ -123,24 +126,21 @@ import javax.lang.model.`type`.NullType
           s.market(prodSpec.produced._1).add_seller(this)
         }
         //if some land overlays have paddoc purpose, add some cows inside
-        else if (lOver.purpose == paddoc){
-          println("PADDOC")
-          val nCows = 10 + scala.util.Random.nextInt(30)
-          val prodSpec = new ProductionLineSpec(
-            1, 
-            List(),
-            List((FeedStuff, nCows)),
-            (Fertilizer, nCows),
-            1 //TODO later add "List[(Commodity, Int)] instead of tuple in prod line spec 
-          )
-          hr.hire(1)
-          crops ::= new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
-          s.market(prodSpec.produced._1).add_seller(this)
-        }
+        //else if (lOver.purpose == paddoc){
+        //  val nCows = 10 + scala.util.Random.nextInt(30)
+        //  val prodSpec = new ProductionLineSpec(
+        //    1, 
+        //    List(),
+        //    List((FeedStuff, nCows)),
+        //    (),
+        //    (Fertilizer, nCows),
+        //    1 //TODO later add "List[(Commodity, Int)] instead of tuple in prod line spec 
+        //  )
+        //  hr.hire(1)
+        //  crops ::= new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
+        //  s.market(prodSpec.produced._1).add_seller(this)
+        //}
       })
-
-      
-    
     }
 
     /** Returns whether everything was successfully bought. */
@@ -172,6 +172,9 @@ import javax.lang.model.`type`.NullType
       // this ordering is important, so that bulk buying
       // happens before consumption.
       val nxt1 = super.run_until(until).get
+      if (crops.isEmpty){
+        println("FInd an empty crop")
+      }
       val nxt2 = crops.map(_.run_until(until).get).min
       Some(math.min(nxt1, nxt2)) // compute a meaningful next time
     }
@@ -204,6 +207,17 @@ import javax.lang.model.`type`.NullType
           }
         }
       }
+    }
+
+    /** Chose for a given commodity between selling to cooperative or on its own to make the maximum money */
+    def bestSellingStrategy(com: Commodity): Unit = {
+      def getCoopPrice: Double = {
+        1
+      }
+      def getSelfPrice: Double = {
+        1
+      }
+
     }
 
     def canEqual(a: Any) = a.isInstanceOf[Farm]

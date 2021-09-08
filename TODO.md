@@ -35,27 +35,6 @@
   - Opt(location)
 
 
-- case class Seed Supplier extends Supplier
-  - state counter Interactions dans le md
-
-- case class Feedstuff Supplier extends Supplier
-  - state counter Interactions dans le md
-
-
-- Market 
-  - List stuff to buy: List Commodities
-  - List person (clients)
-  - state counter 
-
-
-
-- Person TODO
-
-Dans l'algo:
-  each step, check le state counter de chaque agent et voir si des actions sont requises
-
-
-
 
 # The global Agent (The map):
 
@@ -109,19 +88,15 @@ Change cadastral parcel owner inside generator when assigning to some farm
 maybe add a landoverlaypuprose for growing cows and wich create a factory of meat
 
 
-Today: 
+When ?: 
 - Ajouter dégradation de la qualité du champ -> faire également une fonction de la productivité qui dépend des qualités du landOverlay (ou des parcelles membres)
 - Roulement aléatoire sur le type de culture (aucune ou différent) de manière random 
 - 4: ensuite, on peut complexifier notre modèle de production des fermes a l'infini: changer la prodLineSpec d'un landoverlay, faire du bio etc.. Ces actions peuvent être prises de manière random ou délibérée
 
-
-- Implement the fact that farmer can add the mill they already treated with to their network. And pass by it to sell further product. 
 Voir si regrouper factories of 1 farm producing same commodity 
 implémenter bakery + consumption for people
 
-
-
-
 - add the fact that don't sell to someone we were selling at make decrease score 
+
 
 
