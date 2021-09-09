@@ -6,7 +6,6 @@ import Securities.Commodities._
 import landAdministrator.LandOverlay
 import farmpackage.Farm
 
-
 case class ProductionLineSpec(employees_needed: Int,
                               required: List[(Commodity, Int)],
                               consumed: List[(Commodity, Int)],
@@ -206,8 +205,12 @@ class CropProductionLine(
             pls.produced._1 + " at efficiency " + frac +
             " and " + (unit_cost/100).toInt + "/unit.");
 
-          //test of holding ressources:
-          o.holdCommodity(pls.produced._1, pls.produced._2 / 2)
+          //test of holding ressources: after should call an holding strategy from the farm
+          pls.produced._1 match {
+            case Wheat => o.holdCommodity(Wheat, pls.produced._2 / 2, o.s.timer + CONSTANTS.WHEAT_EXPIRY_TIMER_IN_MONTH)
+            case _ => println("This type of crop is unknown")
+          }
+          
 
           if(o.sellToCoopWorth(pls.produced._1)){
             o.sellFromCoop(List((pls.produced._1, units_produced - keepForFarmUse(pls.produced._1, units_produced))))

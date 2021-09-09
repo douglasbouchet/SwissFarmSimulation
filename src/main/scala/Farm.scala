@@ -76,6 +76,7 @@ import javax.lang.model.`type`.NullType
       __do {
         assert(hr.employees.length == crops.map(_.pls.employees_needed).sum)
         hr.pay_workers()
+        removeExpiredItems(s.timer)
       }
     )
 

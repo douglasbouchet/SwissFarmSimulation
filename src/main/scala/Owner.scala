@@ -67,8 +67,14 @@ class Owner {
                                      collection.mutable.Map[ITEM_T, Double]()
   private var total_value_destroyed : Double = 0.0
 
-  protected var holdedCommodities: collection.mutable.Map[ITEM_T, Int] =
-                                 collection.mutable.Map[ITEM_T, Int]()
+
+  /** We can assume that commodities are produced ~ in the same time Wheat is harvested once a year (for a specific type)
+   * Thus we need only one counter of expiry date by commodity holded
+   * Of the form: Wheat -> (quantity, timer of expiry)
+   * When timer of expiry is reach, commodity is destroyed
+   *  */
+  protected var holdedCommodities: collection.mutable.Map[ITEM_T, (Int, Int)] =
+                                 collection.mutable.Map[ITEM_T, (Int, Int)]()
 
   val contactNetwork = new ContactNetwork
   /** The probability of bankruptcy, as a basis of a credit rating.
@@ -203,7 +209,7 @@ class Owner {
                       unit_price: Double) : Int = {
     //val available = math.max(inventory(item), 0);
     //No need to check that inv - holded > 0 as it is made when adding and removing from holdedCommodities
-    val available = Math.min(inventory.getOrElse(item,0) - holdedCommodities.getOrElse(item, 0), units)
+    val available = Math.min(inventory.getOrElse(item,0) - holdedCommodities.getOrElse(item, (0,0))._1, units)
     //val n = math.min(available, units); // no shorting
 
     //atomic_sell_to(buyer, item, n, unit_price);
@@ -237,24 +243,53 @@ class Owner {
 
   //Holded inventory operations:
 
-  def holdCommodity(com: ITEM_T, unit: Int): Unit = {
+  /**
+    * The method assumes that the added commodities are added with close simulation timer difference 
+    * (this is why we just replace the old expiryTimer by the new one)
+    * @param com
+    * @param unit
+    * @param expiryTimer should be time time to expire + the current time
+    */
+  def holdCommodity(com: ITEM_T, unit: Int, expiryTimer: Int): Unit = {
+    assert(unit > 0)
+    assert(expiryTimer > 0)
     //Check if we actually have enough in the inventory
-    assert(unit <= inventory.getOrElse(com,0) + holdedCommodities.getOrElse(com, 0))
-    holdedCommodities.update(com, holdedCommodities.getOrElse(com,0) + unit)
+    val oldValue: (Int, Int) = holdedCommodities.getOrElse(com,(0,0))
+    holdedCommodities.update(com, (oldValue._1 + unit, expiryTimer))
   }
 
   def releaseToMarket(com: ITEM_T, unit: Int): Unit = {
-    assert(unit <= holdedCommodities.getOrElse(com, 0))
-    holdedCommodities.update(com, holdedCommodities.getOrElse(com,0) - unit)
+    assert(unit <= holdedCommodities.getOrElse(com, (0,0))._1)
+    val oldValue: (Int, Int) = holdedCommodities.getOrElse(com,(0,0))
+    holdedCommodities.update(com, (oldValue._1 - unit, oldValue._2))
+    //If no more of this kind of commodity is stored, reset expiryTimer to 0
+    if(holdedCommodities.getOrElse(com, (0,0))._1 == 0){
+      holdedCommodities.put(com, (0,0))
+    }
   }
 
   def saleableUnits(com: ITEM_T): Int = {
-    val y = inventory.getOrElse(com,0) - holdedCommodities.getOrElse(com, 0)
-    inventory.getOrElse(com,0) - holdedCommodities.getOrElse(com, 0)
-    val x = 0
-    y
+    inventory.getOrElse(com, 0) - holdedCommodities.getOrElse(com, (0,0))._1
   }
-  
+
+  /** Use to destroy the items that have expired
+    * @param timer the current timer of the simulation
+    */
+  def removeExpiredItems(timer: Int): Unit = {
+    holdedCommodities.foreach{
+      case (com: ITEM_T, (units:Int, expireTimer:Int)) => {
+        //we need to destroy the holded Items
+        if(timer >= expireTimer){
+          println(s"Destroying $units units of $com")
+          //Clear the hold inventory and the inventory
+          holdedCommodities.put(com, (0,0))
+          destroy(com, units)
+          
+        }
+      }
+    }
+  }
+
   
 
 
