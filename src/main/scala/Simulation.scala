@@ -128,9 +128,9 @@ class Simulation {
         for (s <- sims) s.stat;
         println(); println();
       }
-      //updtate the global Prices
-      println("The prices are: " + prices.comPrices)
+      //update the global Prices
       prices.updateAllPrices
+
       timer += 1;
     }
     println("STOP Simulation " + this);
@@ -165,7 +165,7 @@ class Simulation {
     val allParcels = generator.generateParcels(canton)
     landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
     //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
-    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(3)
+    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(2)
     println(farms.length + " farms created: ")
     //assign land overlays to farms
     generator.createAndAssignLandOverlays(farms, landAdministrator)

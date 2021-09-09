@@ -32,8 +32,8 @@ import javax.lang.model.`type`.NullType
     }
 
 
+    /** For each dummy, make an average over all crops that produces this dummy */
     override def price(dummy: Commodity): Option[Double] = {
-      //make 5% benefits on selling
       if (crops.nonEmpty && (available(dummy) > 0))
         Some(1.05 * inventory_avg_cost.getOrElse(dummy, 0.0))
       else None
@@ -45,7 +45,7 @@ import javax.lang.model.`type`.NullType
       //println(this + " " + inventory_to_string())
 
       //Voir combien on pait pour les ressources car 40000 enormes ?
-      println(this + " capital = " + capital/100)
+      println(this + " capital = " + capital/100 + "  " + inventory_to_string)
     }
 
     //TODO add here the fact to change the type of agriculture 
@@ -155,16 +155,12 @@ import javax.lang.model.`type`.NullType
         (t._1, amount)
       })
 
-      
       def successfully_bought(line: (Commodity, Int)) = {
         
         val alreadyBuyFrom = contactNetwork.contacts.map(_._1).toList
         //println("Already buy to")
         s.market(line._1).market_buy_order_now(s.timer, this, line._2,alreadyBuyFrom) == 0
       }
-
-      // nothing missing
-
       l.forall(successfully_bought)
     }
 
@@ -209,16 +205,31 @@ import javax.lang.model.`type`.NullType
       }
     }
 
-    /** Chose for a given commodity between selling to cooperative or on its own to make the maximum money */
-    def bestSellingStrategy(com: Commodity): Unit = {
+    /** Chose for a given commodity between selling to cooperative or on its own to make the maximum money 
+     * @return true if selling with coop is worth, else false */
+    def sellToCoopWorth(com: Commodity): Boolean = {
+      //For the moment, as coop sells in gross, price are a bit lower than the ones on the market.
+      //Worthness of selling to coop is getting money instantly + sure to sell all at an okay price
       def getCoopPrice: Double = {
-        1
-      }
-      def getSelfPrice: Double = {
-        1
+        0.98*s.prices.getPriceOf(com)
       }
 
+      /** 1st Milestone: estimate profits/loss randomly (between 90 and 110 %)
+       * 2nd Milestone: estimate profits/loss based on an expected value of how many and at which price stock is sell on market
+       * A bit like someone who would speculate 
+       * //TODO see if can add some contracts to ensure selling price ? 
+       * */
+      def getSelfPrice: Double = {
+        (90.0 + scala.util.Random.nextInt(20))/100 * s.prices.getPriceOf(com)
+      }
+      
+      cooperative match {
+        case None => false // Will sell by itself, see if some stocks needs to be hold
+        case Some(value) => getCoopPrice > getSelfPrice
+        
+      }
     }
+    
 
     def canEqual(a: Any) = a.isInstanceOf[Farm]
 
@@ -321,7 +332,7 @@ package cooperative {
         _substitution: scala.collection.mutable.Map[SimO, SimO]
     ): SimO = ???
 
-    //TODO
+    //The price of a dummy is the average of the price of each farm 
     override def price(dummy: Commodity): Option[Double] = {
       if (available(dummy) > 0)
         Some(1.0 * inventory_avg_cost.getOrElse(dummy, 0.0))

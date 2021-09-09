@@ -122,6 +122,10 @@ class CropProductionLine(
     var efficiency: Double = 1.0
     var lOver: LandOverlay = _lOver
 
+    //Used to compute average price in Farm
+    var unitPrice: Double = 0
+    var quantity: Int = 0
+
     /** Compute the performance of the production line. Influenced by product used, ground quality
       * 1.0 means normal productivity. 
       * @return the performance of the production Line
@@ -186,6 +190,11 @@ class CropProductionLine(
                               pls.time_to_complete;
         val total_cost : Double = costs_consumables + personnel_costs;
         val unit_cost = total_cost / units_produced;
+
+        
+        unitPrice = unit_cost
+        quantity = units_produced
+
         //It will be reset by the farm(owner) once taken into account
         Co2Emitted += lOver.getSurface * CONSTANTS.KG_CO2_PER_WHEAT_CROP_HA
 
@@ -197,11 +206,11 @@ class CropProductionLine(
             pls.produced._1 + " at efficiency " + frac +
             " and " + (unit_cost/100).toInt + "/unit.");
 
-          //if farm is part of a cooperative, sell to it. Else sell itself
-          o.cooperative match {
-            case Some(_) => o.sellFromCoop(List((pls.produced._1, units_produced - keepForFarmUse(pls.produced._1, units_produced))))
-            case None => () //nothing to do
+          if(o.sellToCoopWorth(pls.produced._1)){
+            o.sellFromCoop(List((pls.produced._1, units_produced - keepForFarmUse(pls.produced._1, units_produced))))
           }
+          
+          //else nothing to do, the farm will sellby itself
           
         }
         else {
@@ -236,7 +245,7 @@ class CropProductionLine(
 // TODO: different capabilities and salaries per employee
 case class HR(private val shared: Simulation,
               private val o: Owner,
-              salary: Int = 20000 * 100, // 20kEUR
+              salary: Int = 6000 * 100, // 6kEUR
               employees: collection.mutable.Stack[Person] =
                          collection.mutable.Stack[Person]()
 ) {

@@ -162,14 +162,14 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
   class Prices(markets: scala.collection.mutable.Map[Commodity, SellersMarket]){
 
   //The base price for each commodity. In euros/Tons
-  var baseComPrices = scala.collection.mutable.Map[Commodity, Int](
+  private var baseComPrices = scala.collection.mutable.Map[Commodity, Int](
     WheatSeeds -> 100, //No Idea 
     Wheat -> 240, 
     Flour -> 280, //No Idea
     FeedStuff -> 300, //No Idea
     Fertilizer -> 80//No Idea
   ) //constant
-  var comPrices = scala.collection.mutable.Map[Commodity, Int](
+  private var comPrices = scala.collection.mutable.Map[Commodity, Int](
       WheatSeeds -> baseComPrices(WheatSeeds),
       Wheat -> baseComPrices(Wheat),
       Flour -> baseComPrices(Flour),
@@ -189,6 +189,18 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
     comPrices.keySet.foreach(updatePrice(_))
     counter += 1
   }
+
+  def getPriceOf(com: Commodity): Double = {
+    comPrices(com)
+    //comPrices(com) match {
+    //  case Some(price) => price
+    //  case None => {
+    //    println("There is no current global price for: " + com)
+    //    0.0
+    //  }
+    //}
+  }
+
 }
 
 } // package Markets
