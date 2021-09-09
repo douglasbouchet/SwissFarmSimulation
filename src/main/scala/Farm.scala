@@ -9,10 +9,13 @@ package farmpackage {
   import Securities.Commodities._
   import scala.collection.mutable
   import cooperative.AgriculturalCooperative
-import javax.lang.model.`type`.NullType
+  import javax.lang.model.`type`.NullType
+  import Securities._
 
 
   case class Farm(s: Simulation) extends SimO(s) {
+
+    //type ITEM_T = Security
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
@@ -77,6 +80,7 @@ import javax.lang.model.`type`.NullType
         assert(hr.employees.length == crops.map(_.pls.employees_needed).sum)
         hr.pay_workers()
         removeExpiredItems(s.timer)
+        sellingStrategy
       }
     )
 
@@ -229,6 +233,26 @@ import javax.lang.model.`type`.NullType
         case Some(value) => getCoopPrice > getSelfPrice
         
       }
+    }
+
+    // dump atm, only sell if 1 turn is remaining
+    //TODO maybe should be declared inside seller or owner ? 
+    //Increase later by speculating on an increasing of the selling price
+    def sellingStrategy: Unit = {
+      holdedCommodities.foreach{
+              case (com: Security, (units:Int, expireTimer:Int)) => {
+              //Sells holded commodidites if one turn remains before beeing expired
+              if(s.timer == expireTimer - 1){
+                println(s"Selling $units units of holded stuff: $com")
+                //Clear the hold inventory
+                holdedCommodities.put(com, (0,0))
+                if(sellToCoopWorth(com.asInstanceOf[Commodity])){
+                  sellFromCoop(List((com.asInstanceOf[Commodity], units)))
+                }
+                //Otherwise, as removed from holded, could now be buy by everyone
+              }
+            }
+          }
     }
     
 
