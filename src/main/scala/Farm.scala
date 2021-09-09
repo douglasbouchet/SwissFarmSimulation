@@ -34,7 +34,7 @@ import javax.lang.model.`type`.NullType
 
     /** For each dummy, make an average over all crops that produces this dummy */
     override def price(dummy: Commodity): Option[Double] = {
-      if (crops.nonEmpty && (available(dummy) > 0))
+      if (crops.nonEmpty && (saleableUnits(dummy) > 0))
         Some(1.05 * inventory_avg_cost.getOrElse(dummy, 0.0))
       else None
     }

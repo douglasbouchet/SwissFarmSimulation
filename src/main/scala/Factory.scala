@@ -206,6 +206,9 @@ class CropProductionLine(
             pls.produced._1 + " at efficiency " + frac +
             " and " + (unit_cost/100).toInt + "/unit.");
 
+          //test of holding ressources:
+          o.holdCommodity(pls.produced._1, pls.produced._2 / 2)
+
           if(o.sellToCoopWorth(pls.produced._1)){
             o.sellFromCoop(List((pls.produced._1, units_produced - keepForFarmUse(pls.produced._1, units_produced))))
           }

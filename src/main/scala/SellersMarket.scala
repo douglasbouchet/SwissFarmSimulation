@@ -117,7 +117,8 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
                 s.price(commodity).get - s.contactNetwork.getContactScore(exclude.asInstanceOf[Seller])/100 * s.price(commodity).get
               })) 
     //may require some checks like the fact that price is not taken into account between usualTraders and others
-    greedy_match(asks, ((s: Seller) => s.available(commodity)), units)
+    //greedy_match(asks, ((s: Seller) => s.available(commodity)), units)
+    greedy_match(asks, ((s: Seller) => s.saleableUnits(commodity)), units)
   }
 
   private def compute_price(l: List[(Int, Seller)]) =

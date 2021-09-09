@@ -67,6 +67,9 @@ class Owner {
                                      collection.mutable.Map[ITEM_T, Double]()
   private var total_value_destroyed : Double = 0.0
 
+  protected var holdedCommodities: collection.mutable.Map[ITEM_T, Int] =
+                                 collection.mutable.Map[ITEM_T, Int]()
+
   val contactNetwork = new ContactNetwork
   /** The probability of bankruptcy, as a basis of a credit rating.
       TODO: In which time frame?
@@ -156,8 +159,11 @@ class Owner {
   def atomic_sell_to(buyer: Owner, item: ITEM_T, units: Int,
               unit_price: Double) {
     assert(units >= 0); // respect trading direction: it's a sell
-
+              
     if(! inventory.contains(item)) init_inv(item);
+
+    //Take into account the fact that some Items may be holded, thus not saleable
+    //val availableUnits = Math.min(inventory.get(item) - holdedCommodities.getOrElse(com, 0), units)
 
     if(this == buyer)
       println("WARNING Owner.atomic_sell_to: " + this + " selling to himself!");
@@ -167,6 +173,7 @@ class Owner {
 
     if(! GLOBAL.silent)
       println((this + " sells " + units + "*" + item + " to " + buyer +
+      //println((this + " sells " + availableUnits + "*" + item + " to " + buyer +
         " at " + (unit_price/100).toInt) + "/unit");
 
     if(unit_price < inventory_avg_cost(item))
@@ -174,6 +181,9 @@ class Owner {
 
     buyer.recalculate_inv_avg_cost(item, units, unit_price);
     recalculate_inv_avg_cost(item, -units, unit_price);
+
+    //buyer.recalculate_inv_avg_cost(item, availableUnits, unit_price);
+    //recalculate_inv_avg_cost(item, -availableUnits, unit_price);
 
     // transfer asset
     buyer.inventory(item) += units;
@@ -191,12 +201,16 @@ class Owner {
   /** No shorting: sell no more than inventory. */
   def partial_sell_to(buyer: Owner, item: ITEM_T, units: Int,
                       unit_price: Double) : Int = {
-    val available = math.max(inventory(item), 0);
-    val n = math.min(available, units); // no shorting
+    //val available = math.max(inventory(item), 0);
+    //No need to check that inv - holded > 0 as it is made when adding and removing from holdedCommodities
+    val available = Math.min(inventory.getOrElse(item,0) - holdedCommodities.getOrElse(item, 0), units)
+    //val n = math.min(available, units); // no shorting
 
-    atomic_sell_to(buyer, item, n, unit_price);
+    //atomic_sell_to(buyer, item, n, unit_price);
+    atomic_sell_to(buyer, item, available, unit_price);
 
-    n // return #units sold
+    //n
+    available // return #units sold
   }
 
   /** Doesn't touch capital:
@@ -220,6 +234,32 @@ class Owner {
 
     value_destroyed // returns cost of destroyed stuff
   }
+
+  //Holded inventory operations:
+
+  def holdCommodity(com: ITEM_T, unit: Int): Unit = {
+    //Check if we actually have enough in the inventory
+    assert(unit <= inventory.getOrElse(com,0) + holdedCommodities.getOrElse(com, 0))
+    holdedCommodities.update(com, holdedCommodities.getOrElse(com,0) + unit)
+  }
+
+  def releaseToMarket(com: ITEM_T, unit: Int): Unit = {
+    assert(unit <= holdedCommodities.getOrElse(com, 0))
+    holdedCommodities.update(com, holdedCommodities.getOrElse(com,0) - unit)
+  }
+
+  def saleableUnits(com: ITEM_T): Int = {
+    val y = inventory.getOrElse(com,0) - holdedCommodities.getOrElse(com, 0)
+    inventory.getOrElse(com,0) - holdedCommodities.getOrElse(com, 0)
+    val x = 0
+    y
+  }
+  
+  
+
+
+
+
 }
 
 
