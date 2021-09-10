@@ -44,7 +44,7 @@ object MainExample {
   //}
   def main(argv: Array[String]) {
     //s.run(25);
-    s.run(28);
+    s.run(430);
   }
 }
 

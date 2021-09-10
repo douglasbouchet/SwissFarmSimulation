@@ -125,8 +125,10 @@ class Simulation {
       if (!GLOBAL.silent) println("timer = " + timer);
       for (s <- sims) s.run_until(timer);
       if (!GLOBAL.silent) {
-        for (s <- sims) s.stat;
-        println(); println();
+        //for (s <- sims) s.stat;
+        //println(); println();
+        print(" " + prices.getPriceOf(Wheat))
+        println()
       }
       //update the global Prices
       prices.updateAllPrices

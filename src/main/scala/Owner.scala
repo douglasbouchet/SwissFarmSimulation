@@ -258,6 +258,10 @@ class Owner {
     holdedCommodities.update(com, (oldValue._1 + unit, expiryTimer))
   }
 
+  def holdedCommodity(com: ITEM_T): Int = {
+    holdedCommodities.getOrElse(com, (0,0))._1
+  }
+
   def releaseToMarket(com: ITEM_T, unit: Int): Unit = {
     assert(unit <= holdedCommodities.getOrElse(com, (0,0))._1)
     val oldValue: (Int, Int) = holdedCommodities.getOrElse(com,(0,0))
@@ -280,7 +284,6 @@ class Owner {
       case (com: ITEM_T, (units:Int, expireTimer:Int)) => {
         //we need to destroy the holded Items
         if(timer >= expireTimer){
-          println(s"Destroying $units units of $com")
           //Clear the hold inventory and the inventory
           holdedCommodities.put(com, (0,0))
           destroy(com, units)

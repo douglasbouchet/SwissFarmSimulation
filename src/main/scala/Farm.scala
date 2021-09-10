@@ -30,6 +30,10 @@ package farmpackage {
 
     protected var hr: HR = HR(s, this)
 
+    //Strategy for selling
+    var prevPrices: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
+    var toSellEachTurn: scala.collection.mutable.Map[Commodity, Int] = scala.collection.mutable.Map[Commodity, Int]()
+
     def addParcels(newParcels: List[CadastralParcel]): Unit = {
       parcels :::= newParcels
     }
@@ -37,8 +41,11 @@ package farmpackage {
 
     /** For each dummy, make an average over all crops that produces this dummy */
     override def price(dummy: Commodity): Option[Double] = {
+      //println(s"The actual price for com $dummy is : " + 1.05 * inventory_avg_cost.getOrElse(dummy, 0.0))
+      //println("The market price is : " + s.prices.getPriceOf(dummy))
       if (crops.nonEmpty && (saleableUnits(dummy) > 0))
         Some(1.05 * inventory_avg_cost.getOrElse(dummy, 0.0))
+
       else None
     }
 
@@ -80,7 +87,7 @@ package farmpackage {
         assert(hr.employees.length == crops.map(_.pls.employees_needed).sum)
         hr.pay_workers()
         removeExpiredItems(s.timer)
-        sellingStrategy
+        sellingStrategy //manage hold commodities
       }
     )
 
@@ -123,7 +130,7 @@ package farmpackage {
               Wheat,
               (area * CONSTANTS.WHEAT_PRODUCED_PER_HA).toInt
             ),
-            12
+            CONSTANTS.WHEAT_PROD_DURATION
           )
           hr.hire(worker)
           val prodL = new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
@@ -235,22 +242,46 @@ package farmpackage {
       }
     }
 
-    // dump atm, only sell if 1 turn is remaining
     //TODO maybe should be declared inside seller or owner ? 
-    //Increase later by speculating on an increasing of the selling price
+    /**
+      * Implement a Fo Moo strategy (copy the others). If price is bearing(falling), sell. Else hold
+      * If one turn remains before the holded commodities expires, sell all 
+      */
     def sellingStrategy: Unit = {
       holdedCommodities.foreach{
               case (com: Security, (units:Int, expireTimer:Int)) => {
-              //Sells holded commodidites if one turn remains before beeing expired
-              if(s.timer == expireTimer - 1){
-                println(s"Selling $units units of holded stuff: $com")
-                //Clear the hold inventory
-                holdedCommodities.put(com, (0,0))
-                if(sellToCoopWorth(com.asInstanceOf[Commodity])){
-                  sellFromCoop(List((com.asInstanceOf[Commodity], units)))
+                val commodity = com.asInstanceOf[Commodity]
+                if(s.timer < expireTimer - 1){
+                  //Check if price has fallen
+                  if(s.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
+                    //we sell 10% of our holded commodities
+                    val quantityToSell = Math.min(holdedCommodity(com), toSellEachTurn.getOrElse(commodity,0)/10)
+                    if(sellToCoopWorth(commodity)){
+                      sellFromCoop(List((commodity, quantityToSell)))
+                    }
+                    else{
+                      releaseToMarket(commodity, quantityToSell)
+                    }
+                  }
                 }
-                //Otherwise, as removed from holded, could now be buy by everyone
-              }
+                //One turn remains before beeing expired, sell all of this commodity
+                else if (s.timer == expireTimer - 1){
+                  //Clear the hold inventory
+                  //holdedCommodities.put(com, (0,0))
+
+                  //TODO PUT THIS INSIDE A METHOD ??
+                  if(sellToCoopWorth(commodity)){
+                    sellFromCoop(List((commodity, units)))
+                  }
+                  else{
+                    releaseToMarket(commodity, units)
+                  }
+                  //END TODO
+                  //Otherwise, as removed from holded, could now be buy by everyone
+                  toSellEachTurn.put(commodity, 0)
+                }
+                //update prevPrice of commodity
+                prevPrices.put(commodity, s.prices.getPriceOf(commodity))
             }
           }
     }

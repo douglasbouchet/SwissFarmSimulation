@@ -206,8 +206,13 @@ class CropProductionLine(
             " and " + (unit_cost/100).toInt + "/unit.");
 
           //test of holding ressources: after should call an holding strategy from the farm
+          
+          //Hold all the wheat, then call selling strategy in farm to decide when to sell it
           pls.produced._1 match {
-            case Wheat => o.holdCommodity(Wheat, pls.produced._2 / 2, o.s.timer + CONSTANTS.WHEAT_EXPIRY_TIMER_IN_MONTH)
+            case Wheat => {
+              o.holdCommodity(Wheat, units_produced, o.s.timer + CONSTANTS.WHEAT_EXPIRY_TIMER_IN_MONTH)
+              o.toSellEachTurn.update(pls.produced._1, o.toSellEachTurn.getOrElse(pls.produced._1,0) + units_produced)
+            }
             case _ => println("This type of crop is unknown")
           }
           

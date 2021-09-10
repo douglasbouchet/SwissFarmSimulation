@@ -178,7 +178,7 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
       Fertilizer -> baseComPrices(Fertilizer)
   ) //fluctuate
 
-  val timeStep: Double = 2*Math.PI / (12 * 2) // For a period of 2 years, if each timestep is 1 month
+  val timeStep: Double = 2*Math.PI / (12 * 2 * CONSTANTS.TICKS_TIMER_PER_MONTH) // For a period of 2 years, if each timestep is 1 month
   var counter: Int = 0
 
   //Change it with a sinus of amplitude 20% of base price
