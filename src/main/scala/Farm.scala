@@ -203,6 +203,7 @@ package farmpackage {
         case Some(coop) => {
           toBuy.foreach{
             case(com: Commodity, unit: Int) => (
+              //Change this line 
               coop.buyLogs.update(this, coop.buyLogs(this) :+ (com, math.max(0, unit - available(com))))
             )
           }
@@ -262,8 +263,13 @@ package farmpackage {
                 if(s.timer < expireTimer - 1){
                   //Check if price has fallen
                   if(s.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
-                    //we sell 10% of our holded commodities
-                    val quantityToSell = Math.min(holdedCommodity(com), toSellEachTurn.getOrElse(commodity,0)/10)
+                    var toSell: Int = toSellEachTurn.getOrElse(commodity,0)/10
+                    //avoid selling less than 10% of the stock each turn
+                    if(holdedCommodity(com) - toSell < toSell){
+                      //Sell all remaining stock
+                      toSell = holdedCommodity(com)
+                    }
+                    val quantityToSell = Math.min(holdedCommodity(com), toSell)
                     if(sellToCoopWorth(commodity)){
                       sellFromCoop(List((commodity, quantityToSell)))
                     }
@@ -376,7 +382,7 @@ package cooperative {
     //TODO atm I assume that everything was bought succesfully, so we can just sell back the ask quantity to each 
     //member of buyLog. After include memory so if buy wasn't possible, sell it after and not now (else operation on empty inventory)
     def sellBackToFarm: Unit = {
-      //println("The buy Logs is: " + buyLogs)
+      println("The buy Logs is: " + buyLogs)
       buyLogs.foreach(
         elem => elem._2.foreach{
           //TODO the price should be the one they paid for (almost no benefits, should be fair)

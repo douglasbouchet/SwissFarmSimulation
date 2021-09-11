@@ -178,7 +178,6 @@ class CropProductionLine(
         pls.boosters match {
           case Some(list) => {
             for(booster <- list) {
-              println("Quantity of boosters = " + o.available(booster._1))
               val n = math.min(o.available(booster._1), booster._2); // requested and available
               costs_consumables += o.destroy(booster._1, n);
               // min ratio over all boosters. Improve by separating different ratios of available vs needed of each booster
