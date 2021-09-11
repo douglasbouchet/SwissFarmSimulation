@@ -14,6 +14,8 @@ import Timeseries.LogList
  */
 class ContactNetwork {
 
+  //TODO maybe change and contacts BY commodity
+
   /** Just store a list of Seller, together with their clientScore */
   var contacts = scala.collection.mutable.Set[(Seller, Int)]()
 

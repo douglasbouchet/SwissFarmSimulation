@@ -58,10 +58,6 @@ class Simulation {
 
     initMills
 
-    //temporary
-    sims ++= List(new AgriculturalCooperative(List(), List(Wheat), this))
-    //end tempo
-
     println("Number of sims = " + sims.length)
 
     if (!GLOBAL.silent) {
@@ -70,6 +66,7 @@ class Simulation {
     }
 
     println("INIT Simulation complete " + this);
+
   }
 
   /** TODO: Object ids (owners) in logs don't get substituted yet. This will

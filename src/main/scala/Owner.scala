@@ -197,9 +197,9 @@ class Owner {
 
     buyer.transfer_money_to(this, math.ceil(units * unit_price).toInt);
 
-    /** add buyer to seller contactNetwork and vice-versa */
-    this.contactNetwork.increaseScore(buyer.asInstanceOf[Seller])
-    buyer.asInstanceOf[Seller].contactNetwork.increaseScore(this.asInstanceOf[Seller])
+    /** add buyer to seller contactNetwork */
+    //this.contactNetwork.increaseScore(buyer.asInstanceOf[Seller])
+    buyer.contactNetwork.increaseScore(this.asInstanceOf[Seller])
 
     // println("Now buyer = " + buyer + " and seller = " + this);
   }

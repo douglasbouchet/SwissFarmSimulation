@@ -62,7 +62,6 @@ package farmpackage {
     override def algo: __forever = __forever(
       __do {
         s.observator.Co2 += crops.map(_.Co2Emitted).sum
-
         crops.foreach(crop => {
           //if there is a cooperative, buy from it. Else by itself
           val boostersToBuy = crop.pls.boosters match {
@@ -198,18 +197,19 @@ package farmpackage {
     /** The commodities asks may not be available immediatly
      * order is pass to the coop, which sells them back to this when products are buy by coop */ 
     def buyMissingFromCoop(toBuy: List[(Commodity, Int)]): Unit = {
-      cooperative match {
-        case None => println("Farm: " + this + "should be part of a cooperative to buy from it")
-        case Some(coop) => {
-          toBuy.foreach{
-            case(com: Commodity, unit: Int) => (
-              //Change this line 
-              coop.buyLogs.update(this, coop.buyLogs(this) :+ (com, math.max(0, unit - available(com))))
-            )
+          cooperative match {
+            case None => println("Farm: " + this + "should be part of a cooperative to buy from it")
+            case Some(coop) => {
+              toBuy.foreach{
+                case(com: Commodity, unit: Int) => (
+                  //Change this line 
+                  coop.buyLogs.update(this,
+                    coop.buyLogs(this) ++ Map(com -> (coop.buyLogs(this).getOrElse(com, 0) + math.max(0, unit - available(com)))))
+                )
+              }
+            }
           }
         }
-      }
-    }
 
     def sellFromCoop(toSell: List[(Commodity, Int)]): Unit = {
       cooperative match {
@@ -232,7 +232,8 @@ package farmpackage {
       //For the moment, as coop sells in gross, price are a bit lower than the ones on the market.
       //Worthness of selling to coop is getting money instantly + sure to sell all at an okay price
       def getCoopPrice: Double = {
-        0.98*s.prices.getPriceOf(com)
+        //0.98*s.prices.getPriceOf(com)
+        2*s.prices.getPriceOf(com)
       }
 
       /** 1st Milestone: estimate profits/loss randomly (between 90 and 110 %)
@@ -270,11 +271,9 @@ package farmpackage {
                       toSell = holdedCommodity(com)
                     }
                     val quantityToSell = Math.min(holdedCommodity(com), toSell)
+                    releaseToMarket(commodity, quantityToSell)
                     if(sellToCoopWorth(commodity)){
                       sellFromCoop(List((commodity, quantityToSell)))
-                    }
-                    else{
-                      releaseToMarket(commodity, quantityToSell)
                     }
                   }
                 }
@@ -339,7 +338,8 @@ package cooperative {
     
     //Used as a buffer, to buy/sell all stuff together, and redestribute goods/money 
     /** For each member, the commodities and their quantity that coop needs to buy to them */
-    var buyLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
+    //var buyLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
+    var buyLogs = scala.collection.mutable.Map[Farm, Map[Commodity, Int]]()
     /** For each member, the commodities and their quantity that are sold by coop
      * Usefull only if we do not pay immediately farmers when they give commodities to coop (not the case atm)*/ 
     var sellLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]() 
@@ -359,7 +359,7 @@ package cooperative {
     def addMember(member: Farm): Unit = {
       member.cooperative = Some(this)
       sellLogs.put(member, List[(Commodity, Int)]())
-      buyLogs.put(member, List[(Commodity, Int)]())
+      buyLogs.put(member, Map[Commodity, Int]())
     }
 
     def removeMember(member:Farm): Unit = {
@@ -382,7 +382,6 @@ package cooperative {
     //TODO atm I assume that everything was bought succesfully, so we can just sell back the ask quantity to each 
     //member of buyLog. After include memory so if buy wasn't possible, sell it after and not now (else operation on empty inventory)
     def sellBackToFarm: Unit = {
-      println("The buy Logs is: " + buyLogs)
       buyLogs.foreach(
         elem => elem._2.foreach{
           //TODO the price should be the one they paid for (almost no benefits, should be fair)
@@ -393,7 +392,7 @@ package cooperative {
           }
         }
       )
-      buyLogs.keys.foreach(farm => buyLogs.put(farm, List[(Commodity, Int)]()))
+      buyLogs.keys.foreach(farm => buyLogs.put(farm, Map[Commodity, Int]()))
       commoditiesToBuy.keys.foreach(com => commoditiesToBuy.update(com, 0))
     }
 
@@ -437,6 +436,7 @@ package cooperative {
         sellBackToFarm
       },
       __wait(1),
+      __do{println(members + "   Contacts = " + contactNetwork.contacts)}
     )
   }
 }

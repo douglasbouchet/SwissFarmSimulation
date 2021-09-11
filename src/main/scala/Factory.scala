@@ -245,9 +245,9 @@ class CropProductionLine(
           }
           
 
-          if(o.sellToCoopWorth(pls.produced._1)){
-            o.sellFromCoop(List((pls.produced._1, units_produced - keepForFarmUse(pls.produced._1, units_produced))))
-          }
+          //if(o.sellToCoopWorth(pls.produced._1)){
+          //  o.sellFromCoop(List((pls.produced._1, units_produced - keepForFarmUse(pls.produced._1, units_produced))))
+          //}
           
           //else nothing to do, the farm will sellby itself
           
