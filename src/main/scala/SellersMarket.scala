@@ -180,10 +180,11 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
 
   val timeStep: Double = 2*Math.PI / (12 * 2 * CONSTANTS.TICKS_TIMER_PER_MONTH) // For a period of 2 years, if each timestep is 1 month
   var counter: Int = 0
+  val rnd = scala.util.Random
 
-  //Change it with a sinus of amplitude 20% of base price
+  //Change it with a sinus of amplitude 20% of base price, + small jumps of [-3;3]
   def updatePrice(com: Commodity): Unit = {
-    comPrices.update(com, (baseComPrices(com)*(1 + 0.2*Math.sin(timeStep * counter))).toInt)
+    comPrices.update(com, (baseComPrices(com)*(1 + 0.2*Math.sin(timeStep * counter)) + (-3 + rnd.nextInt(6))).toInt)
   }
 
   def updateAllPrices: Unit = {

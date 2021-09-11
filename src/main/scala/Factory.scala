@@ -6,11 +6,15 @@ import Securities.Commodities._
 import landAdministrator.LandOverlay
 import farmpackage.Farm
 
+/**
+ * The booster is optionnal, and increase the productivity. Of the form (commodity, how many, inc of production)
+ */
 case class ProductionLineSpec(employees_needed: Int,
                               required: List[(Commodity, Int)],
                               consumed: List[(Commodity, Int)],
                               produced: (Commodity, Int),
-                              time_to_complete: Int) {
+                              time_to_complete: Int, 
+                              boosters: Option[List[(Commodity, Int, Double)]]= None) {
 
   def theoretical_max_productivity(): Double =
     produced._2.toDouble / time_to_complete
@@ -125,6 +129,9 @@ class CropProductionLine(
     var unitPrice: Double = 0
     var quantity: Int = 0
 
+    //Used to quantify efficiency of boosters use
+    private var boosterFrac: Double = 1.0
+
     /** Compute the performance of the production line. Influenced by product used, ground quality
       * 1.0 means normal productivity. 
       * @return the performance of the production Line
@@ -145,8 +152,8 @@ class CropProductionLine(
       __do { // start of production run
         costs_consumables = 0;
         //print("buying consumables: " + o + " " + this + ". ");
-        frac = 1.0;
-        //
+        frac = 1.0
+        boosterFrac = 1.0
         
         //wait until there are wheet seeds to start production
         //__dowhile(
@@ -166,6 +173,20 @@ class CropProductionLine(
           costs_consumables += o.destroy(x._1, n);
           frac = math.min(frac, n.toDouble / x._2);
         }
+
+        //using the boosters
+        pls.boosters match {
+          case Some(list) => {
+            for(booster <- list) {
+              println("Quantity of boosters = " + o.available(booster._1))
+              val n = math.min(o.available(booster._1), booster._2); // requested and available
+              costs_consumables += o.destroy(booster._1, n);
+              // min ratio over all boosters. Improve by separating different ratios of available vs needed of each booster
+              boosterFrac = math.min(boosterFrac, n.toDouble / booster._2)
+            }
+          }
+          case None => {} //nothing more to do 
+        }
           
         goodwill = costs_consumables;
         if((frac < 1.0) && (! GLOBAL.silent))
@@ -184,7 +205,15 @@ class CropProductionLine(
       )({ rpt < pls.time_to_complete }),
       __do{
         //print("production complete! ");
-        val units_produced = (pls.produced._2  * efficiencyFunc).toInt; // here to influence quantity produced 
+
+        //Multiply between them the increase of productivity of all boosters,
+        val boosterRatio = pls.boosters match {
+          case Some(list) => {
+            list.foldLeft(1.0){(acc, booster) => acc * booster._3} * boosterFrac
+          }
+          case None => 1.0
+        }
+        val units_produced = (pls.produced._2  * efficiencyFunc * Math.max(1,boosterRatio)).toInt; // here to influence quantity produced 
         val personnel_costs = pls.employees_needed * salary *
                               pls.time_to_complete;
         val total_cost : Double = costs_consumables + personnel_costs;

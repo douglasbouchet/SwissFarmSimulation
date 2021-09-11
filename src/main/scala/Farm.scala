@@ -64,11 +64,14 @@ package farmpackage {
         s.observator.Co2 += crops.map(_.Co2Emitted).sum
 
         crops.foreach(crop => {
-
           //if there is a cooperative, buy from it. Else by itself
+          val boostersToBuy = crop.pls.boosters match {
+            case Some(list) => list.map(elem => (elem._1, elem._2))
+            case None => List() 
+          }
           cooperative match {
-            case Some(_) => buyMissingFromCoop(crop.pls.consumed)
-            case None => bulk_buy_missing(crop.pls.consumed, 1)
+            case Some(_) => buyMissingFromCoop(crop.pls.consumed ++ boostersToBuy)
+            case None => bulk_buy_missing(crop.pls.consumed ++ boostersToBuy, 1)
           }
           //buyMissingFromCoop(crop.pls.consumed)
           crop.Co2Emitted = 0.0
@@ -109,7 +112,8 @@ package farmpackage {
     def init(): Unit = {
       //give some capital to start
       capital += 20000000
-      make(WheatSeeds, 3000, 10) //free wheat seeds to start
+      make(WheatSeeds, 3000, 10)
+      make(Fertilizer, 15, 2) //free wheat seeds to start
       landOverlays.foreach(lOver => {
         if (lOver.purpose == wheatField) {
           //afterwards we could add more complex attributes for productivity
@@ -117,7 +121,7 @@ package farmpackage {
           val nWorker = math.round((area / CONSTANTS.HA_PER_WORKER).toFloat)
           val worker = if (nWorker > 0) nWorker else 1
           CONSTANTS.workercounter += worker
-          val prodSpec = ProductionLineSpec(
+          val prodSpec: ProductionLineSpec = ProductionLineSpec(
             worker,
             List(/** (
                 WheatSeeds,
@@ -130,7 +134,8 @@ package farmpackage {
               Wheat,
               (area * CONSTANTS.WHEAT_PRODUCED_PER_HA).toInt
             ),
-            CONSTANTS.WHEAT_PROD_DURATION
+            CONSTANTS.WHEAT_PROD_DURATION,
+            Some(List((Fertilizer, 10, 1.20)))
           )
           hr.hire(worker)
           val prodL = new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
@@ -181,10 +186,13 @@ package farmpackage {
       // happens before consumption.
       val nxt1 = super.run_until(until).get
       if (crops.isEmpty){
-        println("FInd an empty crop")
+        Some(nxt1)
       }
-      val nxt2 = crops.map(_.run_until(until).get).min
-      Some(math.min(nxt1, nxt2)) // compute a meaningful next time
+      else {
+        val nxt2 = crops.map(_.run_until(until).get).min
+        Some(math.min(nxt1, nxt2)) // compute a meaningful next time
+      }
+      
     }
 
     /** The commodities asks may not be available immediatly

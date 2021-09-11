@@ -11,6 +11,7 @@ object MainExample {
   val seedsSeller = new Source(WheatSeeds, 100000,300, s);
   val seedsSeller1 = new Source(WheatSeeds, 100000,340, s);
   val feedStuffSeller = new Source(FeedStuff, 100000,100, s);
+  val fertilizerSeller = new Source(Fertilizer, 100000,100, s);
   //val fertilizeSeller = new Source(Fertilizer, 1000, 200, s)
   // val m   = new Mill(s);
   //val c   = new Cinema(s);
@@ -43,8 +44,8 @@ object MainExample {
   //    s.run(argv(0).toInt);
   //}
   def main(argv: Array[String]) {
-    //s.run(25);
-    s.run(430);
+    s.run(800);
+    //s.run(430);
   }
 }
 
