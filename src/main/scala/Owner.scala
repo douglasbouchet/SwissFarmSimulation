@@ -9,6 +9,7 @@ type ITEM_T = Security
 package Owner {
 
 import contact.{ContactNetwork, LocalMarket}
+import Securities.Commodities.Commodity
 
 
 case class BalanceSheet(
@@ -199,7 +200,7 @@ class Owner {
 
     /** add buyer to seller contactNetwork */
     //this.contactNetwork.increaseScore(buyer.asInstanceOf[Seller])
-    buyer.contactNetwork.increaseScore(this.asInstanceOf[Seller])
+    buyer.contactNetwork.increaseScore(this.asInstanceOf[Seller], item.asInstanceOf[Commodity])
 
     // println("Now buyer = " + buyer + " and seller = " + this);
   }

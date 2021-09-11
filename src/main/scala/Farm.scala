@@ -111,8 +111,8 @@ package farmpackage {
     def init(): Unit = {
       //give some capital to start
       capital += 20000000
-      make(WheatSeeds, 3000, 10)
-      make(Fertilizer, 15, 2) //free wheat seeds to start
+      make(WheatSeeds, 1300, 10)
+      make(Fertilizer, 7, 2) //free wheat seeds to start
       landOverlays.foreach(lOver => {
         if (lOver.purpose == wheatField) {
           //afterwards we could add more complex attributes for productivity
@@ -173,7 +173,8 @@ package farmpackage {
 
       def successfully_bought(line: (Commodity, Int)) = {
         
-        val alreadyBuyFrom = contactNetwork.contacts.map(_._1).toList
+        val alreadyBuyFrom = contactNetwork.contactsSellingCom(line._1)
+        //val alreadyBuyFrom = contactNetwork.contacts.map(_._1).toList
         //println("Already buy to")
         s.market(line._1).market_buy_order_now(s.timer, this, line._2,alreadyBuyFrom) == 0
       }
@@ -419,7 +420,8 @@ package cooperative {
 
       def successfullyBought(line: (Commodity, Int)) = {
         
-        val alreadyBuyFrom = contactNetwork.contacts.map(_._1).toList
+        val alreadyBuyFrom = contactNetwork.contactsSellingCom(line._1)
+        //val alreadyBuyFrom = contactNetwork.contacts.map(_._1).toList
         //println("Already buy to")
         s.market(line._1).market_buy_order_now(s.timer, this, line._2, alreadyBuyFrom) == 0
       }
@@ -436,7 +438,6 @@ package cooperative {
         sellBackToFarm
       },
       __wait(1),
-      __do{println(members + "   Contacts = " + contactNetwork.contacts)}
     )
   }
 }

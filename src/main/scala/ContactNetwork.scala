@@ -4,6 +4,7 @@ import Markets.MarketMatchingUtilities
 import Owner.{Owner, SalesRecord, Seller}
 import Securities.Commodities.Commodity
 import Timeseries.LogList
+import Securities._
 
 /**
  * The Goal of this class is to reflect the fact that people have usual suppliers in real life.
@@ -18,6 +19,7 @@ class ContactNetwork {
 
   /** Just store a list of Seller, together with their clientScore */
   var contacts = scala.collection.mutable.Set[(Seller, Int)]()
+  var comToContacts = scala.collection.mutable.Map[Commodity, scala.collection.mutable.Set[Seller]]()
 
   def addContact(contact: Seller): Unit = {contacts += ((contact,1))}
 
@@ -33,10 +35,11 @@ class ContactNetwork {
   }
 
   /** automatically add the contact if does not exists yet */
-  def increaseScore(contact: Seller): Unit = {
+  def increaseScore(contact: Seller, item: Commodity): Unit = {
     val oldScore = getContactScore(contact)
     contacts -= ((contact,oldScore))
     contacts += ((contact, Math.min(oldScore + 1,10)))
+    comToContacts.update(item, comToContacts.getOrElse(item, scala.collection.mutable.Set[Seller]()) + contact)
   }
 
   /** remove the contact if its score reach -1 */
@@ -46,6 +49,11 @@ class ContactNetwork {
     if(oldScore  > 0) {
       contacts += ((contact, oldScore - 1))
     }
+  }
+
+  //Return the seller from whom the owner has already buy a type of commodity from
+  def contactsSellingCom(com: Commodity): List[Seller] = {
+    comToContacts.getOrElse(com, Set[Seller]()).toList
   }
 
   def stats: Unit = {
