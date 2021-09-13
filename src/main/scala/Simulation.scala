@@ -7,7 +7,7 @@ import Simulation.Factory.{Factory, ProductionLineSpec}
 import generator.Generator
 import landAdministrator.LandAdministrator
 import landAdministrator.CadastralParcel
-import cooperative.AgriculturalCooperative
+import farmrelated.cooperative.AgriculturalCooperative
 import Securities.Commodities._
 
 class Simulation {
