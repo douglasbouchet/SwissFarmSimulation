@@ -255,45 +255,68 @@ package farmpackage {
       */
     def sellingStrategy: Unit = {
       holdedCommodities.foreach{
-              case (com: Security, (units:Int, expireTimer:Int)) => {
+              case (com: Security, (units:Int, endTimer:Option[Int])) => {
                 val commodity = com.asInstanceOf[Commodity]
-                if(s.timer < expireTimer - 1){
-                  //Check if price has fallen
-                  if(s.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
-                    var toSell: Int = toSellEachTurn.getOrElse(commodity,0)/10
-                    //avoid selling less than 10% of the stock each turn
-                    if(holdedCommodity(com) - toSell < toSell){
-                      //Sell all remaining stock
-                      toSell = holdedCommodity(com)
+                endTimer match {
+                  case Some(expireTimer) => {
+                    if(s.timer < expireTimer - 1){
+                        //Check if price has fallen
+                        if(s.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
+                          var toSell: Int = toSellEachTurn.getOrElse(commodity,0)/10
+                          //avoid selling less than 10% of the stock each turn
+                          if(holdedCommodity(com) - toSell < toSell){
+                            //Sell all remaining stock
+                            toSell = holdedCommodity(com)
+                          }
+                          val quantityToSell = Math.min(holdedCommodity(com), toSell)
+                          releaseToMarket(commodity, quantityToSell)
+                          if(sellToCoopWorth(commodity)){
+                            sellFromCoop(List((commodity, quantityToSell)))
+                          }
+                        }
+                      }
+                    //One turn remains before being expired, sell all of this commodity
+                    else if (s.timer == expireTimer - 1){
+                      //Clear the hold inventory
+                      //heldCommodities.put(com,
+                      //TODO PUT THIS INSIDE A METHOD ??
+                      if(sellToCoopWorth(commodity)){
+                        sellFromCoop(List((commodity, units)))
+                      }
+                      else{
+                        releaseToMarket(commodity, units)
+                      }
+                      //END TODO
+                      //Otherwise, as removed from held, could now be buy by everyone
+                      toSellEachTurn.put(commodity, 0)
                     }
-                    val quantityToSell = Math.min(holdedCommodity(com), toSell)
-                    releaseToMarket(commodity, quantityToSell)
-                    if(sellToCoopWorth(commodity)){
-                      sellFromCoop(List((commodity, quantityToSell)))
+                  }
+                  case None => {
+                    //TODO duplicated code with just above, create methode
+                    if(s.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
+                        var toSell: Int = toSellEachTurn.getOrElse(commodity,0)/10
+                        //avoid selling less than 10% of the stock each turn
+                        if(holdedCommodity(com) - toSell < toSell){
+                          //Sell all remaining stock
+                          toSell = holdedCommodity(com)
+                        }
+                        val quantityToSell = Math.min(holdedCommodity(com), toSell)
+                        releaseToMarket(commodity, quantityToSell)
+                        if(sellToCoopWorth(commodity)){
+                          sellFromCoop(List((commodity, quantityToSell)))
+                        }
                     }
                   }
                 }
-                //One turn remains before being expired, sell all of this commodity
-                else if (s.timer == expireTimer - 1){
-                  //Clear the hold inventory
-                  //heldCommodities.put(com, (0,0))
-
-                  //TODO PUT THIS INSIDE A METHOD ??
-                  if(sellToCoopWorth(commodity)){
-                    sellFromCoop(List((commodity, units)))
-                  }
-                  else{
-                    releaseToMarket(commodity, units)
-                  }
-                  //END TODO
-                  //Otherwise, as removed from held, could now be buy by everyone
-                  toSellEachTurn.put(commodity, 0)
-                }
+                
                 //update prevPrice of commodity
                 prevPrices.put(commodity, s.prices.getPriceOf(commodity))
             }
           }
     }
+
+    //Using the coop if part of to chose which will be the next production
+    def choseNextCrops(): Unit = {} //TODO
     
 
     def canEqual(a: Any) = a.isInstanceOf[Farm]
@@ -340,9 +363,12 @@ package cooperative {
     var buyLogs = scala.collection.mutable.Map[Farm, Map[Commodity, Int]]()
     /** For each member, the commodities and their quantity that are sold by coop
      * Useful only if we do not pay immediately farmers when they give commodities to coop (not the case atm)*/
-    var sellLogs: mutable.Map[Farm, List[(Commodity, Int)]] = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
+    val sellLogs: mutable.Map[Farm, List[(Commodity, Int)]] = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
 
     var saleableCommodities: List[Commodity] = _saleableCommodities
+
+    //Used to arrange crop type distribution among members:
+    val membersCropsType: mutable.Map[Farm, mutable.Map[Commodity, Int]] = mutable.Map[Farm, mutable.Map[Commodity, Int]]()
 
     //init
     members.foreach(addMember(_))
@@ -425,6 +451,9 @@ package cooperative {
       // nothing missing
       l.forall(successfullyBought)
     }
+
+    //should be called by the farmer, in order to see what crops are planned by other members 
+    def getNextCrops(): Unit = {} //TODO
 
     //Each turn, check if some commodities need to be purchased
     override def algo: __forever = __forever(

@@ -105,9 +105,7 @@ case class ProductionLine(
   )
 }
 
-/** Add an access to a landOverlay 
- * Used to model the influence of culture on the land 
- */
+/** Add an access to a landOverlay, in order to compute unit produced, and the fact that crops should influence soil (quality, dryness)*/
 class CropProductionLine(
   _lOver: LandOverlay,
   pls: ProductionLineSpec,
@@ -238,12 +236,12 @@ class CropProductionLine(
           //Hold all the wheat, then call selling strategy in farm to decide when to sell it
           pls.produced._1 match {
             case Wheat => {
-              o.holdCommodity(Wheat, units_produced, o.s.timer + CONSTANTS.WHEAT_EXPIRY_TIMER_IN_MONTH)
+              o.holdCommodity(Wheat, units_produced, Some(o.s.timer + CONSTANTS.WHEAT_EXPIRY_TIMER_IN_MONTH))
               o.toSellEachTurn.update(pls.produced._1, o.toSellEachTurn.getOrElse(pls.produced._1,0) + units_produced)
             }
             case Fertilizer => {
               //Put half of fertilizer on the market, remaining is for own use
-              o.holdCommodity(Wheat, units_produced/2, o.s.timer + CONSTANTS.FERTILIZER_EXPIRY_TIMER_IN_MONTH)
+              o.holdCommodity(Wheat, units_produced/2, Some(o.s.timer + CONSTANTS.FERTILIZER_EXPIRY_TIMER_IN_MONTH))
               //o.toSellEachTurn.update(pls.produced._1, o.toSellEachTurn.getOrElse(pls.produced._1,0) + units_produced)
             }
             case _ => println("This type of crop is unknown")
