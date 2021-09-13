@@ -221,8 +221,8 @@ class Generator {
           }
           //else if (n >= 75 && n < 95){
           else{
-            landAdministrator.purposeOfLandOverlay += (overlay -> paddoc)
-            overlay.purpose = paddoc
+            landAdministrator.purposeOfLandOverlay += (overlay -> paddock)
+            overlay.purpose = paddock
           }
           //else{
           //  landAdministrator.purposeOfLandOverlay += (overlay -> meadow)

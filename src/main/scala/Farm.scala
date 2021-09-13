@@ -9,7 +9,6 @@ package farmpackage {
   import Securities.Commodities._
   import scala.collection.mutable
   import cooperative.AgriculturalCooperative
-  import javax.lang.model.`type`.NullType
   import Securities._
 
 
@@ -54,7 +53,7 @@ package farmpackage {
     override def stat: Unit = {
       //println(this + " " + inventory_to_string())
 
-      //Voir combien on pait pour les ressources car 40000 enormes ?
+      //Voir combien on pait pour les resources car 40000 enormes ?
       println(this + " capital = " + capital/100 + "  " + inventory_to_string)
     }
 
@@ -126,7 +125,7 @@ package farmpackage {
                 WheatSeeds,
                 (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt)*/),
             List(
-              (WheatSeeds, (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt),
+              (WheatSeeds, (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt /** * 1000 */),
               //(Fertilizer, 1)
                ),
             (
@@ -141,21 +140,20 @@ package farmpackage {
           crops ::= prodL
           s.market(prodSpec.produced._1).add_seller(this)
         }
-        //if some land overlays have paddoc purpose, add some cows inside
-        //else if (lOver.purpose == paddoc){
-        //  val nCows = 10 + scala.util.Random.nextInt(30)
-        //  val prodSpec = new ProductionLineSpec(
-        //    1, 
-        //    List(),
-        //    List((FeedStuff, nCows)),
-        //    (),
-        //    (Fertilizer, nCows),
-        //    1 //TODO later add "List[(Commodity, Int)] instead of tuple in prod line spec 
-        //  )
-        //  hr.hire(1)
-        //  crops ::= new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
-        //  s.market(prodSpec.produced._1).add_seller(this)
-        //}
+        //if some land overlays have paddock purpose, add some cows inside
+        else if (lOver.purpose == paddock){
+          val nCows = 10 + scala.util.Random.nextInt(30)
+          val prodSpec = new ProductionLineSpec(
+            1, 
+            List(),
+            List((FeedStuff, nCows)),
+            (Fertilizer, nCows),
+            CONSTANTS.FERTILIZER_PROD_DURATION, //TODO later add "List[(Commodity, Int)] instead of tuple in prod line spec 
+          )
+          hr.hire(1)
+          crops ::= new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
+          s.market(prodSpec.produced._1).add_seller(this)
+        }
       })
     }
 
@@ -195,35 +193,32 @@ package farmpackage {
       
     }
 
-    /** The commodities asks may not be available immediatly
+    /** The commodities asks may not be available immediately
      * order is pass to the coop, which sells them back to this when products are buy by coop */ 
     def buyMissingFromCoop(toBuy: List[(Commodity, Int)]): Unit = {
           cooperative match {
             case None => println("Farm: " + this + "should be part of a cooperative to buy from it")
-            case Some(coop) => {
+            case Some(coop) =>
               toBuy.foreach{
                 case(com: Commodity, unit: Int) => (
-                  //Change this line 
+                  //Change this line
                   coop.buyLogs.update(this,
                     coop.buyLogs(this) ++ Map(com -> (coop.buyLogs(this).getOrElse(com, 0) + math.max(0, unit - available(com)))))
                 )
               }
-            }
           }
         }
 
     def sellFromCoop(toSell: List[(Commodity, Int)]): Unit = {
       cooperative match {
         case None => println("Farm: " + this + "should be part of a cooperative to sell from it")
-        case Some(coop) => {
+        case Some(coop) =>
           toSell.foreach{
-            case(com: Commodity, unit: Int) => {
+            case(com: Commodity, unit: Int) =>
               assert(coop.saleableCommodities.contains(com))
               coop.sellLogs.update(this, coop.sellLogs(this) :+ (com, unit))
               sell_to(s.timer, coop, com, unit)
-            }
           }
-        }
       }
     }
 
@@ -234,7 +229,7 @@ package farmpackage {
       //Worthness of selling to coop is getting money instantly + sure to sell all at an okay price
       def getCoopPrice: Double = {
         //0.98*s.prices.getPriceOf(com)
-        2*s.prices.getPriceOf(com)
+        0.98*s.prices.getPriceOf(com)
       }
 
       /** 1st Milestone: estimate profits/loss randomly (between 90 and 110 %)
@@ -248,7 +243,7 @@ package farmpackage {
       
       cooperative match {
         case None => false // Will sell by itself, see if some stocks needs to be hold
-        case Some(value) => getCoopPrice > getSelfPrice
+        case Some(_) => getCoopPrice > getSelfPrice
         
       }
     }
@@ -256,7 +251,7 @@ package farmpackage {
     //TODO maybe should be declared inside seller or owner ? 
     /**
       * Implement a Fo Moo strategy (copy the others). If price is bearing(falling), sell. Else hold
-      * If one turn remains before the holded commodities expires, sell all 
+      * If one turn remains before the held commodities expires, sell all
       */
     def sellingStrategy: Unit = {
       holdedCommodities.foreach{
@@ -278,10 +273,10 @@ package farmpackage {
                     }
                   }
                 }
-                //One turn remains before beeing expired, sell all of this commodity
+                //One turn remains before being expired, sell all of this commodity
                 else if (s.timer == expireTimer - 1){
                   //Clear the hold inventory
-                  //holdedCommodities.put(com, (0,0))
+                  //heldCommodities.put(com, (0,0))
 
                   //TODO PUT THIS INSIDE A METHOD ??
                   if(sellToCoopWorth(commodity)){
@@ -291,7 +286,7 @@ package farmpackage {
                     releaseToMarket(commodity, units)
                   }
                   //END TODO
-                  //Otherwise, as removed from holded, could now be buy by everyone
+                  //Otherwise, as removed from held, could now be buy by everyone
                   toSellEachTurn.put(commodity, 0)
                 }
                 //update prevPrice of commodity
@@ -321,11 +316,13 @@ package cooperative {
   import Simulation._
   import farmpackage.Farm
   import code._
+
+  import scala.collection.mutable
   import scala.collection.mutable.Map
 
   /**
     * Buy production of `members` and sells them to market
-    * Buy product for the community (e.g fertilizer, tractor,...). These products must be selled to members of the community
+    * Buy product for the community (e.g fertilizer, tractor,...). These products must be sold to members of the community
     * (after cause need contract on selling price) Part of benefits should be reverse to members 
     *
     * @param _farms:List[farm] : The initial members of the cooperative
@@ -335,15 +332,15 @@ package cooperative {
     var members: List[Farm] = _farms
 
     // Group all commodities, in order to have better price afterwards
-    private var commoditiesToBuy = scala.collection.mutable.Map[Commodity, Int]()
+    private val commoditiesToBuy = scala.collection.mutable.Map[Commodity, Int]()
     
-    //Used as a buffer, to buy/sell all stuff together, and redestribute goods/money 
+    //Used as a buffer, to buy/sell all stuff together, and redistribute goods/money
     /** For each member, the commodities and their quantity that coop needs to buy to them */
     //var buyLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
     var buyLogs = scala.collection.mutable.Map[Farm, Map[Commodity, Int]]()
     /** For each member, the commodities and their quantity that are sold by coop
-     * Usefull only if we do not pay immediately farmers when they give commodities to coop (not the case atm)*/ 
-    var sellLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]() 
+     * Useful only if we do not pay immediately farmers when they give commodities to coop (not the case atm)*/
+    var sellLogs: mutable.Map[Farm, List[(Commodity, Int)]] = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
 
     var saleableCommodities: List[Commodity] = _saleableCommodities
 
@@ -360,7 +357,7 @@ package cooperative {
     def addMember(member: Farm): Unit = {
       member.cooperative = Some(this)
       sellLogs.put(member, List[(Commodity, Int)]())
-      buyLogs.put(member, Map[Commodity, Int]())
+      buyLogs.put(member, mutable.Map[Commodity, Int]())
     }
 
     def removeMember(member:Farm): Unit = {
@@ -371,7 +368,7 @@ package cooperative {
     }
 
     /** Take the new orders from buyLogs, and put them in commoditiesToBuy. Clear buyLogs*/ 
-    def updateCommoditiesToBuy: Unit = {
+    def updateCommoditiesToBuy(): Unit = {
       buyLogs.foreach(
         elem => elem._2.foreach{
           case(com: Commodity, unit: Int) => commoditiesToBuy.update(com, commoditiesToBuy(com) + unit)
@@ -380,9 +377,9 @@ package cooperative {
     }
 
     /** Sell to farms products they ordered and clear values of buyLogs */
-    //TODO atm I assume that everything was bought succesfully, so we can just sell back the ask quantity to each 
+    //TODO atm I assume that everything was bought successfully, so we can just sell back the ask quantity to each
     //member of buyLog. After include memory so if buy wasn't possible, sell it after and not now (else operation on empty inventory)
-    def sellBackToFarm: Unit = {
+    def sellBackToFarm(): Unit = {
       buyLogs.foreach(
         elem => elem._2.foreach{
           //TODO the price should be the one they paid for (almost no benefits, should be fair)
@@ -393,7 +390,7 @@ package cooperative {
           }
         }
       )
-      buyLogs.keys.foreach(farm => buyLogs.put(farm, Map[Commodity, Int]()))
+      buyLogs.keys.foreach(farm => buyLogs.put(farm, mutable.Map[Commodity, Int]()))
       commoditiesToBuy.keys.foreach(com => commoditiesToBuy.update(com, 0))
     }
 

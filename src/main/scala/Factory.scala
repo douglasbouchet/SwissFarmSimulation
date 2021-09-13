@@ -241,6 +241,11 @@ class CropProductionLine(
               o.holdCommodity(Wheat, units_produced, o.s.timer + CONSTANTS.WHEAT_EXPIRY_TIMER_IN_MONTH)
               o.toSellEachTurn.update(pls.produced._1, o.toSellEachTurn.getOrElse(pls.produced._1,0) + units_produced)
             }
+            case Fertilizer => {
+              //Put half of fertilizer on the market, remaining is for own use
+              o.holdCommodity(Wheat, units_produced/2, o.s.timer + CONSTANTS.FERTILIZER_EXPIRY_TIMER_IN_MONTH)
+              //o.toSellEachTurn.update(pls.produced._1, o.toSellEachTurn.getOrElse(pls.produced._1,0) + units_produced)
+            }
             case _ => println("This type of crop is unknown")
           }
           

@@ -139,7 +139,7 @@ package landAdministrator {
   object LandOverlayPurpose extends Enumeration {
     type LandOverlayPurpose = Value
     val wheatField = Value("Wheat field")
-    val paddoc = Value("Paddoc")
+    val paddock = Value("Paddock")
     val meadow = Value("Meadow")
     val noPurpose = Value("no purpose")
   }

@@ -124,8 +124,7 @@ class Simulation {
       if (!GLOBAL.silent) {
         //for (s <- sims) s.stat;
         //println(); println();
-        print(" " + prices.getPriceOf(Wheat))
-        println()
+        println(" " + prices.getPriceOf(Wheat))
       }
       //update the global Prices
       prices.updateAllPrices
@@ -171,7 +170,7 @@ class Simulation {
     // init the farm (make a factory for each landOverlay)
     farms.foreach(_.init)
 
-    val coop = new AgriculturalCooperative(farms.take(2), List(Wheat, Fertilizer), this)
+    val coop = new AgriculturalCooperative(farms, List(Wheat, Fertilizer), this)
 
     sims ++= List(coop)
     sims ++= farms

@@ -97,7 +97,7 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
    */
   private def best_match(units: Int,
                          exclude: Owner, usualSellers: List[Seller] = List[Seller]()) : (Int, List[(Int, Seller)]) = {
-    /** lowest price first + in function of the clientScore of the seller (substract clientscore% to price for selecting)
+    /** lowest price first + in function of the clientScore of the seller (subtract clientscore% to price for selecting)
      *for example: selling at 100 unit with client score of 5 yield to selling at 100 - 5%of100 = 95 
      * TODO might need something else afterwards than only - some % */
 
@@ -126,22 +126,22 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
             t._2.price(commodity).getOrElse(1.0/0) * t._1).sum
 
   def ask_price(units: Int) : (Double, Int) = {
-    val (left_over, l) = best_match(units, null);
+    val (left_over, l) = best_match(units, null)
     (compute_price(l), units - left_over)
   }
   def ask_price() : Option[Double] = {
-    val (p, l) = ask_price(1);
+    val (p, l) = ask_price(1)
     if(l == 0) None else Some(p)
   }
 
   /** execute immediately, partial fulfillment possible. */
   def market_buy_order_now(time: Int, buyer: Owner, units: Int, usualSellers: List[Seller] = List()) : Int = {
     //println("SellersMarket.market_buy_order_now " + this);
-    val (left_over, l) = best_match(units, buyer, usualSellers);
+    val (left_over, l) = best_match(units, buyer, usualSellers)
     //println("Buying " + units + " on market: " + l + " " + left_over);
-    val p = compute_price(l); // can't reorder this line and the next
-    for((u, s) <- l) { s.sell_to(time, buyer, commodity, u) };
-    val sold = units - left_over;
+    val p = compute_price(l) // can't reorder this line and the next
+    for((u, s) <- l) { s.sell_to(time, buyer, commodity, u) }
+    val sold = units - left_over
 
     order_history.add(time, SalesRecord(buyer, List(), units, sold, p.toInt));
     left_over
@@ -163,19 +163,19 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
   class Prices(markets: scala.collection.mutable.Map[Commodity, SellersMarket]){
 
   //The base price for each commodity. In euros/Tons
-  private var baseComPrices = scala.collection.mutable.Map[Commodity, Int](
-    WheatSeeds -> 100, //No Idea 
-    Wheat -> 240, 
-    Flour -> 280, //No Idea
-    FeedStuff -> 300, //No Idea
-    Fertilizer -> 80//No Idea
+  private val baseComPrices = scala.collection.mutable.Map[Commodity, Double](
+    WheatSeeds -> 100.0, //No Idea 
+    Wheat -> 240.0,
+    Flour -> 280.0, //No Idea
+    FeedStuff -> 300.0, //No Idea
+    Fertilizer -> 80.0 //No Idea
   ) //constant
-  private var comPrices = scala.collection.mutable.Map[Commodity, Int](
-      WheatSeeds -> baseComPrices(WheatSeeds),
-      Wheat -> baseComPrices(Wheat),
-      Flour -> baseComPrices(Flour),
-      FeedStuff -> baseComPrices(FeedStuff),
-      Fertilizer -> baseComPrices(Fertilizer)
+  private val comPrices = scala.collection.mutable.Map[Commodity, Double](
+    WheatSeeds -> baseComPrices(WheatSeeds),
+    Wheat -> baseComPrices(Wheat),
+    Flour -> baseComPrices(Flour),
+    FeedStuff -> baseComPrices(FeedStuff),
+    Fertilizer -> baseComPrices(Fertilizer)
   ) //fluctuate
 
   val timeStep: Double = 2*Math.PI / (12 * 2 * CONSTANTS.TICKS_TIMER_PER_MONTH) // For a period of 2 years, if each timestep is 1 month
@@ -184,11 +184,12 @@ class SellersMarket(commodity: Commodity) extends MarketSelling with MarketMatch
 
   //Change it with a sinus of amplitude 20% of base price, + small jumps of [-3;3]
   def updatePrice(com: Commodity): Unit = {
-    comPrices.update(com, (baseComPrices(com)*(1 + 0.2*Math.sin(timeStep * counter)) + (-3 + rnd.nextInt(6))).toInt)
+    comPrices.update(com, 
+    BigDecimal(baseComPrices(com)*(1 + 0.2*Math.sin(timeStep * counter)) -3 + rnd.nextInt(6)).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble)
   }
 
-  def updateAllPrices: Unit = {
-    comPrices.keySet.foreach(updatePrice(_))
+  def updateAllPrices(): Unit = {
+    comPrices.keySet.foreach(updatePrice)
     counter += 1
   }
 
