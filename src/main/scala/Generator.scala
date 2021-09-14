@@ -261,26 +261,21 @@ private def initLandsAndFarms(canton: String, landAdministrator: LandAdministrat
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init)
 
-
-  //sims ++= List(coop) //TODO a modifier 
-  //sims ++= farms //TODO a modifier 
-
   farms
 }
-
 /** Generate Mills based on production of a canton
  *  The production if mills is a pure guess. Change it afterwards
  * @param canton
  */
-private def initMills(canton: String, s: Simulation): List[Mill] = {
+ private def initMills(canton: String, s: Simulation): List[Mill] = {
   val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
   val tonnesOfWheat: Int = math.round((cropAreas*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)
   /** Assum Mill handle 100T of wheat per turn */
   val nMills = tonnesOfWheat/100000  
   //(for (i <- 1 to nMills) yield Mill(s)).toList
-  (for (i <- 1 to 2) yield Mill(s)).toList
+  //(for (i <- 1 to 2) yield new Mill(s)).toList
+  List[Mill]()
 
-  //sims ++= mills
 }
 
 /** Create some cooperatives, and assign them farms

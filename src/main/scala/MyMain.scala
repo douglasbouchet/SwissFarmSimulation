@@ -36,7 +36,7 @@ object MainSwissFarmSimulation {
   def main(argv: Array[String]) {
     
     //s.run(2);
-    for (i <- 0 to 800){
+    for (i <- 0 to 100){
       s.run_until(i)
       GLOB.prices.updateAllPrices
     }
