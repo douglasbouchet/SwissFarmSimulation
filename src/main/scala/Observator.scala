@@ -4,7 +4,7 @@
   *   Observe the global emission of CO2
   *   Observe the quantity of commodities produced
   */
-package Simulation 
+package glob 
 
 class Observator {
 

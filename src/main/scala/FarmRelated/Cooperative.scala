@@ -2,11 +2,15 @@ package farmrelated.cooperative{
 
   import Securities.Commodities._
   import Simulation._
+  //import economic_simulations._
+  //import economic_simulations.Simulation._
   import farmpackage.Farm
   import code._
 
   import scala.collection.mutable
   import scala.collection.mutable.Map
+
+  //import economicsimulations._
 
   /**
     * Buy production of `members` and sells them to market
@@ -18,6 +22,8 @@ package farmrelated.cooperative{
   class AgriculturalCooperative(_farms: List[Farm], _saleableCommodities: List[Commodity], s: Simulation) extends SimO(s){
 
     var members: List[Farm] = _farms
+
+
 
     // Group all commodities, in order to have better price afterwards
     private val commoditiesToBuy = scala.collection.mutable.Map[Commodity, Int]()
@@ -128,7 +134,7 @@ package farmrelated.cooperative{
         bulkBuyMissing(commoditiesToBuy.toList) //TODO check condition if some buy couldn't be made
         sellBackToFarm
       },
-      __wait(1),
+      __wait(1)
     )
   }
 }

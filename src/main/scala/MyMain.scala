@@ -5,6 +5,8 @@ import farmpackage.Farm
 import Simulation.Factory._
 import generator.Generator
 import landAdministrator.LandAdministrator
+import Markets._
+import glob._
 
 object MainSwissFarmSimulation {
   val s = new Simulation;
@@ -18,11 +20,12 @@ object MainSwissFarmSimulation {
   // val flour_buyer     = new Buyer(Flour, () => 40, s);
 
   val generator = new Generator
-  val landAdministrator = new LandAdministrator(0,0)
+  //val landAdministrator = new LandAdministrator(0,0)
+
 
   val canton = "Glaris"
 
-  s.init(generator.generateAgents(canton, landAdministrator, s))
+  generator.generateAgents(canton, GLOB.landAdministrator, s)
 
   //def main(argv: Array[String]) {
   //  if((argv.length != 1) || (argv(0).toInt < 1))
@@ -31,9 +34,15 @@ object MainSwissFarmSimulation {
   //    s.run(argv(0).toInt);
   //}
   def main(argv: Array[String]) {
+    
     //s.run(2);
-    s.run(800);
+    for (i <- 0 to 800){
+      s.run_until(i)
+      GLOB.prices.updateAllPrices
+    }
+    //s.run(800);
 
+    GLOB.observator.stats
   }
 }
 

@@ -11,6 +11,7 @@ package farmpackage {
   import farmrelated.cooperative.AgriculturalCooperative
   import Securities._
   import farmrelated.crop.CropProductionLine
+  import glob._
 
 
   case class Farm(s: Simulation) extends SimO(s) {
@@ -61,7 +62,7 @@ package farmpackage {
     //TODO add here the fact to change the type of agriculture 
     override def algo: __forever = __forever(
       __do {
-        s.observator.Co2 += crops.map(_.Co2Emitted).sum
+        GLOB.observator.Co2 += crops.map(_.Co2Emitted).sum
         crops.foreach(crop => {
           //if there is a cooperative, buy from it. Else by itself
           val boostersToBuy = crop.pls.boosters match {
@@ -230,7 +231,7 @@ package farmpackage {
       //Worthness of selling to coop is getting money instantly + sure to sell all at an okay price
       def getCoopPrice: Double = {
         //0.98*s.prices.getPriceOf(com)
-        0.98*s.prices.getPriceOf(com)
+        0.98*GLOB.prices.getPriceOf(com)
       }
 
       /** 1st Milestone: estimate profits/loss randomly (between 90 and 110 %)
@@ -239,7 +240,7 @@ package farmpackage {
        * //TODO see if can add some contracts to ensure selling price ? 
        * */
       def getSelfPrice: Double = {
-        (90.0 + scala.util.Random.nextInt(20))/100 * s.prices.getPriceOf(com)
+        (90.0 + scala.util.Random.nextInt(20))/100 * GLOB.prices.getPriceOf(com)
       }
       
       cooperative match {
@@ -262,7 +263,7 @@ package farmpackage {
                   case Some(expireTimer) => {
                     if(s.timer < expireTimer - 1){
                         //Check if price has fallen
-                        if(s.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
+                        if(GLOB.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
                           var toSell: Int = toSellEachTurn.getOrElse(commodity,0)/10
                           //avoid selling less than 10% of the stock each turn
                           if(holdedCommodity(com) - toSell < toSell){
@@ -294,7 +295,7 @@ package farmpackage {
                   }
                   case None => {
                     //TODO duplicated code with just above, create methode
-                    if(s.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
+                    if(GLOB.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
                         var toSell: Int = toSellEachTurn.getOrElse(commodity,0)/10
                         //avoid selling less than 10% of the stock each turn
                         if(holdedCommodity(com) - toSell < toSell){
@@ -311,7 +312,7 @@ package farmpackage {
                 }
                 
                 //update prevPrice of commodity
-                prevPrices.put(commodity, s.prices.getPriceOf(commodity))
+                prevPrices.put(commodity, GLOB.prices.getPriceOf(commodity))
             }
           }
     }

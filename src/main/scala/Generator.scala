@@ -246,7 +246,7 @@ class Generator {
 private def initPerson(canton: String, s: Simulation): List[Person] = {
   val people = (for (i <- 1 to population.filter(_._1 == canton).head._2) yield new Person(s, false)).toList
   println("Generating " + people.length + " people")
-  s.labour_market.pushAll(people)
+  //s.labour_market.pushAll(people)
   people
   //sims ++= people
 }
@@ -299,13 +299,14 @@ private def initCoop(canton: String, farms: List[Farm], s: Simulation): List[Agr
  * @param landAdministrator: this function create its parcels and land overlays
  * @return a list of all agents, that should be put as argument into init function of simulation
  * */
-def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simulation): List[SimO] = {
+def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simulation): Unit = {
   val people: List[Person] = initPerson(canton, s)
+  s.init(people)
   val farms: List[Farm] = initLandsAndFarms(canton, landAdministrator, s)
   val mills: List[Mill] = initMills(canton, s)
   val coop : List[AgriculturalCooperative] = initCoop(canton, farms, s)
 
-  people ::: farms ::: mills ::: coop
+  s.init(farms ::: mills ::: coop)
 }
 
 
