@@ -51,13 +51,6 @@ class Simulation {
     println("INIT Simulation " + this);
     sims = _sims;
 
-    //Create the people inside the canton (call before initFarms cause farm needs worker inside labourMarket)
-    initPerson
-    //Create parcels and farm. Assign parcels to each farm.
-    initLandsAndFarms
-
-    initMills
-
     println("Number of sims = " + sims.length)
 
     if (!GLOBAL.silent) {
@@ -155,38 +148,5 @@ class Simulation {
 
     new_sim.run(it);
     old2new
-  }
-
-  private def initLandsAndFarms {
-
-    //Init generate parcels, and assign them to farms
-    val allParcels = generator.generateParcels(canton)
-    landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
-    //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
-    var farms = generator.assignParcelsToFarms(canton, allParcels._1, this).take(2)
-    println(farms.length + " farms created: ")
-    //assign land overlays to farms
-    generator.createAndAssignLandOverlays(farms, landAdministrator)
-    // init the farm (make a factory for each landOverlay)
-    farms.foreach(_.init)
-
-    val coop = new AgriculturalCooperative(farms, List(Wheat, Fertilizer), this)
-
-    sims ++= List(coop)
-    sims ++= farms
-    println("Number of worker = " + CONSTANTS.workercounter)
-  }
-
-  private def initPerson {
-    val people = generator.generatePeople(canton, this)
-    println("Generating " + people.length + " people")
-    sims ++= people
-    labour_market.pushAll(people)
-  }
-
-  private def initMills {
-    val mills = generator.generateMills(canton, this)
-    println(mills.length + " Mills generated")
-    sims ++= mills
   }
 }

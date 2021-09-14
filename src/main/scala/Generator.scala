@@ -22,6 +22,8 @@ import Owner._
 import farmpackage._
 import Simulation.Person
 import Simulation.Simulation
+import farmrelated.cooperative.AgriculturalCooperative
+import Securities.Commodities._
 
 import Simulation.Factory._
 
@@ -71,7 +73,7 @@ class Generator {
    * @param variance: Double, variance of the gaussian
    * @param until: Double, the total area we want to achieve
   */
-  def generateRdmArea(min: Double, max: Double, mean: Double, variance: Double, until: Double): List[Double] = {
+  private def generateRdmArea(min: Double, max: Double, mean: Double, variance: Double, until: Double): List[Double] = {
     var remainingArea = until
     val gaussianDist  = distributions.Gaussian(mean,variance)
     var sample: Double = 0
@@ -94,7 +96,7 @@ class Generator {
    * other ranges from 0.03 ha to 2 ha, gaussian distrib of mean 0.06, var TBD
    * TODO add some statistics about each commune in switzerland 
    * generate parcels for each of this communes based on these statististics (to give id to parcels) */ 
-  def generateParcels(canton: String): (List[CadastralParcel],List[CadastralParcel]) = {
+  private def generateParcels(canton: String): (List[CadastralParcel],List[CadastralParcel]) = {
     val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
     val totalArea: Double = totalSurface.filter(_._1 == canton).head._2
     var agriculturalParcels, otherParcels: List[CadastralParcel] = List()
@@ -113,7 +115,7 @@ class Generator {
    *    big farm: from 30 to (60?) (Uniform)
    *  Assign parcels until area reach the number of ha
    */ 
-  def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel], s: Simulation): List[Farm] = {
+  private def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel], s: Simulation): List[Farm] = {
     var parcels : List[CadastralParcel] = _parcels
     val nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
     val nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
@@ -186,7 +188,7 @@ class Generator {
     * @param farms: the farms on which we want to assign land overlays
     * @note farm is the only possessor of a land overlay. But this can change by time
     */
-  def createAndAssignLandOverlays(farms: List[Farm], landAdministrator: LandAdministrator) = {
+  private def createAndAssignLandOverlays(farms: List[Farm], landAdministrator: LandAdministrator) = {
     farms.foreach{farm => {
       val nParcels = farm.parcels.length
       var landOverlays: List[LandOverlay] = List()
@@ -237,32 +239,83 @@ class Generator {
 
   /** Next we generate the road network */
 
-  /** generate people for each canton */
-  def generatePeople(canton: String, sim: Simulation): List[Person] = {
-    (for (i <- 1 to population.filter(_._1 == canton).head._2) yield new Person(sim, false)).toList
-  }  
+//This part contains method to generate the farms/mills/people of the simulation
 
-  /** Generate Mills based on production of a canton
-   *  The production if mills is a pure guess. Change it afterwards
-   * @param canton
-   */
-  def generateMills(canton: String, s: Simulation): List[Mill] = {
-    val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
-    val tonnesOfWheat: Int = math.round((cropAreas*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)
-    /** Assum Mill handle 100T of wheat per turn */
-    val nMills = tonnesOfWheat/100000  
-    //(for (i <- 1 to nMills) yield Mill(s)).toList
-    (for (i <- 1 to 2) yield Mill(s)).toList
-  }
 
-  // TODO after
+/**Create people living in a canton, and push them on labour_market (i.e they can be hire) */
+private def initPerson(canton: String, s: Simulation): List[Person] = {
+  val people = (for (i <- 1 to population.filter(_._1 == canton).head._2) yield new Person(s, false)).toList
+  println("Generating " + people.length + " people")
+  s.labour_market.pushAll(people)
+  people
+  //sims ++= people
+}
+
+private def initLandsAndFarms(canton: String, landAdministrator: LandAdministrator, s: Simulation): List[Farm] = {
+  //Init generate parcels, and assign them to farms
+  val allParcels = generateParcels(canton)
+  landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
+  //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
+  var farms = assignParcelsToFarms(canton, allParcels._1, s).take(2)
+  println(farms.length + " farms created ")
+  createAndAssignLandOverlays(farms, landAdministrator)
+  farms.foreach(_.init)
+
+
+  //sims ++= List(coop) //TODO a modifier 
+  //sims ++= farms //TODO a modifier 
+
+  farms
+}
+
+/** Generate Mills based on production of a canton
+ *  The production if mills is a pure guess. Change it afterwards
+ * @param canton
+ */
+private def initMills(canton: String, s: Simulation): List[Mill] = {
+  val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
+  val tonnesOfWheat: Int = math.round((cropAreas*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)
+  /** Assum Mill handle 100T of wheat per turn */
+  val nMills = tonnesOfWheat/100000  
+  //(for (i <- 1 to nMills) yield Mill(s)).toList
+  (for (i <- 1 to 2) yield Mill(s)).toList
+
+  //sims ++= mills
+}
+
+/** Create some cooperatives, and assign them farms
+  * @param canton Useless for the moment, but used to create the cooperative when we get the data
+  * @param farms
+  * @param s
+  * @return a list of AgriculturalCooperative
+  */
+private def initCoop(canton: String, farms: List[Farm], s: Simulation): List[AgriculturalCooperative] = {
+  //for the moment, only create 1 coop
+  List[AgriculturalCooperative](new AgriculturalCooperative(farms, List(Wheat, Fertilizer), s))
+}
+
+
+/** Generate {lands, farms, mills, people, agricultural cooperative} for a given canton
+ * @param landAdministrator: this function create its parcels and land overlays
+ * @return a list of all agents, that should be put as argument into init function of simulation
+ * */
+def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simulation): List[SimO] = {
+  val people: List[Person] = initPerson(canton, s)
+  val farms: List[Farm] = initLandsAndFarms(canton, landAdministrator, s)
+  val mills: List[Mill] = initMills(canton, s)
+  val coop : List[AgriculturalCooperative] = initCoop(canton, farms, s)
+
+  people ::: farms ::: mills ::: coop
+}
+
+
   //def generateSources()
 
   //https://www.atlas.bfs.admin.ch/maps/13/fr/15467_75_3501_70/24217.html
 }
 
 
-class Sauvegarde {
+//class Sauvegarde {
 
   // Should use an SQL database instead of raw json/csv files, in order to target the changes ? 
 
@@ -281,4 +334,4 @@ class Sauvegarde {
 
    // Do we need to have an organization for objects storing ? 
 
-}
+//}

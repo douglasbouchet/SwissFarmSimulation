@@ -3,39 +3,26 @@ import SimLib._
 import Securities.Commodities._
 import farmpackage.Farm
 import Simulation.Factory._
+import generator.Generator
+import landAdministrator.LandAdministrator
 
-
-object MainExample {
+object MainSwissFarmSimulation {
   val s = new Simulation;
 
   val seedsSeller = new Source(WheatSeeds, 10000000,300, s);
   val seedsSeller1 = new Source(WheatSeeds, 100000,340, s);
   val feedStuffSeller = new Source(FeedStuff, 100000,100, s);
-  //val fertilizerSeller = new Source(Fertilizer, 100000,100, s);
-  //val fertilizeSeller = new Source(Fertilizer, 1000, 200, s)
-  // val m   = new Mill(s);
-  //val c   = new Cinema(s);
-  //val rf  = new CattleFarm(s);
-  //val mcd = new McDonalds(s);
-  //val landlord        = new Source(Land,  20, 100000*100, s);
-  //val cattle_farmer = new Source(Beef,   100,  26000*100, s);
-  //val silo          = new Source(Wheat, 1000,   6668*100, s);
+
   //val silo         = new Trader(Wheat, 100, s);
   //val flour_trader  = new Trader(Flour, 50, s);
   // val flour_buyer     = new Buyer(Flour, () => 40, s);
 
-  // val people = for(x <- 1 to 2000) yield new Person(s, false);
+  val generator = new Generator
+  val landAdministrator = new LandAdministrator(0,0)
 
-  s.init(List(
-    //landlord,
-    //temp
-    // silo2,
-    //flour_trader, cattle_farmer,
-    //f.crops(0),
-    //f.crops(1)//, m,
-    // c, rf, mcd,
-    //flour_buyer
-  ) /** ++ people.toList */);
+  val canton = "Glaris"
+
+  s.init(generator.generateAgents(canton, landAdministrator, s))
 
   //def main(argv: Array[String]) {
   //  if((argv.length != 1) || (argv(0).toInt < 1))
