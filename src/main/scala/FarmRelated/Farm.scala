@@ -250,7 +250,6 @@ package farmpackage {
       }
     }
 
-    //TODO maybe should be declared inside seller or owner ? 
     /**
       * Implement a Fo Moo strategy (copy the others). If price is bearing(falling), sell. Else hold
       * If one turn remains before the held commodities expires, sell all
@@ -266,21 +265,22 @@ package farmpackage {
                         if(GLOB.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
                           var toSell: Int = toSellEachTurn.getOrElse(commodity,0)/10
                           //avoid selling less than 10% of the stock each turn
-                          if(holdedCommodity(com) - toSell < toSell){
+                          if(holdedCommodity(com) < 2*toSell){
                             //Sell all remaining stock
                             toSell = holdedCommodity(com)
                           }
-                          val quantityToSell = Math.min(holdedCommodity(com), toSell)
-                          releaseToMarket(commodity, quantityToSell)
+                          toSell = Math.min(holdedCommodity(com), toSell) // new
                           if(sellToCoopWorth(commodity)){
-                            sellFromCoop(List((commodity, quantityToSell)))
+                            sellFromCoop(List((commodity, toSell)))
+                          }
+                          else{
+                            releaseToMarket(commodity, toSell)
                           }
                         }
                       }
                     //One turn remains before being expired, sell all of this commodity
                     else if (s.timer == expireTimer - 1){
                       //Clear the hold inventory
-                      //heldCommodities.put(com,
                       //TODO PUT THIS INSIDE A METHOD ??
                       if(sellToCoopWorth(commodity)){
                         sellFromCoop(List((commodity, units)))
@@ -295,17 +295,20 @@ package farmpackage {
                   }
                   case None => {
                     //TODO duplicated code with just above, create methode
+                    //In that case, the commodity was in the inventory, so just sell as much as we want.
                     if(GLOB.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
-                        var toSell: Int = toSellEachTurn.getOrElse(commodity,0)/10
+                        var toSell: Int = Math.max(saleableUnits(com), 0)
+                        //var toSell: Int = toSellEachTurn.getOrElse(commodity,0)/10
                         //avoid selling less than 10% of the stock each turn
-                        if(holdedCommodity(com) - toSell < toSell){
-                          //Sell all remaining stock
-                          toSell = holdedCommodity(com)
-                        }
-                        val quantityToSell = Math.min(holdedCommodity(com), toSell)
-                        releaseToMarket(commodity, quantityToSell)
+                        //if(holdedCommodity(com) - toSell < toSell){
+                        //  //Sell all remaining stock
+                        //  toSell = holdedCommodity(com)
+                        //}
+                        //val quantityToSell = Math.min(holdedCommodity(com), toSell)
+                        //releaseToMarket(commodity, quantityToSell)
                         if(sellToCoopWorth(commodity)){
-                          sellFromCoop(List((commodity, quantityToSell)))
+                          //sellFromCoop(List((commodity, quantityToSell)))
+                          sellFromCoop(List((commodity, toSell)))
                         }
                     }
                   }

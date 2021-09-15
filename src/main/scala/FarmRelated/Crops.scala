@@ -2,8 +2,6 @@ package farmrelated.crop
 
 import Simulation.Factory._
 import code._
-import Owner._
-import Simulation._
 import Securities.Commodities._
 import landAdministrator.LandOverlay
 import farmpackage.Farm
@@ -51,7 +49,7 @@ class CropProductionLine(
 
     override def algo = __forever(
       __do { // start of production run
-        costs_consumables = 0;
+        costs_consumables = 0
         //print("buying consumables: " + o + " " + this + ". ");
         frac = 1.0
         boosterFrac = 1.0
@@ -145,7 +143,7 @@ class CropProductionLine(
             case Fertilizer => {
               //Put half of fertilizer on the market, remaining is for own use
               o.holdCommodity(Wheat, units_produced/2, Some(o.s.timer + CONSTANTS.FERTILIZER_EXPIRY_TIMER_IN_MONTH))
-              //o.toSellEachTurn.update(pls.produced._1, o.toSellEachTurn.getOrElse(pls.produced._1,0) + units_produced)
+              o.toSellEachTurn.update(pls.produced._1, o.toSellEachTurn.getOrElse(pls.produced._1,0) + units_produced)
             }
             case _ => println("This type of crop is unknown")
           }

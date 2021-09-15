@@ -2,13 +2,10 @@ package farmrelated.cooperative{
 
   import Securities.Commodities._
   import Simulation._
-  //import economic_simulations._
-  //import economic_simulations.Simulation._
   import farmpackage.Farm
   import code._
 
   import scala.collection.mutable
-  import scala.collection.mutable.Map
 
   //import economicsimulations._
 
@@ -23,15 +20,13 @@ package farmrelated.cooperative{
 
     var members: List[Farm] = _farms
 
-
-
     // Group all commodities, in order to have better price afterwards
     private val commoditiesToBuy = scala.collection.mutable.Map[Commodity, Int]()
     
     //Used as a buffer, to buy/sell all stuff together, and redistribute goods/money
     /** For each member, the commodities and their quantity that coop needs to buy to them */
     //var buyLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
-    var buyLogs = scala.collection.mutable.Map[Farm, Map[Commodity, Int]]()
+    var buyLogs: mutable.Map[Farm, mutable.Map[Commodity, Int]] = scala.collection.mutable.Map[Farm, mutable.Map[Commodity, Int]]()
     /** For each member, the commodities and their quantity that are sold by coop
      * Useful only if we do not pay immediately farmers when they give commodities to coop (not the case atm)*/
     val sellLogs: mutable.Map[Farm, List[(Commodity, Int)]] = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
@@ -42,7 +37,7 @@ package farmrelated.cooperative{
     val membersCropsType: mutable.Map[Farm, mutable.Map[Commodity, Int]] = mutable.Map[Farm, mutable.Map[Commodity, Int]]()
 
     //init
-    members.foreach(addMember(_))
+    members.foreach(addMember)
     saleableCommodities.foreach(com => {
       s.market(com).add_seller(this)
     })
@@ -81,10 +76,9 @@ package farmrelated.cooperative{
         elem => elem._2.foreach{
           //TODO the price should be the one they paid for (almost no benefits, should be fair)
           //case(com: Commodity, unit: Int) => sell_to(s.timer, elem._1, com, unit)
-          case(com: Commodity, unit: Int) => {
+          case(com: Commodity, unit: Int) =>
             if(unit > 0) sell_to(s.timer, elem._1, com, unit)
             //else println("The supplies " + com + "in quantity " + unit + " couldn't be bought")
-          }
         }
       )
       buyLogs.keys.foreach(farm => buyLogs.put(farm, mutable.Map[Commodity, Int]()))
@@ -129,15 +123,12 @@ package farmrelated.cooperative{
     //Each turn, check if some commodities need to be purchased
     override def algo: __forever = __forever(
       __do{
-        updateCommoditiesToBuy
+        updateCommoditiesToBuy()
         //Now that things have been bought, we can sell them back to each farm that ask for
         bulkBuyMissing(commoditiesToBuy.toList) //TODO check condition if some buy couldn't be made
-        sellBackToFarm
+        sellBackToFarm()
       },
       __wait(1)
     )
   }
 }
-
-
-//Correct the fact that we are selling 0 units of fertilizer(see terminal)
