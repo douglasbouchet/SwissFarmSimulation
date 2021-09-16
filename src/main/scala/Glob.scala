@@ -23,6 +23,9 @@ package object CONSTANTS {
   val HA_PER_WORKER: Int = 20
   val CONVERSION_WHEAT_FLOUR: Double = 0.8
   val KG_CO2_PER_WHEAT_CROP_HA: Double = 1900
+
+  val KG_OF_BEEF_PER_MEATCOW: Int = 250
+  val KG_OF_GRASS_PER_COW_DAY: Int = 18
   
   var workercounter: Int = 0
   
@@ -31,8 +34,9 @@ package object CONSTANTS {
   val FERTILIZER_EXPIRY_TIMER_IN_MONTH = 3 * TICKS_TIMER_PER_MONTH 
 
 
-  val WHEAT_PROD_DURATION = 12 * TICKS_TIMER_PER_MONTH
-  val FERTILIZER_PROD_DURATION = 1 * TICKS_TIMER_PER_MONTH
+  val WHEAT_PROD_DURATION: Int = 12 * TICKS_TIMER_PER_MONTH
+  val FERTILIZER_PROD_DURATION: Int = 1 * TICKS_TIMER_PER_MONTH
+  val MEATCOW_PROD_DURATION: Int = 36 * TICKS_TIMER_PER_MONTH // assume 3 years before a meat cow can be killed
 }
 
 

@@ -217,12 +217,13 @@ class Generator {
       landOverlays.foreach {overlay => {
           landAdministrator.landOverlays ::= overlay
           val n = scala.util.Random.nextInt(100)
-          if (n < 75) {
+          if (n < 50) {
             landAdministrator.purposeOfLandOverlay += (overlay -> wheatField)
             overlay.purpose = wheatField
           }
           //else if (n >= 75 && n < 95){
           else{
+            println("Generating a paddock")
             landAdministrator.purposeOfLandOverlay += (overlay -> paddock)
             overlay.purpose = paddock
           }

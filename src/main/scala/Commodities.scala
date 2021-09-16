@@ -37,6 +37,7 @@ package object Commodities {
   val Burger      = Commodity("burger")
   val Fertilizer  = Commodity("fertilizer")
   val FeedStuff   = Commodity("feedStuff")
+  val Grass       = Commodity("grass")
 
   val all_commodities = List(WheatSeeds, Wheat, Flour, Land, MovieTicket, Beef, Burger, Fertilizer, FeedStuff);
 }

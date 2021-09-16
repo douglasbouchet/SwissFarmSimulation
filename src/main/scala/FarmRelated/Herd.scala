@@ -1,8 +1,9 @@
-package FarmRelated
+package farmrelated
 
-import Securities.Commodities.Commodity
+import Securities.Commodities.{Beef, Commodity, Grass}
 import Simulation.Factory.{ProductionLine, ProductionLineSpec}
 import Simulation.Simulation
+import code._
 import farmpackage.Farm
 import landAdministrator.LandOverlay
 import landAdministrator.LandOverlayPurpose.paddock
@@ -32,9 +33,10 @@ class Herd(owner: Farm, _landOverlay: LandOverlay, nCows: Int, salary: Int /**An
   def initHerd(): Unit = {
     assert(nCows > 1)
     val required: List[(Commodity, Int)] = List[(Commodity, Int)]() //TODO
-    val consumed: List[(Commodity, Int)] = List[(Commodity, Int)]() //TODO
-    val produced: (Commodity, Int) = ??? //TODO
-    val timeToComplete: Int = ??? //TODO implement from constant
+    //replace feedstuff by Grass
+    val consumed: List[(Commodity, Int)] = List[(Commodity, Int)]((Grass, CONSTANTS.KG_OF_GRASS_PER_COW_DAY))
+    val produced: (Commodity, Int) = (Beef, CONSTANTS.KG_OF_BEEF_PER_MEATCOW)
+    val timeToComplete: Int = CONSTANTS.MEATCOW_PROD_DURATION
     val boosters: Option[List[(Commodity, Int, Double)]] = None //TODO add some afters ?
     var lineSpec: ProductionLineSpec =
       new ProductionLineSpec(1, required, consumed, produced, timeToComplete, boosters)
@@ -55,6 +57,13 @@ class Herd(owner: Farm, _landOverlay: LandOverlay, nCows: Int, salary: Int /**An
   class MeatCow(s: Simulation, pls: ProductionLineSpec, salary: Int) extends ProductionLine(pls, owner, salary, s.timer) {
   //include the fact that can eat the grass contains on the paddock
     //include the fact that methane + ammonia is produced everyturn
+
+    override protected def algo = __forever(
+     __do(
+       println("HMMM CHARALLLL")
+     ),
+      __wait(1)
+    )
   }
 }
 

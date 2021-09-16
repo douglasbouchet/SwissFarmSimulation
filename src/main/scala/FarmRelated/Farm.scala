@@ -1,12 +1,14 @@
 package farmpackage {
 
+  import farmrelated.Herd
   import Simulation._
-  import Simulation.Factory._
+  import _root_.Simulation.Factory._
   import landAdministrator.CadastralParcel
   import landAdministrator.LandOverlay
   import landAdministrator.LandOverlayPurpose._
   import code._
   import Securities.Commodities._
+
   import scala.collection.mutable
   import farmrelated.cooperative.AgriculturalCooperative
   import Securities._
@@ -21,9 +23,8 @@ package farmpackage {
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
     var crops: List[CropProductionLine] = List[CropProductionLine]()
-    //var cattles: List[CropProductionLine] = List[CropProductionLine]() // TODO maybe change name of "Crop" by something
-    //that fits cattles + crops
-    var cooperative: Option[AgriculturalCooperative] = None 
+    var herds: List[Herd] = List[Herd]()
+    var cooperative: Option[AgriculturalCooperative] = None
 
 
     //use afterwards to model other co2 emission
@@ -87,7 +88,8 @@ package farmpackage {
       },
       __wait(1),
       __do {
-        assert(hr.employees.length == crops.map(_.pls.employees_needed).sum)
+        assert(hr.employees.length == crops.map(_.pls.employees_needed).sum +
+          herds.foldLeft(0){(acc, num) => acc + num.cows.map(cow => cow.pls.employees_needed).sum })
         hr.pay_workers()
         removeExpiredItems(s.timer)
         sellingStrategy //manage hold commodities
@@ -144,17 +146,23 @@ package farmpackage {
         }
         //if some land overlays have paddock purpose, add some cows inside
         else if (lOver.purpose == paddock){
-          val nCows = 10 + scala.util.Random.nextInt(30)
-          val prodSpec = new ProductionLineSpec(
-            1, 
-            List(),
-            List((FeedStuff, nCows)),
-            (Fertilizer, nCows),
-            CONSTANTS.FERTILIZER_PROD_DURATION, //TODO later add "List[(Commodity, Int)] instead of tuple in prod line spec 
-          )
+
+          val herd: Herd = new Herd(this, lOver, 2, hr.salary)
+          herd.initHerd()
+          herds ::= herd
+
           hr.hire(1)
-          crops ::= new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
-          s.market(prodSpec.produced._1).add_seller(this)
+          //val nCows = 10 + scala.util.Random.nextInt(30)
+          //val prodSpec = new ProductionLineSpec(
+          //  1,
+          //  List(),
+          //  List((FeedStuff, nCows)),
+          //  (Fertilizer, nCows),
+          //  CONSTANTS.FERTILIZER_PROD_DURATION, //TODO later add "List[(Commodity, Int)] instead of tuple in prod line spec
+          //)
+          //hr.hire(1)
+          //crops ::= new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
+          //s.market(prodSpec.produced._1).add_seller(this)
         }
       })
     }
@@ -172,7 +180,6 @@ package farmpackage {
       })
 
       def successfully_bought(line: (Commodity, Int)) = {
-        
         val alreadyBuyFrom = contactNetwork.contactsSellingCom(line._1)
         //val alreadyBuyFrom = contactNetwork.contacts.map(_._1).toList
         //println("Already buy to")
@@ -185,14 +192,18 @@ package farmpackage {
       // this ordering is important, so that bulk buying
       // happens before consumption.
       val nxt1 = super.run_until(until).get
-      if (crops.isEmpty){
+      if (crops.isEmpty && herds.isEmpty){
         Some(nxt1)
       }
-      else {
-        val nxt2 = crops.map(_.run_until(until).get).min
-        Some(math.min(nxt1, nxt2)) // compute a meaningful next time
+      else if(crops.isEmpty && herds.nonEmpty){
+        Some(math.min(nxt1, herds.map(herd => herd.cows.map(_.run_until(until).get).min).min))
       }
-      
+      else if(crops.nonEmpty && herds.isEmpty){
+        Some(math.min(nxt1, crops.map(_.run_until(until).get).min))
+      }
+      else{
+        Some(math.min(nxt1, math.min(herds.map(herd => herd.cows.map(_.run_until(until).get).min).min, crops.map(_.run_until(until).get).min)))
+      }
     }
 
     /** The commodities asks may not be available immediately
