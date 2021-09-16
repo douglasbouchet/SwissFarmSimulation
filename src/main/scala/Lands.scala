@@ -193,13 +193,15 @@ package landAdministrator {
 
     }
 
-    def addLandOverlay(landsDistrib: List[(CadastralParcel, Double)], purpose: LandOverlayPurpose.Value): Unit = {
-      purpose match {
-        case landAdministrator.LandOverlayPurpose.wheatField => landOverlays ::= new LandOverlay(landsDistrib) //TODO
-        case landAdministrator.LandOverlayPurpose.paddock => landOverlays ::= new Paddock(landsDistrib)
-        case landAdministrator.LandOverlayPurpose.meadow => landOverlays ::= new LandOverlay(landsDistrib) //TODO
-        case landAdministrator.LandOverlayPurpose.noPurpose => landOverlays ::= new LandOverlay(landsDistrib) //TODO
+    def addLandOverlay(landsDistrib: List[(CadastralParcel, Double)], purpose: LandOverlayPurpose.Value): LandOverlay = {
+      val landOverlay: LandOverlay = purpose match {
+        case landAdministrator.LandOverlayPurpose.wheatField => new LandOverlay(landsDistrib) //TODO
+        case landAdministrator.LandOverlayPurpose.paddock =>  new Paddock(landsDistrib)
+        case landAdministrator.LandOverlayPurpose.meadow =>  new LandOverlay(landsDistrib) //TODO
+        case landAdministrator.LandOverlayPurpose.noPurpose => new LandOverlay(landsDistrib) //TODO
       }
+      landOverlays ::= landOverlay
+      landOverlay
     }
 
     /** Split a land overlay in multiple lands overlays of same/different
@@ -277,9 +279,7 @@ package landAdministrator {
     def changePurpose(
         landOverlay: LandOverlay,
         newPurpose: LandOverlayPurpose.Value
-    ) = {
-      purposeOfLandOverlay.get(landOverlay) match {
-        case Some(purpose) => {
+        ): LandOverlay = {
           //remove the landOverlay, but keep its land in memory, as only the purpose changes
           val oldLands: List[(CadastralParcel, Double)] = landOverlay.landsLot
           removeLandOverlay(landOverlay)
@@ -287,9 +287,6 @@ package landAdministrator {
           //purposeOfLandOverlay += (landOverlay -> newPurpose) TODO this object might be remove, useless
 
         }
-        case None => println("Error, this landOverlay does not exist")
-      }
-    }
 
     /** def get_land_overlay_of_purpose(purpose: LandOverlayPurpose, region:
       * Canton or district,...) Could be interesting if want to have some stats

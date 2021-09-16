@@ -3,8 +3,7 @@ package farmpackage {
   import farmrelated.Herd
   import Simulation._
   import _root_.Simulation.Factory._
-  import landAdministrator.CadastralParcel
-  import landAdministrator.LandOverlay
+  import landAdministrator.{CadastralParcel, LandOverlay, Paddock}
   import landAdministrator.LandOverlayPurpose._
   import code._
   import Securities.Commodities._
@@ -155,11 +154,11 @@ package farmpackage {
         //if some land overlays have paddock purpose, add some cows inside
         else if (lOver.purpose == paddock){
 
-          val herd: Herd = new Herd(this, lOver, 2, hr.salary)
-          herd.initHerd()
-          herds ::= herd
-
-          hr.hire(1)
+//          val herd: Herd = new Herd(this, lOver, 2, hr.salary)
+//          herd.initHerd()
+//          herds ::= herd
+//
+//          hr.hire(1)
           //val nCows = 10 + scala.util.Random.nextInt(30)
           //val prodSpec = new ProductionLineSpec(
           //  1,
@@ -173,10 +172,23 @@ package farmpackage {
           //s.market(prodSpec.produced._1).add_seller(this)
         }
       })
+
+      landOverlays.foreach(lOver => {
+        lOver match {
+          case paddock: Paddock => {
+            val herd: Herd = new Herd(this, lOver.asInstanceOf[Paddock], 2, hr.salary) //TODO check ca
+            herd.initHerd()
+            herds ::= herd
+            hr.hire(1)
+          }
+
+          case _ => {}//we already did above, implement with crop when done
+        }
+      })
     }
 
     /** Returns whether everything was successfully bought. */
-    protected def bulk_buy_missing(
+    def bulk_buy_missing(
         _l: List[(Commodity, Int)],
         multiplier: Int
     ): Boolean = {

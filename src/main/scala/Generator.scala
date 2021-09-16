@@ -224,7 +224,7 @@ class Generator {
             println("Generating a paddock")
             landAdministrator.purposeOfLandOverlay += (overlay -> paddock) //TODO This should be destroyed when removing the map
             //remove the landOverlay and create a Paddock instead (inherits from landOverlay so no problem)
-            landAdministrator.changePurpose(overlay, LandOverlayPurpose.paddock)
+            landOverlays ::= landAdministrator.changePurpose(overlay, LandOverlayPurpose.paddock)
 
           }
           //else{

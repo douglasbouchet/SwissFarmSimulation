@@ -5,7 +5,7 @@ import Simulation.Factory.{ProductionLine, ProductionLineSpec}
 import Simulation.Simulation
 import code._
 import farmpackage.Farm
-import landAdministrator.LandOverlay
+import landAdministrator.{LandOverlay, LandOverlayPurpose, Paddock}
 import landAdministrator.LandOverlayPurpose.paddock
 
 /**
@@ -15,11 +15,11 @@ import landAdministrator.LandOverlayPurpose.paddock
  * @param nCows
  * @param salary
  */
-class Herd(owner: Farm, _landOverlay: LandOverlay, nCows: Int, salary: Int /**AnimalType */){
+class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType */){
 
-  assert(_landOverlay.purpose == paddock)
+  assert(_paddock.purpose == LandOverlayPurpose.paddock)
   //This should change if there is no more grass on this paddock
-  var landOverlay: LandOverlay = _landOverlay
+  var paddock: Paddock = _paddock
   var cows: List[MeatCow] = List[MeatCow]()
 
   /**
@@ -40,12 +40,12 @@ class Herd(owner: Farm, _landOverlay: LandOverlay, nCows: Int, salary: Int /**An
     val boosters: Option[List[(Commodity, Int, Double)]] = None //TODO add some afters ?
     var lineSpec: ProductionLineSpec =
       new ProductionLineSpec(1, required, consumed, produced, timeToComplete, boosters)
-    cows ::= new MeatCow(landOverlay, owner.s, lineSpec, salary, owner.s.timer)
+    cows ::= new MeatCow(owner, nCows, paddock, owner.s, lineSpec, salary, owner.s.timer)
     //we already got our employee, next animals does not need anymore employee
     //TODO see if this does not change the first line spec
     lineSpec = new ProductionLineSpec(0, required, consumed, produced, timeToComplete, boosters)
 
-    cows :::= (for (n <- 2 to nCows) yield new MeatCow(landOverlay,owner.s, lineSpec, 0, owner.s.timer)).toList
+    cows :::= (for (n <- 2 to nCows) yield new MeatCow(owner, nCows, paddock,owner.s, lineSpec, 0, owner.s.timer)).toList
   }
 
   //This should be called each time there is no more grass on current landOverlay, and farmer do not want to buy feedstuff
@@ -59,7 +59,9 @@ class Herd(owner: Farm, _landOverlay: LandOverlay, nCows: Int, salary: Int /**An
    * @param pls The productionLineSpec of this productionLine
    * @param salary TODO understamnd
    */
-  class MeatCow(landOverlay: LandOverlay,
+  class MeatCow(owner: Farm,
+                herdSize: Int, //Used to buy for the all herd and not a single cow (avoid multiple buy in a simple way)
+                paddock: Paddock,
                 s: Simulation,
                 pls: ProductionLineSpec,
                 salary: Int,
@@ -71,59 +73,70 @@ class Herd(owner: Farm, _landOverlay: LandOverlay, nCows: Int, salary: Int /**An
   //include the fact that can eat the grass contains on the paddock
     //include the fact that methane + ammonia is produced everyturn
 
-
+    var dailyGrassCons: Int = 0
 
     /** override because more realistic to consume grass each day/month rather than once in all the production process
      * assume that grass consumed is updated everyday (to measure how much remain on the paddock)
      * And if eating grass bought on market, command grass for 2 months (to avoid buying every turn)
      */
-    /*override protected def algo = __forever(
+    override protected def algo = __forever(
       __do { // start of production run
         costs_consumables = 0
         rpt = 0
         frac = 1.0;
+        if (pls.consumed.filter(_._1 == Grass).nonEmpty){
+          dailyGrassCons = (pls.consumed.filter(_._1 == Grass).head._2 / CONSTANTS.TICKS_TIMER_PER_DAY).toInt
+        }
+        else {
+          println("There is a problem: this animal seems carnivore")
+        }
       },
       __dowhile(
-        //Eat grass on landOverlay if it contains some, else eat from owner inventory.
-        //If missing on land, order a change of paddock, and buy some from owner to put in inventory
+        __do{
+          //Eat grass on landOverlay if it contains some, else eat from owner inventory.
+          //If missing on land, order a change of paddock, and buy some from owner to put in inventory
+          if(paddock.grassQuantity > dailyGrassCons){
+            paddock.grassQuantity -= dailyGrassCons
+          }
+          //Not enough grass, check inside inventory
+          else{
+            paddock.grassQuantity = 0.0 //Prendre en compte la nourriture manger ce coup ici
+            val invGrass: Int = owner.available(Grass)
+            //In that case, buy should buy for the all herds for 2 month (atm). + reduce the frac as cow are eating less
+            if(invGrass < dailyGrassCons){
+              owner.cooperative match {
+                case Some(coop) => owner.buyMissingFromCoop(List((Grass, herdSize * dailyGrassCons * 60 )))
+                case None => owner.bulk_buy_missing(List((Grass, dailyGrassCons * 60 )), herdSize)
+              }
+              //avoid quite long call to destroy
+              if(invGrass != 0){
+                costs_consumables += owner.destroy(Grass, invGrass)
+              }
+              //assume that loss 0.1 % of frac each time does not eat (of course could be a function of missing and not always 0.001 but simple atm)
+              frac -= 0.001
+            }
+            else{
+              costs_consumables += owner.destroy(Grass, dailyGrassCons)
+            }
+          }
+          //ammonia & methane emissions DEMAIN MON BG
 
-        //update Frac based on above
+          //pay employee if month (% with rpt)
 
+          rpt += 1
+        },
 
-        //ammonia & methane emissions
+        __wait(1),
 
         //Each month (assume 30 days), pay the salary (check salary != 0 cause only one MeatCow pls has an employee)
 
 
-
-
       )({ rpt < pls.time_to_complete }),
 
-//        for(x <- pls.consumed) {
-//          val n = math.min(o.available(x._1), x._2); // requested and available
-//          costs_consumables += o.destroy(x._1, n);
-//          frac = math.min(frac, n.toDouble / x._2);
-//        }
-//        goodwill = costs_consumables;
-//        if((frac < 1.0) && (! GLOBAL.silent))
-//          println(o + " " + " starts low-efficiency run.");
-
-
-      //},
-      __dowhile(
-        __wait(1),
-        __do{
-          //print("paying salaries. ");
-          // salaries are paid globally (by the factory)
-          goodwill += pls.employees_needed * salary;
-          rpt += 1;
-        }
-      )({ rpt < pls.time_to_complete }),
       __do{
         //print("production complete! ");
         val units_produced = (pls.produced._2  * frac).toInt;
-        val personnel_costs = pls.employees_needed * salary *
-          pls.time_to_complete;
+        val personnel_costs = pls.employees_needed * salary * pls.time_to_complete;
         val total_cost : Double = costs_consumables + personnel_costs;
         val unit_cost = total_cost / units_produced;
 
@@ -143,7 +156,7 @@ class Herd(owner: Farm, _landOverlay: LandOverlay, nCows: Int, salary: Int /**An
         }
         //      log = (get_time, frac) :: log;
       }
-    )*/
+    )
 
   }
 }
