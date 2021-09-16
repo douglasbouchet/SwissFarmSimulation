@@ -60,6 +60,10 @@ package landAdministrator {
     /** (CadastralParcel, Percentage occupied on it (0 to 1)) */
     var landsLot: List[(CadastralParcel, Double)] = aggregation
 
+    landsLot.foreach{
+      case (parcelle: CadastralParcel, proportion: Double) => parcelle.partOf.put(this, proportion)
+    }
+
     /** How much percentage of the aggregated lands each owner has */
     var ownershipDistrib: List[(Owner, Double)] = cmptOwnershipDistrib(landsLot)
 
@@ -96,11 +100,12 @@ package landAdministrator {
       ownershipDistrib = cmptOwnershipDistrib(landsLot)
     }
 
-    def removeCadastralParcel(cadastralParcel: CadastralParcel) = {
+    def removeCadastralParcel(cadastralParcel: CadastralParcel): Unit = {
       cadastralParcel.partOf.get(this) match {
         case Some(percentage) => {
           assert(landsLot.contains((cadastralParcel, percentage)))
-          landsLot.filterNot(_ == (cadastralParcel, percentage))
+          cadastralParcel.partOf.remove(this)
+          landsLot = landsLot.filterNot(_ == (cadastralParcel, percentage))
           ownershipDistrib = cmptOwnershipDistrib(landsLot)
         }
         case None =>
@@ -110,13 +115,14 @@ package landAdministrator {
       }
     }
 
-    def getCadastralParcels(): List[CadastralParcel] = landsLot.map(_._1).toList
+    def getCadastralParcels: List[CadastralParcel] = landsLot.map(_._1).toList
 
     def getSurface: Double = landsLot.foldLeft(0.0) { (acc, tup) =>
       acc + tup._1.area * tup._2
     }
 
 
+    //This ones should extends LandOverlay
     class Crops {
       //val type : CropsType
       //Impact on land and productivity
@@ -124,16 +130,16 @@ package landAdministrator {
       //svar pesticide : List[Pesticide] = List()
     }
 
-    class Paddoc {
-      //var typeAnimals: List[Animal]
-      //var nAnimals: Int
-      //...
-    }
 
     class Meadow {
       //var remainingQuantityOfGrass: Double
       //...
     }
+  }
+
+  class Paddock(aggregation: List[(CadastralParcel, Double)]) extends LandOverlay(aggregation) {
+    var grassQuantity: Double = CONSTANTS.KG_GRASS_PER_PADDOCK_HA * super.getSurface
+    purpose = LandOverlayPurpose.paddock
   }
 
   object LandOverlayPurpose extends Enumeration {
@@ -150,7 +156,7 @@ package landAdministrator {
   class LandAdministrator(parcelsData: Any, landOverlaysData: Any) {
 
     var cadastralParcels: List[CadastralParcel] = List()
-    var landOverlays: List[LandOverlay] = List()
+    var landOverlays: List[LandOverlay] = List[LandOverlay]()
     //var purposeOfLandOverlay: collection.mutable.Map[LandOverlay, LandOverlayPurpose] = collection.mutable.Map[LandOverlay, LandOverlayPurpose]()
     var purposeOfLandOverlay
         : collection.mutable.Map[LandOverlay, LandOverlayPurpose.Value] =
@@ -180,6 +186,22 @@ package landAdministrator {
 
     } // end constructor
 
+
+    def removeLandOverlay(landOverlay: LandOverlay): Unit = {
+        landOverlay.getCadastralParcels.foreach((parcelle: CadastralParcel) => landOverlay.removeCadastralParcel(parcelle))
+        landOverlays = landOverlays.filterNot(_ == landOverlay)
+
+    }
+
+    def addLandOverlay(landsDistrib: List[(CadastralParcel, Double)], purpose: LandOverlayPurpose.Value): Unit = {
+      purpose match {
+        case landAdministrator.LandOverlayPurpose.wheatField => landOverlays ::= new LandOverlay(landsDistrib) //TODO
+        case landAdministrator.LandOverlayPurpose.paddock => landOverlays ::= new Paddock(landsDistrib)
+        case landAdministrator.LandOverlayPurpose.meadow => landOverlays ::= new LandOverlay(landsDistrib) //TODO
+        case landAdministrator.LandOverlayPurpose.noPurpose => landOverlays ::= new LandOverlay(landsDistrib) //TODO
+      }
+    }
+
     /** Split a land overlay in multiple lands overlays of same/different
       * purpose.
       * @param current:
@@ -196,13 +218,13 @@ package landAdministrator {
 
       assert(landOverlays.contains(current))
 
-      into.foreach(tup => assert(tup._1.getCadastralParcels().length > 0))
+      into.foreach(tup => assert(tup._1.getCadastralParcels.length > 0))
       //Check if each cadastral parcels of into is actually in current
       into.foreach(tup =>
         tup._1
-          .getCadastralParcels()
+          .getCadastralParcels
           .foreach(parcel =>
-            assert(current.getCadastralParcels().contains(parcel))
+            assert(current.getCadastralParcels.contains(parcel))
           )
       )
 
@@ -251,16 +273,19 @@ package landAdministrator {
       return true
     }
 
+    /** Remove the land Overlay, and create a new One of different type  */
     def changePurpose(
         landOverlay: LandOverlay,
         newPurpose: LandOverlayPurpose.Value
     ) = {
       purposeOfLandOverlay.get(landOverlay) match {
         case Some(purpose) => {
-          purposeOfLandOverlay += (landOverlay -> newPurpose)
-          println(
-            landOverlay + " changes its purpose from " + purpose + " to " + newPurpose
-          )
+          //remove the landOverlay, but keep its land in memory, as only the purpose changes
+          val oldLands: List[(CadastralParcel, Double)] = landOverlay.landsLot
+          removeLandOverlay(landOverlay)
+          addLandOverlay(oldLands, newPurpose)
+          //purposeOfLandOverlay += (landOverlay -> newPurpose) TODO this object might be remove, useless
+
         }
         case None => println("Error, this landOverlay does not exist")
       }

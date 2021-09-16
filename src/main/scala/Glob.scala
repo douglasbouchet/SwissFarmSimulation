@@ -16,10 +16,11 @@ import prices.Prices
 
 package object CONSTANTS {
 
-  val TICKS_TIMER_PER_MONTH: Int = 30 //Change this to change the timer rate
+  val TICKS_TIMER_PER_DAY: Int = 1 //Change this to change the timer rate
 
   val WHEAT_SEEDS_PER_HA: Double = 150 // in kg per ha
   val WHEAT_PRODUCED_PER_HA: Double = 6000 // in kg per ha
+  val KG_GRASS_PER_PADDOCK_HA: Int = 1300
   val HA_PER_WORKER: Int = 20
   val CONVERSION_WHEAT_FLOUR: Double = 0.8
   val KG_CO2_PER_WHEAT_CROP_HA: Double = 1900
@@ -30,13 +31,13 @@ package object CONSTANTS {
   var workercounter: Int = 0
   
   //If timer tick = 1 per month, last 2 month. If 2x faster TICKS_TIMER_PER_MONTH -> Still last 2 month (but requires 4 ticks)
-  val WHEAT_EXPIRY_TIMER_IN_MONTH = 2 * TICKS_TIMER_PER_MONTH 
-  val FERTILIZER_EXPIRY_TIMER_IN_MONTH = 3 * TICKS_TIMER_PER_MONTH 
+  val WHEAT_EXPIRY_TIMER_IN_MONTH = 2 * 30 * TICKS_TIMER_PER_DAY
+  val FERTILIZER_EXPIRY_TIMER_IN_MONTH = 6 * 30 * TICKS_TIMER_PER_DAY
 
 
-  val WHEAT_PROD_DURATION: Int = 12 * TICKS_TIMER_PER_MONTH
-  val FERTILIZER_PROD_DURATION: Int = 1 * TICKS_TIMER_PER_MONTH
-  val MEATCOW_PROD_DURATION: Int = 36 * TICKS_TIMER_PER_MONTH // assume 3 years before a meat cow can be killed
+  val WHEAT_PROD_DURATION: Int = 365 * TICKS_TIMER_PER_DAY
+  val FERTILIZER_PROD_DURATION: Int = 30 * TICKS_TIMER_PER_DAY
+  val MEATCOW_PROD_DURATION: Int = 365 * 3 * TICKS_TIMER_PER_DAY // assume 3 years before a meat cow can be killed
 }
 
 

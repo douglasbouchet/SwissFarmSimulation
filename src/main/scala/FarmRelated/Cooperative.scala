@@ -41,9 +41,10 @@ package farmrelated.cooperative{
     saleableCommodities.foreach(com => {
       s.market(com).add_seller(this)
     })
-    commoditiesToBuy.put(WheatSeeds, 0)
-    commoditiesToBuy.put(Fertilizer, 0) //TODO faire mieux que hardcoder
-    commoditiesToBuy.put(FeedStuff, 0)
+    all_commodities.foreach(com => commoditiesToBuy.put(com, 0))
+    //commoditiesToBuy.put(WheatSeeds, 0)
+    //commoditiesToBuy.put(Fertilizer, 0) //TODO faire mieux que hardcoder
+    //commoditiesToBuy.put(FeedStuff, 0)
     //end init
 
     def addMember(member: Farm): Unit = {
@@ -114,7 +115,10 @@ package farmrelated.cooperative{
         s.market(line._1).market_buy_order_now(s.timer, this, line._2, alreadyBuyFrom) == 0
       }
       // nothing missing
+      successfullyBought(l(8)) //Need to stay at the moment, cause l dont go to grass, maybe cause clash of diff versions
       l.forall(successfullyBought)
+
+
     }
 
     //should be called by the farmer, in order to see what crops are planned by other members 

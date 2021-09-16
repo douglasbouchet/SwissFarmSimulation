@@ -83,6 +83,14 @@ package farmpackage {
           //if(crop.fertilized) crop.lOver.soilQuality = Math.max(crop.lOver.soilQuality - 0.03, 0.5) 
           //else crop.lOver.soilQuality = Math.min(crop.lOver.soilQuality + 0.02, 1.0)
         })
+
+        //Buy the necessary stuff for herds
+        herds.foreach(_.cows.foreach(cow => {
+          cooperative match {
+            case Some(coop) => buyMissingFromCoop(cow.pls.consumed )
+            case None => bulk_buy_missing(cow.pls.consumed, 1)
+          }
+        }))
         
         //crops.foreach(crop => changeActivity(false, crop))
       },

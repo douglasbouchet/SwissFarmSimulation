@@ -25,7 +25,7 @@ import Markets._
     Fertilizer -> baseComPrices(Fertilizer)
   ) //fluctuate
 
-  val timeStep: Double = 2*Math.PI / (12 * 2 * CONSTANTS.TICKS_TIMER_PER_MONTH) // For a period of 2 years, if each timestep is 1 month
+  val timeStep: Double = 2*Math.PI / (12 * 2 * CONSTANTS.TICKS_TIMER_PER_DAY) // For a period of 2 years, if each timestep is 1 month
   var counter: Int = 0
   val rnd = scala.util.Random
 

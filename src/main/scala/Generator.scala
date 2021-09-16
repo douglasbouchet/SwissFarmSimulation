@@ -17,25 +17,22 @@
 */
 package generator 
 import Simulation._
-import landAdministrator.CadastralParcel
+import landAdministrator.{CadastralParcel, LandAdministrator, LandOverlay, LandOverlayPurpose}
 import Owner._
 import farmpackage._
-import Simulation.Person
-import Simulation.Simulation
+import _root_.Simulation.Person
+import _root_.Simulation.Simulation
 import farmrelated.cooperative.AgriculturalCooperative
 import Securities.Commodities._
-
-import Simulation.Factory._
-
-
+import _root_.Simulation.Factory._
+import _root_.Simulation.MainSwissFarmSimulation.s
 import breeze.stats.distributions
 import org.apache.poi.ss.usermodel.WorkbookFactory
+
 import java.io.File
 import scala.jdk.CollectionConverters._
-import landAdministrator.LandOverlay
-import landAdministrator.LandAdministrator
 import landAdministrator.LandOverlayPurpose._
-import Simulation.SimLib.Mill
+import _root_.Simulation.SimLib.{Mill, Source}
 
 
 class Generator {
@@ -218,14 +215,17 @@ class Generator {
           landAdministrator.landOverlays ::= overlay
           val n = scala.util.Random.nextInt(100)
           if (n < 50) {
+            println("Generating a wheat field")
             landAdministrator.purposeOfLandOverlay += (overlay -> wheatField)
             overlay.purpose = wheatField
           }
           //else if (n >= 75 && n < 95){
           else{
             println("Generating a paddock")
-            landAdministrator.purposeOfLandOverlay += (overlay -> paddock)
-            overlay.purpose = paddock
+            landAdministrator.purposeOfLandOverlay += (overlay -> paddock) //TODO This should be destroyed when removing the map
+            //remove the landOverlay and create a Paddock instead (inherits from landOverlay so no problem)
+            landAdministrator.changePurpose(overlay, LandOverlayPurpose.paddock)
+
           }
           //else{
           //  landAdministrator.purposeOfLandOverlay += (overlay -> meadow)
@@ -234,8 +234,17 @@ class Generator {
         }
       }
       farm.landOverlays :::= landOverlays
+      landAdministrator.landOverlays :::= landOverlays
     }
     }
+  }
+
+  def generateSources(canton: String, s: Simulation): List[Source] = {
+    val seedsSeller = new Source(WheatSeeds, 10000000,300, s);
+    val seedsSeller1 = new Source(WheatSeeds, 100000,340, s);
+    val feedStuffSeller = new Source(FeedStuff, 100000,100, s);
+    val grassSource = new Source(Grass, units = 1000000, 100, s)
+    List(seedsSeller, seedsSeller1, feedStuffSeller, grassSource)
   }
 
   /** Next we generate the road network */
@@ -301,8 +310,9 @@ def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simu
   val farms: List[Farm] = initLandsAndFarms(canton, landAdministrator, s)
   val mills: List[Mill] = initMills(canton, s)
   val coop : List[AgriculturalCooperative] = initCoop(canton, farms, s)
+  val sources: List[Source] = generateSources(canton, s)
 
-  s.init(farms ::: mills ::: coop)
+  s.init(farms ::: mills ::: coop ::: sources)
 }
 
 

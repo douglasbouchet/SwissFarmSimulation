@@ -6,14 +6,11 @@ import Simulation.Factory._
 import generator.Generator
 import landAdministrator.LandAdministrator
 import Markets._
+import Simulation.Simulation
 import glob._
 
 object MainSwissFarmSimulation {
-  val s = new Simulation;
-
-  val seedsSeller = new Source(WheatSeeds, 10000000,300, s);
-  val seedsSeller1 = new Source(WheatSeeds, 100000,340, s);
-  val feedStuffSeller = new Source(FeedStuff, 100000,100, s);
+  val s = new Simulation
 
   //val silo         = new Trader(Wheat, 100, s);
   //val flour_trader  = new Trader(Flour, 50, s);
@@ -36,7 +33,7 @@ object MainSwissFarmSimulation {
   def main(argv: Array[String]) {
     
     //s.run(2);
-    for (i <- 0 to 5){
+    for (i <- 0 to 400){
       s.run_until(i)
       GLOB.prices.updateAllPrices
     }
