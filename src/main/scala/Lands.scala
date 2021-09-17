@@ -121,20 +121,17 @@ package landAdministrator {
       acc + tup._1.area * tup._2
     }
 
-
-    //This ones should extends LandOverlay
-    class Crops {
-      //val type : CropsType
-      //Impact on land and productivity
-      //var fertilizer : List[Fertilizer] = List()
-      //svar pesticide : List[Pesticide] = List()
-    }
-
-
     class Meadow {
       //var remainingQuantityOfGrass: Double
       //...
     }
+  }
+
+  class Crop(aggregation: List[(CadastralParcel, Double)]) extends LandOverlay(aggregation) {
+    // var cropsType = TODO say if it grows wheat, barley, ...
+    purpose = LandOverlayPurpose.wheatField
+    //Impact on land and productivity TODO implement in function of what we want to influence (e.g quantity of nutrients, .... )
+    // var nutrients ???
   }
 
   class Paddock(aggregation: List[(CadastralParcel, Double)]) extends LandOverlay(aggregation) {
@@ -195,7 +192,7 @@ package landAdministrator {
 
     def addLandOverlay(landsDistrib: List[(CadastralParcel, Double)], purpose: LandOverlayPurpose.Value): LandOverlay = {
       val landOverlay: LandOverlay = purpose match {
-        case landAdministrator.LandOverlayPurpose.wheatField => new LandOverlay(landsDistrib) //TODO
+        case landAdministrator.LandOverlayPurpose.wheatField => new Crop(landsDistrib)
         case landAdministrator.LandOverlayPurpose.paddock =>  new Paddock(landsDistrib)
         case landAdministrator.LandOverlayPurpose.meadow =>  new LandOverlay(landsDistrib) //TODO
         case landAdministrator.LandOverlayPurpose.noPurpose => new LandOverlay(landsDistrib) //TODO

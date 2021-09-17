@@ -217,7 +217,7 @@ class Generator {
           if (n < 50) {
             println("Generating a wheat field")
             landAdministrator.purposeOfLandOverlay += (overlay -> wheatField)
-            overlay.purpose = wheatField
+            landOverlays ::= landAdministrator.changePurpose(overlay, LandOverlayPurpose.wheatField)
           }
           //else if (n >= 75 && n < 95){
           else{

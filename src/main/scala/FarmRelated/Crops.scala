@@ -3,12 +3,12 @@ package farmrelated.crop
 import Simulation.Factory._
 import code._
 import Securities.Commodities._
-import landAdministrator.LandOverlay
+import landAdministrator.{Crop, LandOverlay}
 import farmpackage.Farm
 
 /** Add an access to a landOverlay, in order to compute unit produced, and the fact that crops should influence soil (quality, dryness)*/
 class CropProductionLine(
-  _lOver: LandOverlay,
+  _crop: Crop,
   pls: ProductionLineSpec,
   o: Farm,
   salary: Int,
@@ -22,7 +22,7 @@ class CropProductionLine(
     var Co2Emitted: Double = 0.0
     var fertilized: Boolean = false 
     var efficiency: Double = 1.0
-    var lOver: LandOverlay = _lOver
+    var crop: LandOverlay = _crop
 
     //Used to compute average price in Farm
     var unitPrice: Double = 0
@@ -122,7 +122,7 @@ class CropProductionLine(
         quantity = units_produced
 
         //It will be reset by the farm(owner) once taken into account
-        Co2Emitted += lOver.getSurface * CONSTANTS.KG_CO2_PER_WHEAT_CROP_HA
+        Co2Emitted += crop.getSurface * CONSTANTS.KG_CO2_PER_WHEAT_CROP_HA
 
         if(units_produced > 0) {
           o.make(pls.produced._1, units_produced, unit_cost);

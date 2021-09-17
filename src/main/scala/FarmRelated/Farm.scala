@@ -1,23 +1,20 @@
 package farmpackage {
 
-  import farmrelated.Herd
+  import Securities.Commodities._
+  import Securities._
   import Simulation._
   import _root_.Simulation.Factory._
-  import landAdministrator.{CadastralParcel, LandOverlay, Paddock}
-  import landAdministrator.LandOverlayPurpose._
   import code._
-  import Securities.Commodities._
-
-  import scala.collection.mutable
+  import farmrelated.Herd
   import farmrelated.cooperative.AgriculturalCooperative
-  import Securities._
   import farmrelated.crop.CropProductionLine
   import glob._
+  import landAdministrator.{CadastralParcel, Crop, LandOverlay, Paddock}
+
+  import scala.collection.mutable
 
 
   case class Farm(s: Simulation) extends SimO(s) {
-
-    //type ITEM_T = Security
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
@@ -35,7 +32,6 @@ package farmpackage {
     def addParcels(newParcels: List[CadastralParcel]): Unit = {
       parcels :::= newParcels
     }
-
 
     /** For each dummy, make an average over all crops that produces this dummy */
     override def price(dummy: Commodity): Option[Double] = {
@@ -60,8 +56,8 @@ package farmpackage {
     override def algo: __forever = __forever(
       __do {
         //Each turn, get the emissions of each crop/herd
-        getCropsAndHersEmissions()
-        resetCropsAndHerdsEmissions()
+        updateCropsAndHerdsEmissions()
+
 
         crops.foreach(crop => {
           //if there is a cooperative, buy from it. Else by itself
@@ -85,7 +81,7 @@ package farmpackage {
         //Buy the necessary stuff for herds
         herds.foreach(_.cows.foreach(cow => {
           cooperative match {
-            case Some(coop) => buyMissingFromCoop(cow.pls.consumed )
+            case Some(_) => buyMissingFromCoop(cow.pls.consumed )
             case None => bulk_buy_missing(cow.pls.consumed, 1)
           }
         }))
@@ -118,26 +114,34 @@ package farmpackage {
       *   wheatSeeds These numbers should be updated afterwards
       */
     def init(): Unit = {
-      //give some capital to start
+      //give some capital + commodities to start
       capital += 20000000
       make(WheatSeeds, 1300, 10)
-      make(Fertilizer, 7, 2) //free wheat seeds to start
-      landOverlays.foreach(lOver => {
-        if (lOver.purpose == wheatField) {
+      make(Fertilizer, 7, 2)
+
+      landOverlays.foreach {
+        case lOver@(_: Paddock) => {
+          val herd: Herd = new Herd(this, lOver, 2, hr.salary) //TODO check ca
+          herd.initHerd()
+          herds ::= herd
+          hr.hire(1)
+        }
+        case lOver@(crop: Crop) => {
           //afterwards we could add more complex attributes for productivity
-          val area: Double = lOver.getSurface
+          val area: Double = crop.getSurface
           val nWorker = math.round((area / CONSTANTS.HA_PER_WORKER).toFloat)
           val worker = if (nWorker > 0) nWorker else 1
           CONSTANTS.workercounter += worker
           val prodSpec: ProductionLineSpec = ProductionLineSpec(
             worker,
             List(/** (
-                WheatSeeds,
-                (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt)*/),
+             * WheatSeeds,
+             * (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt) */),
             List(
-              (WheatSeeds, (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt /** * 1000 */),
-              //(Fertilizer, 1)
-               ),
+              (WheatSeeds, (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt
+                /** * 1000 */
+              ),
+            ),
             (
               Wheat,
               (area * CONSTANTS.WHEAT_PRODUCED_PER_HA).toInt
@@ -150,40 +154,8 @@ package farmpackage {
           crops ::= prodL
           s.market(prodSpec.produced._1).add_seller(this)
         }
-        //if some land overlays have paddock purpose, add some cows inside
-        else if (lOver.purpose == paddock){
-
-//          val herd: Herd = new Herd(this, lOver, 2, hr.salary)
-//          herd.initHerd()
-//          herds ::= herd
-//
-//          hr.hire(1)
-          //val nCows = 10 + scala.util.Random.nextInt(30)
-          //val prodSpec = new ProductionLineSpec(
-          //  1,
-          //  List(),
-          //  List((FeedStuff, nCows)),
-          //  (Fertilizer, nCows),
-          //  CONSTANTS.FERTILIZER_PROD_DURATION, //TODO later add "List[(Commodity, Int)] instead of tuple in prod line spec
-          //)
-          //hr.hire(1)
-          //crops ::= new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
-          //s.market(prodSpec.produced._1).add_seller(this)
-        }
-      })
-
-      landOverlays.foreach(lOver => {
-        lOver match {
-          case paddock: Paddock => {
-            val herd: Herd = new Herd(this, lOver.asInstanceOf[Paddock], 2, hr.salary) //TODO check ca
-            herd.initHerd()
-            herds ::= herd
-            hr.hire(1)
-          }
-
-          case _ => {}//we already did above, implement with crop when done
-        }
-      })
+        case _ => {} //we already did above, implement with crop when done
+      }
     }
 
     /** Returns whether everything was successfully bought. */
@@ -284,7 +256,7 @@ package farmpackage {
       * Implement a Fo Moo strategy (copy the others). If price is bearing(falling), sell. Else hold
       * If one turn remains before the held commodities expires, sell all
       */
-    def sellingStrategy: Unit = {
+    def sellingStrategy(): Unit = {
       holdedCommodities.foreach{
               case (com: Security, (units:Int, endTimer:Option[Int])) => {
                 val commodity = com.asInstanceOf[Commodity]
@@ -327,7 +299,7 @@ package farmpackage {
                     //TODO duplicated code with just above, create methode
                     //In that case, the commodity was in the inventory, so just sell as much as we want.
                     if(GLOB.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
-                        var toSell: Int = Math.max(saleableUnits(com), 0)
+                      val toSell: Int = Math.max(saleableUnits(com), 0)
                         //var toSell: Int = toSellEachTurn.getOrElse(commodity,0)/10
                         //avoid selling less than 10% of the stock each turn
                         //if(holdedCommodity(com) - toSell < toSell){
@@ -359,9 +331,11 @@ package farmpackage {
       herds.foreach(_.cows.foreach(cow => {cow.methane = 0.0; cow.ammonia = 0.0}))
     }
 
-    def getCropsAndHersEmissions(): Unit = {
+    def updateCropsAndHerdsEmissions(): Unit = {
       GLOB.observator.Co2 += crops.map(_.Co2Emitted).sum
-      herds.foreach(_.cows.foreach(cow => {GLOB.observator.methane += cow.methane;GLOB.observator.ammonia += cow.ammonia}))
+      GLOB.observator.methane += herds.map(_.cows.map(_.methane).sum).sum
+      GLOB.observator.ammonia += herds.map(_.cows.map(_.ammonia).sum).sum
+      resetCropsAndHerdsEmissions()
     }
     
 
