@@ -69,7 +69,7 @@ package farmpackage {
             case Some(_) => buyMissingFromCoop(crop.pls.consumed ++ boostersToBuy)
             case None => bulk_buy_missing(crop.pls.consumed ++ boostersToBuy, 1)
           }
-          //buyMissingFromCoop(crop.pls.consumed)
+
           //if quality of soil is not to low, we can use fertilizer
           //if(crop.lOver.soilQuality > 1.0) fertilize(crop)
           //else fertilize(crop, state = false)
@@ -119,12 +119,19 @@ package farmpackage {
       make(WheatSeeds, 1300, 10)
       make(Fertilizer, 7, 2)
 
+      //We only populate 1 paddock with animals, and keep the others paddock empty, in order to put animals inside them when their current paddock is out of grass
+      var paddockOccupied: Boolean = false
+
       landOverlays.foreach {
         case lOver@(_: Paddock) => {
-          val herd: Herd = new Herd(this, lOver, 2, hr.salary) //TODO check ca
-          herd.initHerd()
-          herds ::= herd
-          hr.hire(1)
+          if(!paddockOccupied){
+            val herd: Herd = new Herd(this, lOver, 2, hr.salary) //TODO check ca
+            herd.initHerd()
+            herds ::= herd
+            hr.hire(1)
+            paddockOccupied = true
+          }
+
         }
         case lOver@(crop: Crop) => {
           //afterwards we could add more complex attributes for productivity

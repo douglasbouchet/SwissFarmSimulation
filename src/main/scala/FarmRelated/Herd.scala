@@ -40,16 +40,27 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
     val boosters: Option[List[(Commodity, Int, Double)]] = None //TODO add some afters ?
     var lineSpec: ProductionLineSpec =
       new ProductionLineSpec(1, required, consumed, produced, timeToComplete, boosters)
-    cows ::= new MeatCow(owner, nCows, paddock, owner.s, lineSpec, salary, owner.s.timer)
+    cows ::= new MeatCow(owner, this, paddock, owner.s, lineSpec, salary, owner.s.timer)
     //we already got our employee, next animals does not need anymore employee
     //TODO see if this does not change the first line spec
     lineSpec = new ProductionLineSpec(0, required, consumed, produced, timeToComplete, boosters)
 
-    cows :::= (for (n <- 2 to nCows) yield new MeatCow(owner, nCows, paddock,owner.s, lineSpec, 0, owner.s.timer)).toList
+    cows :::= (for (n <- 2 to nCows) yield new MeatCow(owner, this, paddock,owner.s, lineSpec, 0, owner.s.timer)).toList
   }
 
-  //This should be called each time there is no more grass on current landOverlay, and farmer do not want to buy feedstuff
-  def changeOfPaddock(): Unit = {}
+  /** This should be called each time there is no more grass on current landOverlay
+   * Move the herd to the paddock with the most grass quantity. If no other paddock is available, stay on this one.
+   */
+  def changeOfPaddock(): Unit = {
+    val candidates: List[Paddock] = owner.landOverlays.filter(landOverlay => landOverlay.isInstanceOf[Paddock] && landOverlay != cows.head.paddock)
+      .map(elem => elem.asInstanceOf[Paddock])
+    println(s"The candidates for migrating the cows are : $candidates")
+    val nextPaddockCandidates = candidates.sortWith(_.grassQuantity > _.grassQuantity)
+    nextPaddockCandidates.headOption match {
+      case Some(paddock) => cows.foreach(_.paddock = paddock)
+      case None => println("No paddock is available for changing, staying on the same paddock")
+    }
+  }
 
 
   /** Nothing to add for the moment
@@ -60,8 +71,8 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
    * @param salary TODO understamnd
    */
   class MeatCow(owner: Farm,
-                herdSize: Int, //Used to buy for the all herd and not a single cow (avoid multiple buy in a simple way)
-                paddock: Paddock,
+                herd: Herd, //Used to buy for the all herd and not a single cow (avoid multiple buy in a simple way)
+                _paddock: Paddock,
                 s: Simulation,
                 pls: ProductionLineSpec,
                 salary: Int,
@@ -76,6 +87,8 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
     var dailyGrassCons: Int = 0
     var methane: Double = 0.0
     var ammonia: Double = 0.0
+    var paddock: Paddock = _paddock
+    // var paddock: Paddock = paddock TODO see if we need a new attribut
 
     /** override because more realistic to consume grass each day/month rather than once in all the production process
      * assume that grass consumed is updated everyday (to measure how much remain on the paddock)
@@ -107,8 +120,8 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
             //In that case, buy should buy for the all herds for 2 month (atm). + reduce the frac as cow are eating less
             if(invGrass < dailyGrassCons){
               owner.cooperative match {
-                case Some(coop) => owner.buyMissingFromCoop(List((Grass, herdSize * dailyGrassCons * 60 )))
-                case None => owner.bulk_buy_missing(List((Grass, dailyGrassCons * 60 )), herdSize)
+                case Some(coop) => owner.buyMissingFromCoop(List((Grass, herd.cows.length * dailyGrassCons * 60 )))
+                case None => owner.bulk_buy_missing(List((Grass, dailyGrassCons * 60 )), herd.cows.length)
               }
               //avoid quite long call to destroy
               if(invGrass != 0){
@@ -120,6 +133,9 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
             else{
               costs_consumables += owner.destroy(Grass, dailyGrassCons)
             }
+
+            //Now that this paddock does not contains anymore grass, herd should move to another paddock
+            herd.changeOfPaddock()
           }
           //ammonia & methane emissions. In the future, compute them as a function depending on diet, temperature,...
           methane += CONSTANTS.KG_METHANE_COW_DAY
