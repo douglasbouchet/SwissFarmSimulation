@@ -8,10 +8,13 @@ package glob
 
 class Observator {
 
-  var Co2: Double = 0.0 //in Kg 
+  //All in Kg
+  var Co2: Double = 0.0
+  var methane: Double = 0.0
+  var ammonia: Double = 0.0
 
   def stats {
-    println("The final CO2 emission was: " + Co2)
+    println(s"Co2 emitted: $Co2 kg \nMethane emitted: $methane kg \nAmmonia emitted: $ammonia kg")
   }
 
 }

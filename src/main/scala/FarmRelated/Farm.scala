@@ -26,9 +26,6 @@ package farmpackage {
     var cooperative: Option[AgriculturalCooperative] = None
 
 
-    //use afterwards to model other co2 emission
-    var Co2: Double = 0
-
     protected var hr: HR = HR(s, this)
 
     //Strategy for selling
@@ -62,7 +59,10 @@ package farmpackage {
     //TODO add here the fact to change the type of agriculture 
     override def algo: __forever = __forever(
       __do {
-        GLOB.observator.Co2 += crops.map(_.Co2Emitted).sum
+        //Each turn, get the emissions of each crop/herd
+        getCropsAndHersEmissions()
+        resetCropsAndHerdsEmissions()
+
         crops.foreach(crop => {
           //if there is a cooperative, buy from it. Else by itself
           val boostersToBuy = crop.pls.boosters match {
@@ -74,7 +74,6 @@ package farmpackage {
             case None => bulk_buy_missing(crop.pls.consumed ++ boostersToBuy, 1)
           }
           //buyMissingFromCoop(crop.pls.consumed)
-          crop.Co2Emitted = 0.0
           //if quality of soil is not to low, we can use fertilizer
           //if(crop.lOver.soilQuality > 1.0) fertilize(crop)
           //else fertilize(crop, state = false)
@@ -353,6 +352,17 @@ package farmpackage {
 
     //Using the coop if part of to chose which will be the next production
     def choseNextCrops(): Unit = {} //TODO
+
+
+    def resetCropsAndHerdsEmissions(): Unit = {
+      crops.foreach(_.Co2Emitted = 0.0)
+      herds.foreach(_.cows.foreach(cow => {cow.methane = 0.0; cow.ammonia = 0.0}))
+    }
+
+    def getCropsAndHersEmissions(): Unit = {
+      GLOB.observator.Co2 += crops.map(_.Co2Emitted).sum
+      herds.foreach(_.cows.foreach(cow => {GLOB.observator.methane += cow.methane;GLOB.observator.ammonia += cow.ammonia}))
+    }
     
 
     def canEqual(a: Any) = a.isInstanceOf[Farm]

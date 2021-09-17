@@ -74,6 +74,8 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
     //include the fact that methane + ammonia is produced everyturn
 
     var dailyGrassCons: Int = 0
+    var methane: Double = 0.0
+    var ammonia: Double = 0.0
 
     /** override because more realistic to consume grass each day/month rather than once in all the production process
      * assume that grass consumed is updated everyday (to measure how much remain on the paddock)
@@ -119,20 +121,19 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
               costs_consumables += owner.destroy(Grass, dailyGrassCons)
             }
           }
-          //ammonia & methane emissions DEMAIN MON BG
-
-          //pay employee if month (% with rpt)
+          //ammonia & methane emissions. In the future, compute them as a function depending on diet, temperature,...
+          methane += CONSTANTS.KG_METHANE_COW_DAY
+          ammonia += CONSTANTS.KG_AMMONIA_COW_DAY
 
           rpt += 1
+
+          //Each month (assume 30 days), pay the salary (check salary != 0 cause only one MeatCow pls has an employee)
+          if(rpt%30 == 0 && salary != 0){
+            goodwill += pls.employees_needed * salary;
+          }
         },
-
         __wait(1),
-
-        //Each month (assume 30 days), pay the salary (check salary != 0 cause only one MeatCow pls has an employee)
-
-
       )({ rpt < pls.time_to_complete }),
-
       __do{
         //print("production complete! ");
         val units_produced = (pls.produced._2  * frac).toInt;
