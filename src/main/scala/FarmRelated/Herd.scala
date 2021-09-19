@@ -17,6 +17,7 @@ import landAdministrator.LandOverlayPurpose.paddock
  */
 class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType */){
 
+  println("Creating an herd")
   assert(_paddock.purpose == LandOverlayPurpose.paddock)
   //This should change if there is no more grass on this paddock
   var paddock: Paddock = _paddock
@@ -85,10 +86,16 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
     //include the fact that methane + ammonia is produced everyturn
 
     var dailyGrassCons: Int = 0
+    if (pls.consumed.filter(_._1 == Grass).nonEmpty){
+      dailyGrassCons = (pls.consumed.filter(_._1 == Grass).head._2 / CONSTANTS.TICKS_TIMER_PER_DAY)
+    }
+    else {
+      println("There is a problem: this animal seems carnivore")
+    }
     var methane: Double = 0.0
     var ammonia: Double = 0.0
     var paddock: Paddock = _paddock
-    // var paddock: Paddock = paddock TODO see if we need a new attribut
+
 
     /** override because more realistic to consume grass each day/month rather than once in all the production process
      * assume that grass consumed is updated everyday (to measure how much remain on the paddock)
@@ -99,12 +106,6 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
         costs_consumables = 0
         rpt = 0
         frac = 1.0;
-        if (pls.consumed.filter(_._1 == Grass).nonEmpty){
-          dailyGrassCons = (pls.consumed.filter(_._1 == Grass).head._2 / CONSTANTS.TICKS_TIMER_PER_DAY).toInt
-        }
-        else {
-          println("There is a problem: this animal seems carnivore")
-        }
       },
       __dowhile(
         __do{
@@ -120,8 +121,12 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
             //In that case, buy should buy for the all herds for 2 month (atm). + reduce the frac as cow are eating less
             if(invGrass < dailyGrassCons){
               owner.cooperative match {
-                case Some(coop) => owner.buyMissingFromCoop(List((Grass, herd.cows.length * dailyGrassCons * 60 )))
-                case None => owner.bulk_buy_missing(List((Grass, dailyGrassCons * 60 )), herd.cows.length)
+                case Some(coop) => {
+                  println("Buying some grass on market")
+                  owner.buyMissingFromCoop(List((Grass, herd.cows.length * dailyGrassCons * 60 / CONSTANTS.TICKS_TIMER_PER_DAY)))
+                  println("Now the situation is : ")
+                }
+                case None => owner.bulk_buy_missing(List((Grass, dailyGrassCons * 60 / CONSTANTS.TICKS_TIMER_PER_DAY)), herd.cows.length)
               }
               //avoid quite long call to destroy
               if(invGrass != 0){

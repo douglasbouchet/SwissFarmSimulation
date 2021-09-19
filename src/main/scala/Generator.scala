@@ -187,6 +187,7 @@ class Generator {
     */
   private def createAndAssignLandOverlays(farms: List[Farm], landAdministrator: LandAdministrator) = {
     farms.foreach{farm => {
+      println("Farm: ")
       val nParcels = farm.parcels.length
       var landOverlays: List[LandOverlay] = List()
       if(nParcels == 1){
@@ -216,16 +217,15 @@ class Generator {
           val n = scala.util.Random.nextInt(100)
           if (n < 50) {
             println("Generating a wheat field")
-            landAdministrator.purposeOfLandOverlay += (overlay -> wheatField)
+            landOverlays = landOverlays.filterNot(_ == overlay)
             landOverlays ::= landAdministrator.changePurpose(overlay, LandOverlayPurpose.wheatField)
           }
           //else if (n >= 75 && n < 95){
           else{
             println("Generating a paddock")
-            landAdministrator.purposeOfLandOverlay += (overlay -> paddock) //TODO This should be destroyed when removing the map
             //remove the landOverlay and create a Paddock instead (inherits from landOverlay so no problem)
+            landOverlays = landOverlays.filterNot(_ == overlay)
             landOverlays ::= landAdministrator.changePurpose(overlay, LandOverlayPurpose.paddock)
-
           }
           //else{
           //  landAdministrator.purposeOfLandOverlay += (overlay -> meadow)
@@ -234,7 +234,6 @@ class Generator {
         }
       }
       farm.landOverlays :::= landOverlays
-      //landAdministrator.landOverlays :::= landOverlays
     }
     }
   }

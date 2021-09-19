@@ -160,10 +160,6 @@ package landAdministrator {
 
     var cadastralParcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List[LandOverlay]()
-    //var purposeOfLandOverlay: collection.mutable.Map[LandOverlay, LandOverlayPurpose] = collection.mutable.Map[LandOverlay, LandOverlayPurpose]()
-    var purposeOfLandOverlay
-        : collection.mutable.Map[LandOverlay, LandOverlayPurpose.Value] =
-      collection.mutable.Map[LandOverlay, LandOverlayPurpose.Value]()
 
     /** Declare as an inner object, not stored inside the LandOverlay, cause
       * each time we access a LandOverlay we should pass by the
@@ -287,19 +283,7 @@ package landAdministrator {
           val oldLands: List[(CadastralParcel, Double)] = landOverlay.landsLot
           removeLandOverlay(landOverlay)
           addLandOverlay(oldLands, newPurpose)
-          //purposeOfLandOverlay += (landOverlay -> newPurpose) TODO this object might be remove, useless
-
         }
-
-    /** def get_land_overlay_of_purpose(purpose: LandOverlayPurpose, region:
-      * Canton or district,...) Could be interesting if want to have some stats
-      * per canton/....
-      */
-    def getLandOverlayOfPurpose(
-        purpose: LandOverlayPurpose.Value
-    ): List[LandOverlay] = {
-      return purposeOfLandOverlay.filter(_._2 == purpose).toList.map(_._1)
-    }
 
     /**
      * @return The list of Paddocks (inheriting from landOverlay)
