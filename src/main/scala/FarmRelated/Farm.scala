@@ -19,6 +19,7 @@ package farmpackage {
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
     var crops: List[CropProductionLine] = List[CropProductionLine]()
+    var paddocks: List[Paddock] = List[Paddock]() // TODO don't forget to update this if reassigning landoverlay to other purpose
     var herds: List[Herd] = List[Herd]()
     var cooperative: Option[AgriculturalCooperative] = None
 
@@ -82,10 +83,24 @@ package farmpackage {
           //else crop.lOver.soilQuality = Math.min(crop.lOver.soilQuality + 0.02, 1.0)
         })
 
-        //Buy the necessary stuff for herds
+
+        //Buy the necessary stuff for herds if needed
+        herds.foreach(herd => {
+          //There is no more grass on the current Paddock, so buy for 1 month of grass for the all herd. Buy should only happen if only one paddock is available
+          //TODO  a problem might occur if cows consumption > prod of all paddocks -> #grass will tend to 0. And this code might not scale well if multiple herds are presents
+          //Fix this next (maybe add condition on expected consumption or only buy few amounts of grass each time (to last one week))
+          if(herd.newGrassOrdered && paddocks.length == 1){
+            assert(herd.cows.nonEmpty)
+            cooperative match {
+              case Some(_) => buyMissingFromCoop(List((Grass, herd.cows.length * herd.cows.head.dailyGrassCons * 30 / CONSTANTS.TICKS_TIMER_PER_DAY)))
+              case None => bulk_buy_missing(List((Grass, herd.cows.head.dailyGrassCons * 30 / CONSTANTS.TICKS_TIMER_PER_DAY)),  herd.cows.length)
+            }
+            herd.newGrassOrdered = false
+          }
+        })
         herds.foreach(_.cows.foreach(cow => {
           cooperative match {
-            case Some(_) => buyMissingFromCoop(cow.pls.consumed )
+            case Some(_) => buyMissingFromCoop(cow.pls.consumed)
             case None => bulk_buy_missing(cow.pls.consumed, 1)
           }
         }))
@@ -135,6 +150,7 @@ package farmpackage {
             hr.hire(1)
             paddockOccupied = true
           }
+          paddocks ::= lOver
 
         }
         case lOver@(crop: Crop) => {
