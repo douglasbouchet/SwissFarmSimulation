@@ -58,6 +58,10 @@ package farmpackage {
         //Each turn, get the emissions of each crop/herd
         updateCropsAndHerdsEmissions()
 
+        landOverlays.filter(_.isInstanceOf[Paddock]).map(_.asInstanceOf[Paddock]).foreach{
+          paddock => println(s"gass quantity: ${paddock.grassQuantity}")
+        }
+
 
         crops.foreach(crop => {
           //if there is a cooperative, buy from it. Else by itself
@@ -125,7 +129,7 @@ package farmpackage {
       landOverlays.foreach {
         case lOver@(_: Paddock) => {
           if(!paddockOccupied){
-            val herd: Herd = new Herd(this, lOver, 2, hr.salary) //TODO check ca
+            val herd: Herd = new Herd(this, lOver, 20, hr.salary) //TODO check ca
             herd.initHerd()
             herds ::= herd
             hr.hire(1)

@@ -135,8 +135,14 @@ package landAdministrator {
   }
 
   class Paddock(aggregation: List[(CadastralParcel, Double)]) extends LandOverlay(aggregation) {
+    val maxGrassQuantity: Double = CONSTANTS.KG_GRASS_PER_PADDOCK_HA * super.getSurface
     var grassQuantity: Double = CONSTANTS.KG_GRASS_PER_PADDOCK_HA * super.getSurface
     purpose = LandOverlayPurpose.paddock
+
+    /** growth some grass each turn, in order to each max capacity in 30 days from grass quantity 0 */
+    def grassGrowth(): Unit = {
+      grassQuantity = math.min(maxGrassQuantity, grassQuantity + maxGrassQuantity / CONSTANTS.TIME_FOR_PADDOCK_TO_RECOVER_GRASS)
+    }
   }
 
   object LandOverlayPurpose extends Enumeration {
@@ -295,7 +301,14 @@ package landAdministrator {
       return purposeOfLandOverlay.filter(_._2 == purpose).toList.map(_._1)
     }
 
-    /** Changing owner of a Parcelle, will updtate this Parcelle's owner inside
+    /**
+     * @return The list of Paddocks (inheriting from landOverlay)
+     */
+    def getPaddocks(): List[Paddock] = {
+      landOverlays.filter(_.isInstanceOf[Paddock]).map(_.asInstanceOf[Paddock])
+    }
+
+    /** Changing owner of a Parcelle, will update this Parcelle's owner inside
       * LandOverlay and LandAdministrator Just need to recompute
       * ownershipDistrib inside each land overlays, the Parcelle is part of
       */
@@ -311,6 +324,11 @@ package landAdministrator {
 
     //TODO
     def findParcelAccess(parcel: CadastralParcel) {}
+
+    /** Only update quantity of grass on each Paddock at the moment, can be more complex afterwards, like changing caracteristics of lands after a rainfall, etc... */
+    def update(): Unit = {
+      getPaddocks().foreach(_.grassGrowth())
+    }
 
   }
 

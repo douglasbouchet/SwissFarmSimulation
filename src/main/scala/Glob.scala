@@ -10,6 +10,13 @@ import prices.Prices
     val landAdministrator = new LandAdministrator(0,0)
     val prices = new Prices(/**market*/)
     val ju = 1111
+
+    /** This will update all "Global" classes instances, such as LandAdministrator, Prices (for the moment)
+     */
+    def update(): Unit = {
+      prices.updateAllPrices()
+      landAdministrator.update()
+    }
   }
 
 }
@@ -23,6 +30,7 @@ package object CONSTANTS {
   val KG_GRASS_PER_PADDOCK_HA: Int = 1300
   val HA_PER_WORKER: Int = 20
   val CONVERSION_WHEAT_FLOUR: Double = 0.8
+  val TIME_FOR_PADDOCK_TO_RECOVER_GRASS = 30 * TICKS_TIMER_PER_DAY
 
   val KG_CO2_PER_WHEAT_CROP_HA: Double = 1900
   val KG_METHANE_COW_DAY: Double = 0.3

@@ -35,7 +35,7 @@ object MainSwissFarmSimulation {
     //s.run(2);
     for (i <- 0 to 400){
       s.run_until(i)
-      GLOB.prices.updateAllPrices
+      GLOB.update()
     }
     //s.run(800);
 
