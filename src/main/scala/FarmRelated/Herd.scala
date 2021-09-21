@@ -122,15 +122,6 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
             //In that case, buy should buy for the all herds for 2 month (atm). + reduce the frac as cow are eating less
             if(invGrass < dailyGrassCons && newGrassOrdered == false){
               newGrassOrdered = true
-              /*owner.cooperative match {
-                case Some(coop) => {
-                  println("Buying some grass on market")
-                  newGrassOrdered = true
-                  owner.buyMissingFromCoop(List((Grass, herd.cows.length * dailyGrassCons * 60 / CONSTANTS.TICKS_TIMER_PER_DAY)))
-                  println("Now the situation is : ")
-                }
-                case None => owner.bulk_buy_missing(List((Grass, dailyGrassCons * 60 / CONSTANTS.TICKS_TIMER_PER_DAY)), herd.cows.length)
-              }*/
               //avoid quite long call to destroy
               if(invGrass != 0){
                 costs_consumables += owner.destroy(Grass, invGrass)

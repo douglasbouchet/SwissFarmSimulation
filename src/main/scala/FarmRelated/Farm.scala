@@ -10,11 +10,13 @@ package farmpackage {
   import farmrelated.crop.CropProductionLine
   import glob._
   import landAdministrator.{CadastralParcel, Crop, LandOverlay, Paddock}
+  import geography.Location
+
 
   import scala.collection.mutable
 
 
-  case class Farm(s: Simulation) extends SimO(s) {
+  case class Farm(s: Simulation) extends SimO(s) with Location {
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
@@ -22,6 +24,10 @@ package farmpackage {
     var paddocks: List[Paddock] = List[Paddock]() // TODO don't forget to update this if reassigning landoverlay to other purpose
     var herds: List[Herd] = List[Herd]()
     var cooperative: Option[AgriculturalCooperative] = None
+    //This are assigned by the generator atm (some random district/cities name atm)
+    override var canton: String = _
+    override var district: String = _
+    override var city: String = _
 
 
     protected var hr: HR = HR(s, this)
@@ -98,12 +104,6 @@ package farmpackage {
             herd.newGrassOrdered = false
           }
         })
-        herds.foreach(_.cows.foreach(cow => {
-          cooperative match {
-            case Some(_) => buyMissingFromCoop(cow.pls.consumed)
-            case None => bulk_buy_missing(cow.pls.consumed, 1)
-          }
-        }))
         
         //crops.foreach(crop => changeActivity(false, crop))
       },

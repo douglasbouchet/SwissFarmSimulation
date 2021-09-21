@@ -3,19 +3,11 @@
 
 /** Milestone 2: Add directed edges, bridges, highways, railways */
 
-package roadNetwork
+package geography
 
-import scalax.collection.Graph
-import scalax.collection.mutable.Graph
-import scalax.collection.GraphPredef._
 import scalax.collection.GraphEdge._
-
+import scalax.collection.GraphPredef._
 import scalax.collection.edge.WUnDiEdge
-import scalax.collection.edge.Implicits._
-import scalax.collection.GraphTraversal._
-
-import landAdministrator.CadastralParcel
-import Owner._
 
 class Intersection(val id: String) {
   override def toString = s"$id "

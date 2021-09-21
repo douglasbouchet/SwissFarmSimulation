@@ -161,6 +161,26 @@ class Generator {
 
     val farms: List[Farm] = assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
 
+    //TODO will be modify after we got more location, but for the moment let's assume some random district/cities:
+    //Assign some spatially to each farm
+    val juraDistrict = List[String]("Delémont", "Porrentruy")
+    val delemontCities = List[String]("Saulcy", "Develier", "Courroux")
+    val porrentruyCities = List[String]("Alle", "Boncourt", "Bonfol", "Fontenais")
+
+    val rnd = scala.util.Random
+    farms.foreach(farm => {
+      farm.canton = "Jura"
+      farm.district = juraDistrict(rnd.nextInt(juraDistrict.length))
+      if(farm.district == "Delémont"){
+        farm.city = delemontCities(rnd.nextInt(delemontCities.length))
+      }
+      else{
+        farm.city = porrentruyCities(rnd.nextInt(porrentruyCities.length))
+      }
+    }
+    )
+
+
     /** we reached the expected number of farm for the canton
      * if some parcels remain, add them to some farms randomly */
     if(!parcels.isEmpty){
