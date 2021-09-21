@@ -166,6 +166,9 @@ class Generator {
     val juraDistrict = List[String]("Delémont", "Porrentruy")
     val delemontCities = List[String]("Saulcy", "Develier", "Courroux")
     val porrentruyCities = List[String]("Alle", "Boncourt", "Bonfol", "Fontenais")
+    //val Geneve = City
+    //val Zurich = City
+    //val Lausanne = City
 
     val rnd = scala.util.Random
     farms.foreach(farm => {
