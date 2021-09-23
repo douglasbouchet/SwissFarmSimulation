@@ -9,6 +9,7 @@ import scalax.collection.GraphEdge._
 import scalax.collection.GraphPredef._
 import scalax.collection.edge.WUnDiEdge
 
+/** Consider only cities atm */
 class Intersection(val id: String) {
   override def toString = s"$id "
 }
@@ -102,7 +103,8 @@ class RoadNetwork(
       fromNode,
       toNode,
       name,
-      roadLenght / roadSpeed,
+      //roadLenght / roadSpeed, we can only consider lenght of the road atm, next we take into account the speed
+      roadLenght,
       roadMaxWeight
     )
     roadNetwork.add(road) match {

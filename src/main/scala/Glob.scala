@@ -2,6 +2,8 @@
 // This object will be here to allow for putting for example co2 emission, get prices, get lands,...
 //some global stuff
 package glob {
+import generator.Generator
+import geography.RoadNetwork
 import landAdministrator._
 import prices.Prices
   object GLOB {
@@ -9,8 +11,8 @@ import prices.Prices
     val observator = new Observator
     val landAdministrator = new LandAdministrator(0,0)
     val prices = new Prices(/**market*/)
-    val ju = 1111
-
+    val generator = new Generator
+    val globalRoadNetwork: RoadNetwork = generator.generateRoadNetwork()
     /** This will update all "Global" classes instances, such as LandAdministrator, Prices (for the moment)
      */
     def update(): Unit = {

@@ -333,7 +333,7 @@ private def initCoop(canton: String, farms: List[Farm], s: Simulation): List[Agr
  * @return a list of all agents, that should be put as argument into init function of simulation
  * */
 def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simulation): Unit = {
-  val nCities = 3
+  val nCities = 4
   val cities: List[City] = generateCities(nCities, List())
   LocationAdministrator.init(cities)
   val people: List[Person] = initPerson(canton, s)
@@ -348,13 +348,27 @@ def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simu
   coop.foreach(_.city = cities(rnd.nextInt(nCities)))
 
   s.init(farms ::: mills ::: coop ::: sources)
+
+  generateRoadNetwork()
 }
 
 def generateRoadNetwork(): RoadNetwork = {
-  val roadNetwork: RoadNetwork = new RoadNetwork()
-  LocationAdministrator.cities.forall(city => roadNetwork.createNode(city.name) == true)
+  val roadNetworkInstance: RoadNetwork = new RoadNetwork()
+  LocationAdministrator.cities.forall(city => roadNetworkInstance.createNode(city.name) == true)
+  LocationAdministrator.cities.foreach((cityA: City) => {
+    LocationAdministrator.cities.filterNot(_ == cityA).foreach((cityB:City) => {
+      //we add an edge of fly distance length between CityA and all CityB
+      roadNetworkInstance.createRoad(cityA, cityB, cityA.name + " to " + cityB.name,
+        LocationAdministrator.computeDistanceBetweenCities(cityA, cityB),80,35)
+    })
+  })
+ // roadNetworkInstance.createRoad(LocationAdministrator.cities(0), LocationAdministrator.cities(1), "aaa", 80,90,90)
+  //Next we add a road between each nodes (fully connected atm, but TODO this will change when generating a more complex network)
 
-  roadNetwork
+  val path = roadNetworkInstance.findPath(LocationAdministrator.cities(0),LocationAdministrator.cities(1)).nodes
+  val path2 = roadNetworkInstance.findPath(LocationAdministrator.cities(0),LocationAdministrator.cities(1)).length
+  val path3 = roadNetworkInstance.findPath(LocationAdministrator.cities(0),LocationAdministrator.cities(1)).weight
+  roadNetworkInstance
 }
 
   //def generateSources()

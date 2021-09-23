@@ -1,6 +1,7 @@
 package geography
 
 import Simulation.SimO
+import geography.Intersection
 
 /**
  * This package will contains all classes/trait related to geography i.e The roads, and Location for the moment
@@ -47,16 +48,16 @@ object LocationAdministrator {
   }
 
   //From https://www.movable-type.co.uk/scripts/latlong.html
-  /** compute shortest distance between 2 cities (in meter)
+  /** compute shortest distance between 2 cities (in km)
    * Not perfect because in reality distance depends on roads, and this function skip this detail, but use this while we don't have any road data */
-  private def computeDistanceBetweenCities(cityA: City, cityB: City): Double = {
+  def computeDistanceBetweenCities(cityA: City, cityB: City): Double = {
       val earthRadius: Int = 6371000 //in meter
       val phi1: Double = cityA.centerCoord._1 * Math.PI/180
       val phi2: Double = cityB.centerCoord._1 * Math.PI/180
       val deltaPhi: Double = (cityB.centerCoord._1 - cityA.centerCoord._1) * Math.PI/180
       val deltaLambda: Double = (cityB.centerCoord._2 - cityA.centerCoord._2) * Math.PI/180
       val a: Double = Math.pow(Math.sin(deltaPhi/2),2) + Math.cos(phi1) * Math.cos(phi2) * Math.pow(Math.sin(deltaLambda), 2)
-      earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+      earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) / 1000
   }
 
   /**
@@ -80,8 +81,9 @@ object LocationAdministrator {
  * @param district city is part of
  * @param canton city is part of
  * @param center gps coordinates in the form: (Latitude, Longitude) in degree
+ * extends Intersection in order to be nodes inside the road network
  */
-class City(_name: String, _district: String, _canton: String, _centerCoord: (Double, Double)) {
+class City(_name: String, _district: String, _canton: String, _centerCoord: (Double, Double)) extends Intersection(_name) {
   val name: String = _name
   val district: String = _district
   val canton: String = _canton
