@@ -90,7 +90,7 @@ class RoadNetwork(
   /** Assume constant roadSpeed over all the road atm, afterwards change Double
     * -> List[(Double(distance), Int(speed))]
     */
-  def CreateRoad(
+  def createRoad(
       fromNode: Intersection,
       toNode: Intersection,
       name: String,
@@ -113,7 +113,7 @@ class RoadNetwork(
     }
   }
 
-  def CreateNode(id: String): Boolean = {
+  def createNode(id: String): Boolean = {
     val node = new Intersection(id)
     roadNetwork.add(node) match {
       case true => true

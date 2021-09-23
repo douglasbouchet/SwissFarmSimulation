@@ -16,24 +16,19 @@
 * Each generated type of data is stored inside one excel file 
 */
 package generator 
-import Simulation._
 import landAdministrator.{CadastralParcel, LandAdministrator, LandOverlay, LandOverlayPurpose}
+import geography.{City, LocationAdministrator, RoadNetwork}
 import Owner._
 import farmpackage._
 import _root_.Simulation.Person
 import _root_.Simulation.Simulation
 import farmrelated.cooperative.AgriculturalCooperative
 import Securities.Commodities._
-import _root_.Simulation.Factory._
-import _root_.Simulation.MainSwissFarmSimulation.s
 import breeze.stats.distributions
 import org.apache.poi.ss.usermodel.WorkbookFactory
 
 import java.io.File
-import scala.jdk.CollectionConverters._
-import landAdministrator.LandOverlayPurpose._
 import _root_.Simulation.SimLib.{Mill, Source}
-import geography.City
 
 import scala.annotation.tailrec
 
@@ -183,29 +178,6 @@ class Generator {
 
     val farms: List[Farm] = assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
 
-    //TODO will be modify after we got more location, but for the moment let's assume some random district/cities:
-    //Assign some spatially to each farm
-    val juraDistrict = List[String]("Delémont", "Porrentruy")
-    val delemontCities = List[String]("Saulcy", "Develier", "Courroux")
-    val porrentruyCities = List[String]("Alle", "Boncourt", "Bonfol", "Fontenais")
-    //val Geneve = City
-    //val Zurich = City
-    //val Lausanne = City
-
-    /*val rnd = scala.util.Random
-    farms.foreach(farm => {
-      farm.canton = "Jura"
-      farm.district = juraDistrict(rnd.nextInt(juraDistrict.length))
-      if(farm.district == "Delémont"){
-        farm.city = delemontCities(rnd.nextInt(delemontCities.length))
-      }
-      else{
-        farm.city = porrentruyCities(rnd.nextInt(porrentruyCities.length))
-      }
-    }
-    )*/
-
-
     /** we reached the expected number of farm for the canton
      * if some parcels remain, add them to some farms randomly */
     if(!parcels.isEmpty){
@@ -310,7 +282,7 @@ private def initLandsAndFarms(canton: String, landAdministrator: LandAdministrat
   val allParcels = generateParcels(canton)
   landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
   //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
-  var farms = assignParcelsToFarms(canton, allParcels._1, s).take(2)
+  val farms = assignParcelsToFarms(canton, allParcels._1, s).take(2)
   println(farms.length + " farms created ")
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init)
@@ -343,12 +315,27 @@ private def initCoop(canton: String, farms: List[Farm], s: Simulation): List[Agr
   List[AgriculturalCooperative](new AgriculturalCooperative(farms, List(Wheat, Fertilizer), s))
 }
 
+  /** Add near agents inside contact network of each owner
+   * @param owners the owners whom we want to add people to their contact network
+   * @param radius: each agent present inside this radius from an owner's radius could be added inside its contact network (do not add all but some)
+   */
+  /*private def initRelations(owners: List[Owner], radius: Double): Unit = {
+
+  owners.foreach{
+    //If instance of Farm, we should add one source, and
+    case owner@(_: Farm) => {}
+  }
+  }*/
 
 /** Generate {lands, farms, mills, people, agricultural cooperative} for a given canton
+ * Also generate cities where farms and mills are placed
  * @param landAdministrator: this function create its parcels and land overlays
  * @return a list of all agents, that should be put as argument into init function of simulation
  * */
 def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simulation): Unit = {
+  val nCities = 3
+  val cities: List[City] = generateCities(nCities, List())
+  LocationAdministrator.init(cities)
   val people: List[Person] = initPerson(canton, s)
   s.init(people)
   val farms: List[Farm] = initLandsAndFarms(canton, landAdministrator, s)
@@ -357,14 +344,18 @@ def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simu
   val sources: List[Source] = generateSources(canton, s)
 
   //we place farms and cooperative inside cities
-  val nCities = 3
-  val cities: List[City] = generateCities(nCities, List())
-  farms.foreach(_.city = cities(rnd.nextInt(nCities)))
+
   coop.foreach(_.city = cities(rnd.nextInt(nCities)))
 
   s.init(farms ::: mills ::: coop ::: sources)
 }
 
+def generateRoadNetwork(): RoadNetwork = {
+  val roadNetwork: RoadNetwork = new RoadNetwork()
+  LocationAdministrator.cities.forall(city => roadNetwork.createNode(city.name) == true)
+
+  roadNetwork
+}
 
   //def generateSources()
 

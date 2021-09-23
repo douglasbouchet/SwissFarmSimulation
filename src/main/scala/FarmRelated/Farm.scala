@@ -10,7 +10,7 @@ package farmpackage {
   import farmrelated.crop.CropProductionLine
   import glob._
   import landAdministrator.{CadastralParcel, Crop, LandOverlay, Paddock}
-  import geography.{City, Location}
+  import geography.{City, Location, LocationAdministrator}
 
   import scala.collection.mutable
 
@@ -61,11 +61,6 @@ package farmpackage {
       __do {
         //Each turn, get the emissions of each crop/herd
         updateCropsAndHerdsEmissions()
-
-        landOverlays.filter(_.isInstanceOf[Paddock]).map(_.asInstanceOf[Paddock]).foreach{
-          paddock => println(s"gass quantity: ${paddock.grassQuantity}")
-        }
-
 
         crops.foreach(crop => {
           //if there is a cooperative, buy from it. Else by itself
@@ -134,6 +129,9 @@ package farmpackage {
       capital += 20000000
       make(WheatSeeds, 1300, 10)
       make(Fertilizer, 7, 2)
+
+      //Place this farm inside a city chosen randomly
+      city = LocationAdministrator.cities(scala.util.Random.nextInt(LocationAdministrator.cities.length))
 
       //We only populate 1 paddock with animals, and keep the others paddock empty, in order to put animals inside them when their current paddock is out of grass
       var paddockOccupied: Boolean = false

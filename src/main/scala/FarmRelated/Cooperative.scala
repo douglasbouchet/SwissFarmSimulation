@@ -4,7 +4,7 @@ package farmrelated.cooperative{
   import Simulation._
   import farmpackage.Farm
   import code._
-  import geography.{City, Location}
+  import geography.{City, Location, LocationAdministrator}
 
   import scala.collection.mutable
 
@@ -45,9 +45,7 @@ package farmrelated.cooperative{
       s.market(com).add_seller(this)
     })
     all_commodities.foreach(com => commoditiesToBuy.put(com, 0))
-    //commoditiesToBuy.put(WheatSeeds, 0)
-    //commoditiesToBuy.put(Fertilizer, 0) //TODO faire mieux que hardcoder
-    //commoditiesToBuy.put(FeedStuff, 0)
+    city = LocationAdministrator.cities(scala.util.Random.nextInt(LocationAdministrator.cities.length))
     //end init
 
     def addMember(member: Farm): Unit = {

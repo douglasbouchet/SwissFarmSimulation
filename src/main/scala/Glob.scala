@@ -48,7 +48,7 @@ package object CONSTANTS {
 
   val WHEAT_PROD_DURATION: Int = 365 * TICKS_TIMER_PER_DAY
   val FERTILIZER_PROD_DURATION: Int = 30 * TICKS_TIMER_PER_DAY
-  val MEATCOW_PROD_DURATION: Int = 50 * 3 * TICKS_TIMER_PER_DAY // assume 3 years before a meat cow can be killed
+  val MEATCOW_PROD_DURATION: Int = 365 * 3 * TICKS_TIMER_PER_DAY // assume 3 years before a meat cow can be killed
 }
 
 

@@ -19,7 +19,6 @@ object MainSwissFarmSimulation {
   val generator = new Generator
   //val landAdministrator = new LandAdministrator(0,0)
 
-
   val canton = "Glaris"
 
   generator.generateAgents(canton, GLOB.landAdministrator, s)
