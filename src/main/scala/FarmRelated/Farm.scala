@@ -10,8 +10,7 @@ package farmpackage {
   import farmrelated.crop.CropProductionLine
   import glob._
   import landAdministrator.{CadastralParcel, Crop, LandOverlay, Paddock}
-  import geography.Location
-
+  import geography.{City, Location}
 
   import scala.collection.mutable
 
@@ -25,9 +24,7 @@ package farmpackage {
     var herds: List[Herd] = List[Herd]()
     var cooperative: Option[AgriculturalCooperative] = None
     //This are assigned by the generator atm (some random district/cities name atm)
-    override var canton: String = _
-    override var district: String = _
-    override var city: String = _
+    override var city: City = _
 
 
     protected var hr: HR = HR(s, this)

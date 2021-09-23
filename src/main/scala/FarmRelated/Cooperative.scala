@@ -4,6 +4,7 @@ package farmrelated.cooperative{
   import Simulation._
   import farmpackage.Farm
   import code._
+  import geography.{City, Location}
 
   import scala.collection.mutable
 
@@ -16,7 +17,9 @@ package farmrelated.cooperative{
     *
     * @param _farms:List[farm] : The initial members of the cooperative
     */
-  class AgriculturalCooperative(_farms: List[Farm], _saleableCommodities: List[Commodity], s: Simulation) extends SimO(s){
+  class AgriculturalCooperative(_farms: List[Farm], _saleableCommodities: List[Commodity], s: Simulation) extends SimO(s) with Location{
+
+    override var city: City = _
 
     var members: List[Farm] = _farms
 

@@ -33,10 +33,14 @@ import java.io.File
 import scala.jdk.CollectionConverters._
 import landAdministrator.LandOverlayPurpose._
 import _root_.Simulation.SimLib.{Mill, Source}
+import geography.City
+
+import scala.annotation.tailrec
 
 
 class Generator {
- 
+
+  val rnd: scala.util.Random = new scala.util.Random // fix the seed
   val f = new File("/Users/douglasbouchet/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
   val sheet = WorkbookFactory.create(f).getSheetAt(0)  
 
@@ -62,6 +66,24 @@ class Generator {
     population = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(15).toString().toDouble).toInt) :: population
   }
 
+
+  /**
+   * Generate cities belonging to one canton, 1 districts and random location
+   * @param nCities, the number of city we want to generate
+   * @return the generated cities
+   * @note only works with at most 4 cities at the moment (or find more city names)
+   */
+  @tailrec
+  final def generateCities(nCities: Int, cites: List[City], names: List[String] = List[String]("Morges", "Saint-Sulpice", "Cossonay", "Lausanne")): List[City] = {
+    if(nCities > 0){
+      // class City(_name: String, _district: String, _canton: String, _centerCoord: (Double, Double))
+      val name: String = names.head
+      val coord: (Double, Double) = (45 + rnd.nextDouble()*2, 40 + rnd.nextDouble()) //make cities close to each other (as in real life for these cities names)
+      generateCities(nCities - 1, cites :+ new City(name, "MORGES", "Vaud", coord), names.tail)
+    }
+    else cites
+  }
+
   /** Generate random areas until a total area is reached, following a gaussian distribution 
    * If generated area outside [min,max], generates a new one
    * @param min: Double, the minimum value
@@ -83,7 +105,7 @@ class Generator {
         remainingArea -= sample
       }
     }
-    return areas
+    areas
   }
 
   /** Next we construct the parcels 
@@ -170,7 +192,7 @@ class Generator {
     //val Zurich = City
     //val Lausanne = City
 
-    val rnd = scala.util.Random
+    /*val rnd = scala.util.Random
     farms.foreach(farm => {
       farm.canton = "Jura"
       farm.district = juraDistrict(rnd.nextInt(juraDistrict.length))
@@ -181,7 +203,7 @@ class Generator {
         farm.city = porrentruyCities(rnd.nextInt(porrentruyCities.length))
       }
     }
-    )
+    )*/
 
 
     /** we reached the expected number of farm for the canton
@@ -333,6 +355,12 @@ def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simu
   val mills: List[Mill] = initMills(canton, s)
   val coop : List[AgriculturalCooperative] = initCoop(canton, farms, s)
   val sources: List[Source] = generateSources(canton, s)
+
+  //we place farms and cooperative inside cities
+  val nCities = 3
+  val cities: List[City] = generateCities(nCities, List())
+  farms.foreach(_.city = cities(rnd.nextInt(nCities)))
+  coop.foreach(_.city = cities(rnd.nextInt(nCities)))
 
   s.init(farms ::: mills ::: coop ::: sources)
 }

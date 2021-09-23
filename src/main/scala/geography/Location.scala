@@ -15,12 +15,7 @@ import Simulation.SimO
  * @note name are string for the moment, but they should be values inside a Database or whatever.
  */
 trait Location {
-  var country: String = "Switzerland"
-  var canton: String
-  var district: String
   var city: City
-  //TODO replace by City ?
-
   //donner accès au LocationAdministrator's method -> keep extend Location (main purpose)
 
   /**
@@ -44,8 +39,11 @@ object LocationAdministrator {
    * Simplify the runtime, but exclude some farms, which may not be the case in real life. So store all cities inside a list, w/o differentiations */
   var cities: List[City] = List[City]()
 
-  def init(): Unit = {
 
+  /** This should be called once we got data on each switzerland city
+   * Atm, called by the generator after he generated some cities */
+  def init(_cities: List[City]): Unit = {
+      cities = _cities
   }
 
   //From https://www.movable-type.co.uk/scripts/latlong.html
