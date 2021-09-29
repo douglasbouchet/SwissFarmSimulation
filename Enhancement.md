@@ -3,7 +3,8 @@
   - Keep track of the state of each Sim it can interact with ()
   - Interact = apply a function to a Sim
   - Usefull for example if you want to model influence of weather on cereals, during the time their growth
-   
+
+ddd   
 - **New abstract class "SimCommodity"**. Goal: simulate some commodities in order to have a more complex simulation
   - It extends Commodity (saleable, purchaseable, consumable)
   - It extends InteractivSim 
