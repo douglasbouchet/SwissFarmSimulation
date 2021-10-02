@@ -15,7 +15,7 @@ package farmpackage {
   import scala.collection.mutable
 
 
-  case class Farm(s: Simulation) extends SimO(s) with Location {
+  case class Farm(s: Simulation, obs: Observator) extends SimO(s) with Location {
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
@@ -26,12 +26,13 @@ package farmpackage {
     //This are assigned by the generator atm (some random district/cities name atm)
     override var city: City = _
 
-
     protected var hr: HR = HR(s, this)
 
     //Strategy for selling
     var prevPrices: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
     var toSellEachTurn: scala.collection.mutable.Map[Commodity, Int] = scala.collection.mutable.Map[Commodity, Int]()
+
+    var cropRotationSchedule: mutable.Map[CropProductionLine, List[Commodity]] = collection.mutable.Map[CropProductionLine,List[Commodity]]()
 
     def addParcels(newParcels: List[CadastralParcel]): Unit = {
       parcels :::= newParcels
@@ -175,6 +176,9 @@ package farmpackage {
           val prodL = new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
           crops ::= prodL
           s.market(prodSpec.produced._1).add_seller(this)
+
+          //add the basic crop rotation schedule
+          cropRotationSchedule.put(prodL, List(Pea, CanolaOil, Wheat, Wheat))
         }
         case _ => {} //we already did above, implement with crop when done
       }
@@ -344,8 +348,24 @@ package farmpackage {
           }
     }
 
-    //Using the coop if part of to chose which will be the next production
-    def choseNextCrops(): Unit = {} //TODO
+    /* Using the coop if part of to chose which will be the next production. Should be called once prev crop production ended
+     * Just select next crop in a round robin way
+     * Afterwards, more complex decision making (impact on ground, market demand)
+     */
+    def choseNextCrops(crop: CropProductionLine): Option[Commodity] = {
+      cropRotationSchedule.get(crop) match {
+        case Some(schedule) => {
+          val prevCrop = schedule.head
+          cropRotationSchedule.put(crop, schedule.tail :+ prevCrop)
+          Some(prevCrop)
+        }
+        case _ => {
+          println("No schedule was found for this crop")
+          None
+        }
+      }
+
+    }
 
 
     def resetCropsAndHerdsEmissions(): Unit = {
@@ -354,14 +374,15 @@ package farmpackage {
     }
 
     def updateCropsAndHerdsEmissions(): Unit = {
-      GLOB.observator.Co2 += crops.map(_.Co2Emitted).sum
-      GLOB.observator.methane += herds.map(_.cows.map(_.methane).sum).sum
-      GLOB.observator.ammonia += herds.map(_.cows.map(_.ammonia).sum).sum
+      obs.year_co2 += crops.map(_.Co2Emitted).sum
+      obs.year_methane += herds.map(_.cows.map(_.methane).sum).sum
+      obs.year_ammonia += herds.map(_.cows.map(_.ammonia).sum).sum
       resetCropsAndHerdsEmissions()
     }
+
     
 
-    def canEqual(a: Any) = a.isInstanceOf[Farm]
+    def canEqual(a: Any): Boolean = a.isInstanceOf[Farm]
 
     override def equals(that: Any): Boolean =
       that match {

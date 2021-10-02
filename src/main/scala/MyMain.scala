@@ -17,8 +17,6 @@ object MainSwissFarmSimulation {
   // val flour_buyer     = new Buyer(Flour, () => 40, s);
 
   val generator = new Generator
-  //val landAdministrator = new LandAdministrator(0,0)
-
   val canton = "Glaris"
 
   generator.generateAgents(canton, GLOB.landAdministrator, s)
@@ -32,13 +30,13 @@ object MainSwissFarmSimulation {
   def main(argv: Array[String]) {
     
     //s.run(2);
-    for (i <- 0 to 400){
+    for (i <- 0 to 1600){
       s.run_until(i)
       GLOB.update()
     }
     //s.run(800);
 
-    GLOB.observator.stats
+    //GLOB.observator.stats
   }
 }
 

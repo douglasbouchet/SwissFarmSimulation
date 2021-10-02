@@ -29,6 +29,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory
 
 import java.io.File
 import _root_.Simulation.SimLib.{Mill, Source}
+import glob.Observator
 
 import scala.annotation.tailrec
 
@@ -60,7 +61,6 @@ class Generator {
     totalSurface = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(14).toString().toDouble).toInt*100) :: totalSurface
     population = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(15).toString().toDouble).toInt) :: population
   }
-
 
   /**
    * Generate cities belonging to one canton, 1 districts and random location
@@ -129,7 +129,7 @@ class Generator {
    *    big farm: from 30 to (60?) (Uniform)
    *  Assign parcels until area reach the number of ha
    */ 
-  private def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel], s: Simulation): List[Farm] = {
+  private def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel], s: Simulation, obs: Observator): List[Farm] = {
     var parcels : List[CadastralParcel] = _parcels
     val nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
     val nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
@@ -156,19 +156,19 @@ class Generator {
     while(!parcels.isEmpty && (ended == false)){
       if(assignedSmallFarms.length < nSmallFarms){
         area = 2 + scala.util.Random.nextInt(7)
-        var farm: Farm = new Farm(s)
+        var farm: Farm = new Farm(s, obs)
         assignAreas(farm)
         assignedSmallFarms ::= farm
       }
       else if(assignedMedFarms.length < nMedFarms){
         area = 10 + scala.util.Random.nextInt(20)
-        var farm = new Farm(s)
+        var farm = new Farm(s, obs)
         assignAreas(farm)
         assignedMedFarms ::= farm
       }
       else if(assignedBigFarms.length < nBigFarms){
         area = 30 + scala.util.Random.nextInt(31)
-        var farm = new Farm(s)
+        var farm = new Farm(s, obs)
         assignAreas(farm)
         assignedBigFarms ::= farm
       }
@@ -277,12 +277,12 @@ private def initPerson(canton: String, s: Simulation): List[Person] = {
   //sims ++= people
 }
 
-private def initLandsAndFarms(canton: String, landAdministrator: LandAdministrator, s: Simulation): List[Farm] = {
+private def initLandsAndFarms(canton: String, landAdministrator: LandAdministrator, s: Simulation, obs: Observator): List[Farm] = {
   //Init generate parcels, and assign them to farms
   val allParcels = generateParcels(canton)
   landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
   //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
-  val farms = assignParcelsToFarms(canton, allParcels._1, s).take(2)
+  val farms = assignParcelsToFarms(canton, allParcels._1, s, obs)
   println(farms.length + " farms created ")
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init)
@@ -333,21 +333,25 @@ private def initCoop(canton: String, farms: List[Farm], s: Simulation): List[Agr
  * @return a list of all agents, that should be put as argument into init function of simulation
  * */
 def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simulation): Unit = {
+
+  val observator = new Observator(s)
   val nCities = 4
   val cities: List[City] = generateCities(nCities, List())
   LocationAdministrator.init(cities)
   val people: List[Person] = initPerson(canton, s)
   s.init(people)
-  val farms: List[Farm] = initLandsAndFarms(canton, landAdministrator, s)
+  val farms: List[Farm] = initLandsAndFarms(canton, landAdministrator, s, observator).take(2)
   val mills: List[Mill] = initMills(canton, s)
   val coop : List[AgriculturalCooperative] = initCoop(canton, farms, s)
   val sources: List[Source] = generateSources(canton, s)
+
+
 
   //we place farms and cooperative inside cities
 
   coop.foreach(_.city = cities(rnd.nextInt(nCities)))
 
-  s.init(farms ::: mills ::: coop ::: sources)
+  s.init(observator :: farms ::: mills ::: coop ::: sources)
 
   generateRoadNetwork()
 }
@@ -365,9 +369,9 @@ def generateRoadNetwork(): RoadNetwork = {
  // roadNetworkInstance.createRoad(LocationAdministrator.cities(0), LocationAdministrator.cities(1), "aaa", 80,90,90)
   //Next we add a road between each nodes (fully connected atm, but TODO this will change when generating a more complex network)
 
-  val path = roadNetworkInstance.findPath(LocationAdministrator.cities(0),LocationAdministrator.cities(1)).nodes
-  val path2 = roadNetworkInstance.findPath(LocationAdministrator.cities(0),LocationAdministrator.cities(1)).length
-  val path3 = roadNetworkInstance.findPath(LocationAdministrator.cities(0),LocationAdministrator.cities(1)).weight
+  //val path = roadNetworkInstance.findPath(LocationAdministrator.cities(0),LocationAdministrator.cities(1)).nodes
+  //val path2 = roadNetworkInstance.findPath(LocationAdministrator.cities(0),LocationAdministrator.cities(1)).length
+  //val path3 = roadNetworkInstance.findPath(LocationAdministrator.cities(0),LocationAdministrator.cities(1)).weight
   roadNetworkInstance
 }
 

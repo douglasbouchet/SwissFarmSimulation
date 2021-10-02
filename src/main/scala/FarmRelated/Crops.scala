@@ -127,6 +127,9 @@ class CropProductionLine(
         if(units_produced > 0) {
           o.make(pls.produced._1, units_produced, unit_cost);
 
+          //add them inside the global annual production stats:
+          o.obs.updateAnnualProd(pls.produced._1, units_produced)
+
           if(! GLOBAL.silent)
           println(o + " produces " + units_produced + "x " +
             pls.produced._1 + " at efficiency " + frac +
@@ -163,6 +166,13 @@ class CropProductionLine(
           println(this + " had a production line with zero efficiency.");
         }
 //        log = (get_time, frac) :: log;
+
+       /* println("The next crop to be produced is " + o.choseNextCrops(this).toString)
+        println()
+        println()
+        println()
+        println()
+        println()*/
       }
     )
 

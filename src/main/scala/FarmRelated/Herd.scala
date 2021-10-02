@@ -40,12 +40,11 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
     val produced: (Commodity, Int) = (Beef, CONSTANTS.KG_OF_BEEF_PER_MEATCOW)
     val timeToComplete: Int = CONSTANTS.MEATCOW_PROD_DURATION
     val boosters: Option[List[(Commodity, Int, Double)]] = None //TODO add some afters ?
-    var lineSpec: ProductionLineSpec =
-      new ProductionLineSpec(1, required, consumed, produced, timeToComplete, boosters)
+    var lineSpec: ProductionLineSpec = ProductionLineSpec(1, required, consumed, produced, timeToComplete, boosters)
     cows ::= new MeatCow(owner, this, paddock, owner.s, lineSpec, salary, owner.s.timer)
     //we already got our employee, next animals does not need anymore employee
     //TODO see if this does not change the first line spec
-    lineSpec = new ProductionLineSpec(0, required, consumed, produced, timeToComplete, boosters)
+    lineSpec = ProductionLineSpec(0, required, consumed, produced, timeToComplete, boosters)
 
     cows :::= (for (n <- 2 to nCows) yield new MeatCow(owner, this, paddock,owner.s, lineSpec, 0, owner.s.timer)).toList
   }
@@ -72,7 +71,7 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
    * @param pls The productionLineSpec of this productionLine
    * @param salary TODO understamnd
    */
-  class MeatCow(owner: Farm,
+  class MeatCow(o: Farm,
                 herd: Herd, //Used to buy for the all herd and not a single cow (avoid multiple buy in a simple way)
                 _paddock: Paddock,
                 s: Simulation,
@@ -157,7 +156,9 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
         val unit_cost = total_cost / units_produced;
 
         if(units_produced > 0) {
-          o.make(pls.produced._1, units_produced, unit_cost);
+          o.make(pls.produced._1, units_produced, unit_cost)
+
+          o.obs.updateAnnualProd(pls.produced._1, units_produced)
 
           if(! GLOBAL.silent)
             println(o + " produces " + units_produced + "x " +

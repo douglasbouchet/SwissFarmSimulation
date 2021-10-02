@@ -198,6 +198,13 @@ class Owner {
     buyer.inventory(item) += units;
           inventory(item) -= units;
 
+    //if the buyer or the seller is a Farm or a coop, compute the distance between them
+    // and add a co2 cost for travelling
+    //TODO this will be modified, if we
+    //if(buyer.isInstanceOf[Farm] || buyer.isInstanceOf[Coop] || seller.isInstanceOf[Farm] || seller.isInstanceOf[Coop]){
+//
+    //}
+
     buyer.transfer_money_to(this, math.ceil(units * unit_price).toInt);
 
     /** add buyer to seller contactNetwork */
