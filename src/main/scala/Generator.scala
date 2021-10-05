@@ -16,7 +16,7 @@
 * Each generated type of data is stored inside one excel file 
 */
 package generator 
-import geography.{CadastralParcel, City, LandAdministrator, LandOverlay, LandOverlayPurpose, LocationAdministrator, RoadNetwork}
+import geography.{CadastralParcel, City, Coordinates, LandAdministrator, LandOverlay, LandOverlayPurpose, LocationAdministrator, PointF, RoadNetwork}
 import Owner._
 import farmpackage._
 import _root_.Simulation.{Person, SimO, Simulation}
@@ -61,6 +61,21 @@ class Generator {
     population = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(15).toString().toDouble).toInt) :: population
   }
 
+
+  /**
+   * Start from a unique square of surface totalSurface, and split it until we reach parcels of some ha of area
+   * @param totalSurface
+   * @return the created CadastralParcels
+   */
+  def generateCadastralParcel(canton: String): List[CadastralParcel] = {
+
+    val totalArea: Double = totalSurface.filter(_._1 == canton).head._2 * 1000000 // in m^2
+    val sidelength: Double = math.sqrt(totalArea)
+    val baseCoord = Coordinates(PointF(0,0),PointF(0,sidelength),PointF(sidelength,sidelength),PointF(sidelength,0))
+    val initialParcel: CadastralParcel = new CadastralParcel(("Doug le bg", 1111), new Owner(), List(), baseCoord.computeArea(), baseCoord)
+
+    //TODO POUr demain, fonction tail recursive qui split until toutes les portions sont d'une certaine taille
+  }
   /**
    * Generate cities belonging to one canton, 1 districts and random location
    * @param nCities, the number of city we want to generate

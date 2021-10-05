@@ -3,11 +3,58 @@ import Owner._
 
 package geography {
 
+
+  case class PointF(x: Double, y: Double) {
+    override def toString = s"{$x, $y}"
+
+    def distance(other: PointF): Double = {
+      math.sqrt(math.pow(x - other.x, 2) + math.pow(y - other.y, 2))
+    }
+    }
+  
+  case class LineF(s: PointF, e: PointF)
+
+  /**
+   * @param c0,c1,c2,c3 the 4 coordinates of the shape(assume only rectangular shape atm) (in meter, origin at bottom left of map)
+   * distance in meter
+   * c1 ---  c2
+   * |       |
+   * |       |
+   * c0 ---  c3
+   * From left to right, down to up
+   */
+  case class Coordinates(c0:PointF, c1:PointF, c2:PointF, c3:PointF){
+
+    val leftBorder : LineF = LineF(c0,c1)
+    val rightBorder : LineF = LineF(c3,c2)
+    val upBorder : LineF = LineF(c1,c2)
+    val downBorder : LineF = LineF(c0,c3)
+
+    def findIntersection(l1: LineF, l2: LineF): PointF = {
+      val a1 = l1.e.y - l1.s.y
+      val b1 = l1.s.x - l1.e.x
+      val c1 = a1 * l1.s.x + b1 * l1.s.y
+      val a2 = l2.e.y - l2.s.y
+      val b2 = l2.s.x - l2.e.x
+      val c2 = a2 * l2.s.x + b2 * l2.s.y
+
+      val delta = a1 * b2 - a2 * b1
+      // If lines are parallel, intersection point will contain infinite values
+      PointF((b2 * c1 - b1 * c2) / delta, (a1 * c2 - a2 * c1) / delta)
+    }
+
+    def computeArea(): Double = c0.distance(c1) * c0.distance(c3) //Here we assume rectangular shape, in m^2
+  }
+
+
+
+
   class CadastralParcel(
                          _id: (String, Int),
                          _owner: Owner,
                          adj_parcels: List[CadastralParcel],
-                         _area: Double
+                         _area: Double,
+                         _coordinates: Coordinates
                        ) {
 
     /** (commune name, n° inside commune), unique over switzerland */
@@ -48,6 +95,31 @@ package geography {
         //var depth_soil_exploitable_roots : Double;
       }
     }
+
+    def splitCadastralParcel(): List[CadastralParcel] =  {
+      //select a random point inside the parcel, and split by drawing verticals and horizontals lines
+      val rdm = scala.util.Random
+      val splitPoint = PointF(rdm.between(_coordinates.c0.x, _coordinates.c3.x), rdm.between(_coordinates.c0.y, _coordinates.c1.y))
+      val verticalLine : LineF = LineF(splitPoint, PointF(splitPoint.x, splitPoint.y + 1))
+      val horizontalLine : LineF = LineF(splitPoint, PointF(splitPoint.x + 1, splitPoint.y))
+
+      val upIntersection: PointF = _coordinates.findIntersection(verticalLine, _coordinates.upBorder)
+      val downIntersection: PointF = _coordinates.findIntersection(verticalLine, _coordinates.downBorder)
+      val leftIntersection: PointF = _coordinates.findIntersection(horizontalLine, _coordinates.leftBorder)
+      val rightIntersection: PointF = _coordinates.findIntersection(horizontalLine, _coordinates.rightBorder)
+
+      val botLeftCoord = Coordinates(_coordinates.c0, leftIntersection, splitPoint, downIntersection)
+      val upLeftCoord = Coordinates(leftIntersection, _coordinates.c1, upIntersection, splitPoint)
+      val upRightCoord = Coordinates(splitPoint, upIntersection, _coordinates.c2, rightIntersection)
+      val downRightCoord = Coordinates(downIntersection, splitPoint, leftIntersection, _coordinates.c3)
+
+      List(
+        new CadastralParcel(id, owner, adj_parcels, botLeftCoord.computeArea(), botLeftCoord),
+        new CadastralParcel(id, owner, adj_parcels, upLeftCoord.computeArea(), upLeftCoord),
+        new CadastralParcel(id, owner, adj_parcels, upRightCoord.computeArea(), upRightCoord),
+        new CadastralParcel(id, owner, adj_parcels, downRightCoord.computeArea(), downRightCoord),
+      )
+    }
   }
 
   /** group the cadastral parcels which are physically the same
@@ -55,11 +127,13 @@ package geography {
    */
   class LandOverlay(aggregation: List[(CadastralParcel, Double)]) {
 
+
+
     /** (CadastralParcel, Percentage occupied on it (0 to 1)) */
     var landsLot: List[(CadastralParcel, Double)] = aggregation
 
     landsLot.foreach {
-      case (parcelle: CadastralParcel, proportion: Double) => parcelle.partOf.put(this, proportion)
+      case (parcel: CadastralParcel, proportion: Double) => parcel.partOf.put(this, proportion)
     }
 
     /** How much percentage of the aggregated lands each owner has */
@@ -183,7 +257,8 @@ package geography {
 
     } // end constructor
 
-    /** Split a land overlay in multiple lands overlays of same/different
+
+  /** Split a land overlay in multiple lands overlays of same/different
      * purpose.
      *
      * @param current :
