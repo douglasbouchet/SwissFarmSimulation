@@ -64,7 +64,7 @@ abstract class Oscillator(s: Simulation, baseValue: mutable.Map[Commodity, Int] 
     },
     __if(s.timer % 365*CONSTANTS.TICKS_TIMER_PER_DAY == 0){
       __do{
-        stats()
+        //stats()
       }
     },
     __wait(1)

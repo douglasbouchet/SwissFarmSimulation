@@ -5,8 +5,7 @@ import Simulation.Factory.{ProductionLine, ProductionLineSpec}
 import Simulation.Simulation
 import code._
 import farmpackage.Farm
-import landAdministrator.{LandOverlay, LandOverlayPurpose, Paddock}
-import landAdministrator.LandOverlayPurpose.paddock
+import geography.{LandOverlayPurpose, Paddock}
 
 /**
  *

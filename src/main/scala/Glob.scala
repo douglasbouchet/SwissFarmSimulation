@@ -3,8 +3,7 @@ import Securities.Commodities._
 //some global stuff
 package glob {
 import generator.Generator
-import geography.RoadNetwork
-import landAdministrator._
+import geography.{LandAdministrator, RoadNetwork}
 import market.Prices
 
   object GLOB {

@@ -1,33 +1,30 @@
 import Owner._
 //import roadNetwork.Node
 
-package landAdministrator {
+package geography {
 
   class CadastralParcel(
-      _id: (String, Int),
-      _owner: Owner,
-      adj_parcels: List[CadastralParcel],
-      _area: Double
-  ) {
+                         _id: (String, Int),
+                         _owner: Owner,
+                         adj_parcels: List[CadastralParcel],
+                         _area: Double
+                       ) {
 
     /** (commune name, n° inside commune), unique over switzerland */
     val id: (String, Int) = _id
-
+    val adjacentParcels: List[CadastralParcel] = adj_parcels
+    val area: Double = _area
+    /** TODO add method in LandAdministrator or whater that should find a
+     * ParcelAccess for this parcel add it, and add this parcel inside
+     * ParcelAcess's "connectedParcels" attribut
+     */
+    //val access: ParcelAccess = new ParcelAccess("", list())
+    val landInformation: List[Patch] = List()
     /** next: List[Owner] instead of a single */
     var owner: Owner = _owner
-    val adjacentParcels: List[CadastralParcel] = adj_parcels
-
     /** (Land overlay -> percentage of cadastral parcel in (0 to 1)) */
     var partOf: collection.mutable.Map[LandOverlay, Double] =
       collection.mutable.Map[LandOverlay, Double]()
-    val area: Double = _area
-
-    /** TODO add method in LandAdministrator or whater that should find a
-      * ParcelAccess for this parcel add it, and add this parcel inside
-      * ParcelAcess's "connectedParcels" attribut
-      */
-    //val access: ParcelAccess = new ParcelAccess("", list())
-    val landInformation: List[Patch] = List()
 
     class Patch(_area: Double) {
       val area: Double = _area
@@ -41,6 +38,7 @@ package landAdministrator {
         //var temperature_at_100m : Double;
         //...
       }
+
       class Ground {
         //var steepness : Int;
         //var altitude : Int;
@@ -53,14 +51,14 @@ package landAdministrator {
   }
 
   /** group the cadastral parcels which are physically the same
-    * field/paddoc/meadow, and belong to one or multiple owners
-    */
+   * field/paddoc/meadow, and belong to one or multiple owners
+   */
   class LandOverlay(aggregation: List[(CadastralParcel, Double)]) {
 
     /** (CadastralParcel, Percentage occupied on it (0 to 1)) */
     var landsLot: List[(CadastralParcel, Double)] = aggregation
 
-    landsLot.foreach{
+    landsLot.foreach {
       case (parcelle: CadastralParcel, proportion: Double) => parcelle.partOf.put(this, proportion)
     }
 
@@ -71,13 +69,22 @@ package landAdministrator {
 
     var soilQuality: Double = 1.0
 
+    def addCadastralParcel(
+                            cadastralParcel: CadastralParcel,
+                            proportion: Double
+                          ) = {
+      assert(!landsLot.contains((cadastralParcel, proportion)))
+      landsLot ::= (cadastralParcel, proportion)
+      ownershipDistrib = cmptOwnershipDistrib(landsLot)
+    }
+
     /** Store the characteristics of fields inside the landOverlay class
-      * depending on the purpose of the LandOverlay
-      */
+     * depending on the purpose of the LandOverlay
+     */
 
     def cmptOwnershipDistrib(
-        newLandsLot: List[(CadastralParcel, Double)]
-    ): List[(Owner, Double)] = {
+                              newLandsLot: List[(CadastralParcel, Double)]
+                            ): List[(Owner, Double)] = {
 
       val totalArea: Double = getSurface
 
@@ -91,13 +98,8 @@ package landAdministrator {
       areaPerOwner.toList.map(tup => (tup._1, tup._2 / totalArea))
     }
 
-    def addCadastralParcel(
-        cadastralParcel: CadastralParcel,
-        proportion: Double
-    ) = {
-      assert(!landsLot.contains((cadastralParcel, proportion)))
-      landsLot ::= (cadastralParcel, proportion)
-      ownershipDistrib = cmptOwnershipDistrib(landsLot)
+    def getSurface: Double = landsLot.foldLeft(0.0) { (acc, tup) =>
+      acc + tup._1.area * tup._2
     }
 
     def removeCadastralParcel(cadastralParcel: CadastralParcel): Unit = {
@@ -116,10 +118,6 @@ package landAdministrator {
     }
 
     def getCadastralParcels: List[CadastralParcel] = landsLot.map(_._1).toList
-
-    def getSurface: Double = landsLot.foldLeft(0.0) { (acc, tup) =>
-      acc + tup._1.area * tup._2
-    }
 
     class Meadow {
       //var remainingQuantityOfGrass: Double
@@ -154,30 +152,30 @@ package landAdministrator {
   }
 
   /** Used to perform operation on LandOverlay (split, merge, add/remove
-    * parcelles) and get informations (find specific type of landOverlay)
-    */
+   * parcelles) and get informations (find specific type of landOverlay)
+   */
   class LandAdministrator(parcelsData: Any, landOverlaysData: Any) {
 
     var cadastralParcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List[LandOverlay]()
 
     /** Declare as an inner object, not stored inside the LandOverlay, cause
-      * each time we access a LandOverlay we should pass by the
-      * LandAdministrator
-      */
+     * each time we access a LandOverlay we should pass by the
+     * LandAdministrator
+     */
     /** Constructor */
     {
 
       /** Create all parcelles, given data Set Owner to ""
-        */
+       */
       def createCadastralParcels(data: Any): List[CadastralParcel] = List()
 
       /** For each paddoc/field/meadow: Find The list of CadastralParcel part of
-        * and by how much percentage In function of area of parcelles + perc of
-        * CadastralParcel inside overlay + owner find how much does each owner
-        * of overlay possess of it (usefull for computing crops income of
-        * grouped farmers)
-        */
+       * and by how much percentage In function of area of parcelles + perc of
+       * CadastralParcel inside overlay + owner find how much does each owner
+       * of overlay possess of it (usefull for computing crops income of
+       * grouped farmers)
+       */
       def createLandOverlays(data: Any): List[LandOverlay] = List()
 
       cadastralParcels = createCadastralParcels(parcelsData)
@@ -185,37 +183,20 @@ package landAdministrator {
 
     } // end constructor
 
-
-    def removeLandOverlay(landOverlay: LandOverlay): Unit = {
-        landOverlay.getCadastralParcels.foreach((parcelle: CadastralParcel) => landOverlay.removeCadastralParcel(parcelle))
-        landOverlays = landOverlays.filterNot(_ == landOverlay)
-
-    }
-
-    def addLandOverlay(landsDistrib: List[(CadastralParcel, Double)], purpose: LandOverlayPurpose.Value): LandOverlay = {
-      val landOverlay: LandOverlay = purpose match {
-        case landAdministrator.LandOverlayPurpose.wheatField => new Crop(landsDistrib)
-        case landAdministrator.LandOverlayPurpose.paddock =>  new Paddock(landsDistrib)
-        case landAdministrator.LandOverlayPurpose.meadow =>  new LandOverlay(landsDistrib) //TODO
-        case landAdministrator.LandOverlayPurpose.noPurpose => new LandOverlay(landsDistrib) //TODO
-      }
-      landOverlays ::= landOverlay
-      landOverlay
-    }
-
     /** Split a land overlay in multiple lands overlays of same/different
-      * purpose.
-      * @param current:
-      *   LandOverlay, the land overlay to split
-      * @param into:
-      *   List[LandOverlay], the final lands overlays into must only contain
-      *   CadastralParcels belonging to current, and each CadastralParcel can
-      *   appear in one and only one LandOverlay
-      */
+     * purpose.
+     *
+     * @param current :
+     *                LandOverlay, the land overlay to split
+     * @param into    :
+     *                List[LandOverlay], the final lands overlays into must only contain
+     *                CadastralParcels belonging to current, and each CadastralParcel can
+     *                appear in one and only one LandOverlay
+     */
     def splitLandOverlay(
-        current: LandOverlay,
-        into: List[(LandOverlay, LandOverlayPurpose.Value)]
-    ): Boolean = {
+                          current: LandOverlay,
+                          into: List[(LandOverlay, LandOverlayPurpose.Value)]
+                        ): Boolean = {
 
       assert(landOverlays.contains(current))
 
@@ -245,10 +226,42 @@ package landAdministrator {
       return true
     }
 
+    /** Remove the land Overlay, and create a new One of different type */
+    def changePurpose(
+                       landOverlay: LandOverlay,
+                       newPurpose: LandOverlayPurpose.Value
+                     ): LandOverlay = {
+      //remove the landOverlay, but keep its land in memory, as only the purpose changes
+      val oldLands: List[(CadastralParcel, Double)] = landOverlay.landsLot
+      removeLandOverlay(landOverlay)
+      addLandOverlay(oldLands, newPurpose)
+    }
+
+    def removeLandOverlay(landOverlay: LandOverlay): Unit = {
+      landOverlay.getCadastralParcels.foreach((parcelle: CadastralParcel) => landOverlay.removeCadastralParcel(parcelle))
+      landOverlays = landOverlays.filterNot(_ == landOverlay)
+
+    }
+
+    def addLandOverlay(landsDistrib: List[(CadastralParcel, Double)], purpose: LandOverlayPurpose.Value): LandOverlay = {
+      val landOverlay: LandOverlay = purpose match {
+        case LandOverlayPurpose.wheatField => new Crop(landsDistrib)
+        case LandOverlayPurpose.paddock => new Paddock(landsDistrib)
+        case LandOverlayPurpose.meadow => new LandOverlay(landsDistrib) //TODO
+        case LandOverlayPurpose.noPurpose => new LandOverlay(landsDistrib) //TODO
+        //case landAdministrator.LandOverlayPurpose.wheatField => new Crop(landsDistrib)
+        //case landAdministrator.LandOverlayPurpose.paddock =>  new Paddock(landsDistrib)
+        //case landAdministrator.LandOverlayPurpose.meadow =>  new LandOverlay(landsDistrib) //TODO
+        //case landAdministrator.LandOverlayPurpose.noPurpose => new LandOverlay(landsDistrib) //TODO
+      }
+      landOverlays ::= landOverlay
+      landOverlay
+    }
+
     def mergeLandOverlay(
-        toMerge: List[LandOverlay],
-        newPurpose: LandOverlayPurpose.Value
-    ): Boolean = {
+                          toMerge: List[LandOverlay],
+                          newPurpose: LandOverlayPurpose.Value
+                        ): Boolean = {
 
       var mergedLandOverlay = new LandOverlay(toMerge.map(_.landsLot).flatten)
 
@@ -256,7 +269,9 @@ package landAdministrator {
 
       changePurpose(mergedLandOverlay, newPurpose)
 
-      toMerge.foreach(lOver => { lOver.purpose = newPurpose })
+      toMerge.foreach(lOver => {
+        lOver.purpose = newPurpose
+      })
 
       /** remove old land overlay in partOf inside each parcel */
       toMerge.foreach(land_overlay =>
@@ -274,32 +289,14 @@ package landAdministrator {
       return true
     }
 
-    /** Remove the land Overlay, and create a new One of different type  */
-    def changePurpose(
-        landOverlay: LandOverlay,
-        newPurpose: LandOverlayPurpose.Value
-        ): LandOverlay = {
-          //remove the landOverlay, but keep its land in memory, as only the purpose changes
-          val oldLands: List[(CadastralParcel, Double)] = landOverlay.landsLot
-          removeLandOverlay(landOverlay)
-          addLandOverlay(oldLands, newPurpose)
-        }
-
-    /**
-     * @return The list of Paddocks (inheriting from landOverlay)
-     */
-    def getPaddocks(): List[Paddock] = {
-      landOverlays.filter(_.isInstanceOf[Paddock]).map(_.asInstanceOf[Paddock])
-    }
-
     /** Changing owner of a Parcelle, will update this Parcelle's owner inside
-      * LandOverlay and LandAdministrator Just need to recompute
-      * ownershipDistrib inside each land overlays, the Parcelle is part of
-      */
+     * LandOverlay and LandAdministrator Just need to recompute
+     * ownershipDistrib inside each land overlays, the Parcelle is part of
+     */
     def changeCadastralParcelOwner(
-        cadastralParcel: CadastralParcel,
-        new_owner: Owner
-    ) = {
+                                    cadastralParcel: CadastralParcel,
+                                    new_owner: Owner
+                                  ) = {
       cadastralParcel.owner = new_owner
       cadastralParcel.partOf.keys.foreach(key =>
         key.cmptOwnershipDistrib(key.landsLot)
@@ -314,15 +311,22 @@ package landAdministrator {
       getPaddocks().foreach(_.grassGrowth())
     }
 
+    /**
+     * @return The list of Paddocks (inheriting from landOverlay)
+     */
+    def getPaddocks(): List[Paddock] = {
+      landOverlays.filter(_.isInstanceOf[Paddock]).map(_.asInstanceOf[Paddock])
+    }
+
   }
 
   /** Class Road not needed anymore Dont needed,we could just iterate over all
-    * parcels and check id ("DP 2222") to see if a road, and implement it in the
-    * BFS algo to find access
-    */
+   * parcels and check id ("DP 2222") to see if a road, and implement it in the
+   * BFS algo to find access
+   */
 
-// Use to define what can be made on a land, e.g cannot construct houses on agricultural zone
-// All zones: https://ge.ch/sitg/geodata/SITG/CATALOGUE/INFORMATIONS_COMPLEMENTAIRES/DESCRIPTIF_ZONES_AFFECTATION.pdf
+  // Use to define what can be made on a land, e.g cannot construct houses on agricultural zone
+  // All zones: https://ge.ch/sitg/geodata/SITG/CATALOGUE/INFORMATIONS_COMPLEMENTAIRES/DESCRIPTIF_ZONES_AFFECTATION.pdf
   object ZoneType extends Enumeration {
     type ZoneType = Value
 
@@ -336,9 +340,7 @@ package landAdministrator {
     // not complete
     val Wheat, Barley, Potato = Value
   }
-
 }
-
 //https://www.etat.ge.ch/geoportail/pro/?portalresources=CAD_PARCELLE_MENSU
 
 //https://www.geo.vd.ch/?&mapresources=GEOVD_DONNEESCADASTRALES,GEOVD_DONNEESBASE contains parcells and dp

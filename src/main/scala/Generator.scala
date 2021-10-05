@@ -16,8 +16,7 @@
 * Each generated type of data is stored inside one excel file 
 */
 package generator 
-import landAdministrator.{CadastralParcel, LandAdministrator, LandOverlay, LandOverlayPurpose}
-import geography.{City, LocationAdministrator, RoadNetwork}
+import geography.{CadastralParcel, City, LandAdministrator, LandOverlay, LandOverlayPurpose, LocationAdministrator, RoadNetwork}
 import Owner._
 import farmpackage._
 import _root_.Simulation.{Person, SimO, Simulation}

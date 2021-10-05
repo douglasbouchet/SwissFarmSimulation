@@ -3,8 +3,8 @@ package farmrelated.crop
 import Simulation.Factory._
 import code._
 import Securities.Commodities._
-import landAdministrator.{Crop, LandOverlay}
 import farmpackage.Farm
+import geography.{Crop, LandOverlay}
 
 /** Add an access to a landOverlay, in order to compute unit produced, and the fact that crops should influence soil (quality, dryness)*/
 class CropProductionLine(
