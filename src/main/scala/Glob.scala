@@ -5,18 +5,16 @@ package glob {
 import generator.Generator
 import geography.RoadNetwork
 import landAdministrator._
-import prices.Prices
+import market.Prices
 
   object GLOB {
 
     val landAdministrator = new LandAdministrator(0,0)
-    val prices = new Prices(/**market*/)
     val generator = new Generator
     val globalRoadNetwork: RoadNetwork = generator.generateRoadNetwork()
     /** This will update all "Global" classes instances, such as LandAdministrator, Prices (for the moment)
      */
     def update(): Unit = {
-      prices.updateAllPrices()
       landAdministrator.update()
     }
   }

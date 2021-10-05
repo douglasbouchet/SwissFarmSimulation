@@ -20,8 +20,7 @@ import landAdministrator.{CadastralParcel, LandAdministrator, LandOverlay, LandO
 import geography.{City, LocationAdministrator, RoadNetwork}
 import Owner._
 import farmpackage._
-import _root_.Simulation.Person
-import _root_.Simulation.Simulation
+import _root_.Simulation.{Person, SimO, Simulation}
 import farmrelated.cooperative.AgriculturalCooperative
 import Securities.Commodities._
 import breeze.stats.distributions
@@ -30,6 +29,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory
 import java.io.File
 import _root_.Simulation.SimLib.{Mill, Source}
 import glob.Observator
+import market.{ExternalCommodityDemand, Prices}
 
 import scala.annotation.tailrec
 
@@ -129,7 +129,7 @@ class Generator {
    *    big farm: from 30 to (60?) (Uniform)
    *  Assign parcels until area reach the number of ha
    */ 
-  private def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel], s: Simulation, obs: Observator): List[Farm] = {
+  private def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel], s: Simulation, obs: Observator, prices: Prices): List[Farm] = {
     var parcels : List[CadastralParcel] = _parcels
     val nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
     val nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
@@ -156,19 +156,19 @@ class Generator {
     while(!parcels.isEmpty && (ended == false)){
       if(assignedSmallFarms.length < nSmallFarms){
         area = 2 + scala.util.Random.nextInt(7)
-        var farm: Farm = new Farm(s, obs)
+        var farm: Farm = new Farm(s, obs, prices)
         assignAreas(farm)
         assignedSmallFarms ::= farm
       }
       else if(assignedMedFarms.length < nMedFarms){
         area = 10 + scala.util.Random.nextInt(20)
-        var farm = new Farm(s, obs)
+        var farm = new Farm(s, obs, prices)
         assignAreas(farm)
         assignedMedFarms ::= farm
       }
       else if(assignedBigFarms.length < nBigFarms){
         area = 30 + scala.util.Random.nextInt(31)
-        var farm = new Farm(s, obs)
+        var farm = new Farm(s, obs, prices)
         assignAreas(farm)
         assignedBigFarms ::= farm
       }
@@ -277,12 +277,12 @@ private def initPerson(canton: String, s: Simulation): List[Person] = {
   //sims ++= people
 }
 
-private def initLandsAndFarms(canton: String, landAdministrator: LandAdministrator, s: Simulation, obs: Observator): List[Farm] = {
+private def initLandsAndFarms(canton: String, landAdministrator: LandAdministrator, s: Simulation, obs: Observator, prices: Prices): List[Farm] = {
   //Init generate parcels, and assign them to farms
   val allParcels = generateParcels(canton)
   landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
   //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
-  val farms = assignParcelsToFarms(canton, allParcels._1, s, obs)
+  val farms = assignParcelsToFarms(canton, allParcels._1, s, obs, prices)
   println(farms.length + " farms created ")
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init)
@@ -334,13 +334,15 @@ private def initCoop(canton: String, farms: List[Farm], s: Simulation): List[Agr
  * */
 def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simulation): Unit = {
 
-  val observator = new Observator(s)
+  val observator: Observator = new Observator(s)
+  val prices: Prices = new Prices(s)
+  val externalCommodityDemand: ExternalCommodityDemand = new ExternalCommodityDemand(s, observator)
   val nCities = 4
   val cities: List[City] = generateCities(nCities, List())
   LocationAdministrator.init(cities)
   val people: List[Person] = initPerson(canton, s)
   s.init(people)
-  val farms: List[Farm] = initLandsAndFarms(canton, landAdministrator, s, observator).take(2)
+  val farms: List[Farm] = initLandsAndFarms(canton, landAdministrator, s, observator, prices).take(2)
   val mills: List[Mill] = initMills(canton, s)
   val coop : List[AgriculturalCooperative] = initCoop(canton, farms, s)
   val sources: List[Source] = generateSources(canton, s)
@@ -351,7 +353,7 @@ def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simu
 
   coop.foreach(_.city = cities(rnd.nextInt(nCities)))
 
-  s.init(observator :: farms ::: mills ::: coop ::: sources)
+  s.init(List(observator, prices, externalCommodityDemand) ::: farms ::: mills ::: coop ::: sources)
 
   generateRoadNetwork()
 }

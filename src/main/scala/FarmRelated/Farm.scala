@@ -11,11 +11,12 @@ package farmpackage {
   import glob._
   import landAdministrator.{CadastralParcel, Crop, LandOverlay, Paddock}
   import geography.{City, Location, LocationAdministrator}
+  import market.Prices
 
   import scala.collection.mutable
 
 
-  case class Farm(s: Simulation, obs: Observator) extends SimO(s) with Location {
+  case class Farm(s: Simulation, obs: Observator, prices: Prices) extends SimO(s) with Location {
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
@@ -259,7 +260,7 @@ package farmpackage {
       //Worthness of selling to coop is getting money instantly + sure to sell all at an okay price
       def getCoopPrice: Double = {
         //0.98*s.prices.getPriceOf(com)
-        0.98*GLOB.prices.getPriceOf(com)
+        0.98*prices.getValueOf(com)
       }
 
       /** 1st Milestone: estimate profits/loss randomly (between 90 and 110 %)
@@ -268,7 +269,7 @@ package farmpackage {
        * //TODO see if can add some contracts to ensure selling price ? 
        * */
       def getSelfPrice: Double = {
-        (90.0 + scala.util.Random.nextInt(20))/100 * GLOB.prices.getPriceOf(com)
+        (90.0 + scala.util.Random.nextInt(20))/100 * prices.getValueOf(com)
       }
       
       cooperative match {
@@ -290,7 +291,7 @@ package farmpackage {
                   case Some(expireTimer) => {
                     if(s.timer < expireTimer - 1){
                         //Check if price has fallen
-                        if(GLOB.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
+                        if(prices.getValueOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
                           var toSell: Int = toSellEachTurn.getOrElse(commodity,0)/10
                           //avoid selling less than 10% of the stock each turn
                           if(holdedCommodity(com) < 2*toSell){
@@ -324,7 +325,7 @@ package farmpackage {
                   case None => {
                     //TODO duplicated code with just above, create methode
                     //In that case, the commodity was in the inventory, so just sell as much as we want.
-                    if(GLOB.prices.getPriceOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
+                    if(prices.getValueOf(commodity) <= prevPrices.getOrElse(commodity,0.0)){
                       val toSell: Int = Math.max(saleableUnits(com), 0)
                         //var toSell: Int = toSellEachTurn.getOrElse(commodity,0)/10
                         //avoid selling less than 10% of the stock each turn
@@ -343,7 +344,7 @@ package farmpackage {
                 }
                 
                 //update prevPrice of commodity
-                prevPrices.put(commodity, GLOB.prices.getPriceOf(commodity))
+                prevPrices.put(commodity, prices.getValueOf(commodity))
             }
           }
     }
