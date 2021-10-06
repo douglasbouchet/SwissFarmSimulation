@@ -61,6 +61,7 @@ package geography {
     val id: (String, Int) = _id
     val adjacentParcels: List[CadastralParcel] = adj_parcels
     val area: Double = _area
+    val coordinates : Coordinates = _coordinates
     /** TODO add method in LandAdministrator or whater that should find a
      * ParcelAccess for this parcel add it, and add this parcel inside
      * ParcelAcess's "connectedParcels" attribut
@@ -111,7 +112,7 @@ package geography {
       val botLeftCoord = Coordinates(_coordinates.c0, leftIntersection, splitPoint, downIntersection)
       val upLeftCoord = Coordinates(leftIntersection, _coordinates.c1, upIntersection, splitPoint)
       val upRightCoord = Coordinates(splitPoint, upIntersection, _coordinates.c2, rightIntersection)
-      val downRightCoord = Coordinates(downIntersection, splitPoint, leftIntersection, _coordinates.c3)
+      val downRightCoord = Coordinates(downIntersection, splitPoint, rightIntersection, _coordinates.c3)
 
       List(
         new CadastralParcel(id, owner, adj_parcels, botLeftCoord.computeArea(), botLeftCoord),

@@ -64,16 +64,38 @@ class Generator {
 
   /**
    * Start from a unique square of surface totalSurface, and split it until we reach parcels of some ha of area
-   * @param totalSurface
+   * @param totalSurface, in ha
    * @return the created CadastralParcels
    */
   def generateCadastralParcel(canton: String): List[CadastralParcel] = {
+    /** Split each parcel into 4 smaller parcels until each parcel is at most maxSize
+     * @param maxSize: if a parcel area is greater than maxSize(in ha), then it is split again
+     * */
+    @tailrec
+    def splitParcel(toSplit: CadastralParcel, remainingToSplit: List[CadastralParcel], acc: List[CadastralParcel], maxSize: Double): List[CadastralParcel] = {
+      //
+      if(toSplit == null){
+        acc
+      }
+      else{
+        val newParcels: List[CadastralParcel] = toSplit.splitCadastralParcel()
+        val toBigParcels: List[CadastralParcel] = newParcels.filter(_.coordinates.computeArea() > maxSize)
+        val correctParcels: List[CadastralParcel] = newParcels.diff(toBigParcels) // TODO check maybe do a filter not instead
+        val newParcelsToSplit: List[CadastralParcel] = remainingToSplit ::: toBigParcels
+        newParcelsToSplit.headOption match {
+          case Some(parcel) => splitParcel(parcel, newParcelsToSplit.tail, acc ::: correctParcels, maxSize)
+          case None => splitParcel(null, newParcelsToSplit, acc ::: correctParcels, maxSize)
+        }
+      }
+    }
 
-    val totalArea: Double = totalSurface.filter(_._1 == canton).head._2 * 1000000 // in m^2
+    //val totalArea = totalSurface.filter(_._1 == canton).head._2 * 10000 // in ha
+    val totalArea = 60000 // in ha
     val sidelength: Double = math.sqrt(totalArea)
     val baseCoord = Coordinates(PointF(0,0),PointF(0,sidelength),PointF(sidelength,sidelength),PointF(sidelength,0))
     val initialParcel: CadastralParcel = new CadastralParcel(("Doug le bg", 1111), new Owner(), List(), baseCoord.computeArea(), baseCoord)
 
+    splitParcel(initialParcel, List[CadastralParcel](), List[CadastralParcel](), 0.5)
     //TODO POUr demain, fonction tail recursive qui split until toutes les portions sont d'une certaine taille
   }
   /**
@@ -128,8 +150,8 @@ class Generator {
     val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
     val totalArea: Double = totalSurface.filter(_._1 == canton).head._2
     var agriculturalParcels, otherParcels: List[CadastralParcel] = List()
-    generateRdmArea(2,10,5,2.4,cropAreas).foreach(area => {agriculturalParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area)})
-    generateRdmArea(0.03,2,0.06,2.4,cropAreas).foreach(area => {otherParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area)})
+    //generateRdmArea(2,10,5,2.4,cropAreas).foreach(area => {agriculturalParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area)})
+    //generateRdmArea(0.03,2,0.06,2.4,cropAreas).foreach(area => {otherParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area)})
 
     (agriculturalParcels,otherParcels)
   }
@@ -348,6 +370,7 @@ private def initCoop(canton: String, farms: List[Farm], s: Simulation): List[Agr
  * */
 def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simulation): Unit = {
 
+  val parcels = generateCadastralParcel(canton)
   val observator: Observator = new Observator(s)
   val prices: Prices = new Prices(s)
   val externalCommodityDemand: ExternalCommodityDemand = new ExternalCommodityDemand(s, observator)
