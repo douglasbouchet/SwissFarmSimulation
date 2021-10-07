@@ -54,14 +54,14 @@ package geography {
                          _owner: Owner,
                          adj_parcels: List[CadastralParcel],
                          _area: Double,
-                         _coordinates: Coordinates
+                        // _coordinates: Coordinates
                        ) {
 
     /** (commune name, n° inside commune), unique over switzerland */
     val id: (String, Int) = _id
     val adjacentParcels: List[CadastralParcel] = adj_parcels
     val area: Double = _area
-    val coordinates : Coordinates = _coordinates
+    //val coordinates : Coordinates = _coordinates
     /** TODO add method in LandAdministrator or whater that should find a
      * ParcelAccess for this parcel add it, and add this parcel inside
      * ParcelAcess's "connectedParcels" attribut
@@ -96,8 +96,9 @@ package geography {
         //var depth_soil_exploitable_roots : Double;
       }
     }
+  }
 
-    def splitCadastralParcel(): List[CadastralParcel] =  {
+   /* def splitCadastralParcel(): List[CadastralParcel] =  {
       //select a random point inside the parcel, and split by drawing verticals and horizontals lines
       val rdm = scala.util.Random
       val splitPoint = PointF(rdm.between(_coordinates.c0.x, _coordinates.c3.x), rdm.between(_coordinates.c0.y, _coordinates.c1.y))
@@ -122,6 +123,8 @@ package geography {
       )
     }
   }
+  */
+
 
   /** group the cadastral parcels which are physically the same
    * field/paddoc/meadow, and belong to one or multiple owners

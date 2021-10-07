@@ -29,7 +29,7 @@ object MainSwissFarmSimulation {
   def main(argv: Array[String]) {
     
     //s.run(2);
-    for (i <- 0 to 1600){
+    for (i <- 0 to 5000){
       s.run_until(i)
       GLOB.update()
     }

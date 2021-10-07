@@ -67,9 +67,10 @@ class Generator {
    * @param totalSurface, in ha
    * @return the created CadastralParcels
    */
-  def generateCadastralParcel(canton: String): List[CadastralParcel] = {
+  /*def generateCadastralParcel(canton: String, maxSize: Double): List[CadastralParcel] = {
     /** Split each parcel into 4 smaller parcels until each parcel is at most maxSize
      * @param maxSize: if a parcel area is greater than maxSize(in ha), then it is split again
+     * @note: This is really slow, to generate parcels of max size 0.5 ha, from 60000ha we need ~2 minutes (complexity in O(n^2))
      * */
     @tailrec
     def splitParcel(toSplit: CadastralParcel, remainingToSplit: List[CadastralParcel], acc: List[CadastralParcel], maxSize: Double): List[CadastralParcel] = {
@@ -95,9 +96,11 @@ class Generator {
     val baseCoord = Coordinates(PointF(0,0),PointF(0,sidelength),PointF(sidelength,sidelength),PointF(sidelength,0))
     val initialParcel: CadastralParcel = new CadastralParcel(("Doug le bg", 1111), new Owner(), List(), baseCoord.computeArea(), baseCoord)
 
-    splitParcel(initialParcel, List[CadastralParcel](), List[CadastralParcel](), 0.5)
-    //TODO POUr demain, fonction tail recursive qui split until toutes les portions sont d'une certaine taille
+    splitParcel(initialParcel, List[CadastralParcel](), List[CadastralParcel](), maxSize)
   }
+
+  */
+
   /**
    * Generate cities belonging to one canton, 1 districts and random location
    * @param nCities, the number of city we want to generate
@@ -150,8 +153,8 @@ class Generator {
     val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
     val totalArea: Double = totalSurface.filter(_._1 == canton).head._2
     var agriculturalParcels, otherParcels: List[CadastralParcel] = List()
-    //generateRdmArea(2,10,5,2.4,cropAreas).foreach(area => {agriculturalParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area)})
-    //generateRdmArea(0.03,2,0.06,2.4,cropAreas).foreach(area => {otherParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area)})
+    generateRdmArea(2,10,5,2.4,cropAreas).foreach(area => {agriculturalParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area)})
+    generateRdmArea(0.03,2,0.06,2.4,cropAreas).foreach(area => {otherParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area)})
 
     (agriculturalParcels,otherParcels)
   }
@@ -318,7 +321,7 @@ private def initLandsAndFarms(canton: String, landAdministrator: LandAdministrat
   val allParcels = generateParcels(canton)
   landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
   //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
-  val farms = assignParcelsToFarms(canton, allParcels._1, s, obs, prices)
+  val farms = assignParcelsToFarms(canton, allParcels._1, s, obs, prices).take(2)
   println(farms.length + " farms created ")
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init)
@@ -370,8 +373,8 @@ private def initCoop(canton: String, farms: List[Farm], s: Simulation): List[Agr
  * */
 def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simulation): Unit = {
 
-  val parcels = generateCadastralParcel(canton)
-  val observator: Observator = new Observator(s)
+  //val parcels = generateCadastralParcel(canton, 2)
+  val observator: Observator = new Observator(s, List())
   val prices: Prices = new Prices(s)
   val externalCommodityDemand: ExternalCommodityDemand = new ExternalCommodityDemand(s, observator)
   val nCities = 4
@@ -384,6 +387,7 @@ def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simu
   val coop : List[AgriculturalCooperative] = initCoop(canton, farms, s)
   val sources: List[Source] = generateSources(canton, s)
 
+  observator.farms :::= farms
 
 
   //we place farms and cooperative inside cities

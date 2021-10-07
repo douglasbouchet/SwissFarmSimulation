@@ -97,8 +97,6 @@ package farmpackage {
             herd.newGrassOrdered = false
           }
         })
-        
-        //crops.foreach(crop => changeActivity(false, crop))
       },
       __wait(1),
       __do {
@@ -107,7 +105,7 @@ package farmpackage {
         hr.pay_workers()
         removeExpiredItems(s.timer)
         sellingStrategy //manage hold commodities
-      }
+      },
     )
 
     override def mycopy(
@@ -378,6 +376,10 @@ package farmpackage {
       obs.year_methane += herds.map(_.cows.map(_.methane).sum).sum
       obs.year_ammonia += herds.map(_.cows.map(_.ammonia).sum).sum
       resetCropsAndHerdsEmissions()
+    }
+
+    def sendInvCost(com: Commodity): Double = {
+      inventory_avg_cost.getOrElse(com, 0.0)
     }
 
     
