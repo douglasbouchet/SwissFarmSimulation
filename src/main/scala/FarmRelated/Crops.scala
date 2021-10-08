@@ -130,10 +130,10 @@ class CropProductionLine(
           //add them inside the global annual production stats:
           o.obs.updateAnnualProd(pls.produced._1, units_produced)
 
-          if(! GLOBAL.silent)
-          println(o + " produces " + units_produced + "x " +
-            pls.produced._1 + " at efficiency " + frac +
-            " and " + (unit_cost/100).toInt + "/unit.");
+          //if(! GLOBAL.silent)
+          //println(o + " produces " + units_produced + "x " +
+          //  pls.produced._1 + " at efficiency " + frac +
+          //  " and " + (unit_cost/100).toInt + "/unit.");
 
           //test of holding ressources: after should call an holding strategy from the farm
           

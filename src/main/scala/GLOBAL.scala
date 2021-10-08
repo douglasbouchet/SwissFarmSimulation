@@ -5,7 +5,7 @@ class Dummy;
 }
 
 package object GLOBAL {
-  var silent = false 
+  var silent = false
   val rnd = util.Random
 
   def mapopt[A,B](l: List[A], f: A => Option[B]) : List[B] =
