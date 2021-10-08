@@ -321,7 +321,7 @@ private def initLandsAndFarms(canton: String, landAdministrator: LandAdministrat
   val allParcels = generateParcels(canton)
   landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
   //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
-  val farms = assignParcelsToFarms(canton, allParcels._1, s, obs, prices).take(2)
+  val farms = assignParcelsToFarms(canton, allParcels._1, s, obs, prices)
   println(farms.length + " farms created ")
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init)
@@ -382,7 +382,7 @@ def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simu
   LocationAdministrator.init(cities)
   val people: List[Person] = initPerson(canton, s)
   s.init(people)
-  val farms: List[Farm] = initLandsAndFarms(canton, landAdministrator, s, observator, prices).take(2)
+  val farms: List[Farm] = initLandsAndFarms(canton, landAdministrator, s, observator, prices)
   val mills: List[Mill] = initMills(canton, s)
   val coop : List[AgriculturalCooperative] = initCoop(canton, farms, s)
   val sources: List[Source] = generateSources(canton, s)

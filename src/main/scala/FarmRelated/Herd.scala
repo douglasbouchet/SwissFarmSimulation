@@ -159,10 +159,10 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
 
           o.obs.updateAnnualProd(pls.produced._1, units_produced)
 
-          if(! GLOBAL.silent)
-            println(o + " produces " + units_produced + "x " +
-              pls.produced._1 + " at efficiency " + frac +
-              " and " + (unit_cost/100).toInt + "/unit.");
+          //if(! GLOBAL.silent)
+          //  println(o + " produces " + units_produced + "x " +
+          //    pls.produced._1 + " at efficiency " + frac +
+          //    " and " + (unit_cost/100).toInt + "/unit.");
         }
         else {
           lost_runs_cost += total_cost;
