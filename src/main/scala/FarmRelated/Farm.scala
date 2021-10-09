@@ -9,13 +9,13 @@ package farmpackage {
   import farmrelated.cooperative.AgriculturalCooperative
   import farmrelated.crop.CropProductionLine
   import glob._
-  import geography.{CadastralParcel, City, Crop, LandOverlay, Location, LocationAdministrator, Paddock}
+  import geography.{CadastralParcel, City, Crop, LandAdministrator, LandOverlay, Location, LocationAdministrator, Paddock}
   import market.Prices
 
   import scala.collection.mutable
 
 
-  case class Farm(s: Simulation, obs: Observator, prices: Prices) extends SimO(s) with Location {
+  case class Farm(s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator) extends SimO(s) with Location {
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
@@ -60,6 +60,8 @@ package farmpackage {
     //TODO add here the fact to change the type of agriculture 
     override def algo: __forever = __forever(
       __do {
+
+        //println("Potential candidates:" + landAdmin.findNClosestFarmers(parcels(0), 2))
         //Each turn, get the emissions of each crop/herd
         updateCropsAndHerdsEmissions()
 
@@ -124,6 +126,7 @@ package farmpackage {
       *   wheatSeeds These numbers should be updated afterwards
       */
     def init(): Unit = {
+      landAdmin.addAgent(this)
       //give some capital + commodities to start
       capital += 20000000
       make(WheatSeeds, 1300, 10)

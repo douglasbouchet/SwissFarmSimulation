@@ -3,9 +3,9 @@ import SimLib._
 import Securities.Commodities._
 import farmpackage.Farm
 import Simulation.Factory._
-import generator.Generator
 import Markets._
 import Simulation.Simulation
+import generation.Generator
 import glob._
 
 object MainSwissFarmSimulation {
@@ -15,10 +15,10 @@ object MainSwissFarmSimulation {
   //val flour_trader  = new Trader(Flour, 50, s);
   // val flour_buyer     = new Buyer(Flour, () => 40, s);
 
-  val generator = new Generator
   val canton = "Glaris"
+  val generator = new Generator(canton)
 
-  generator.generateAgents(canton, GLOB.landAdministrator, s)
+  generator.generateAgents(GLOB.landAdministrator, s)
 
   //def main(argv: Array[String]) {
   //  if((argv.length != 1) || (argv(0).toInt < 1))

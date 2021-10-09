@@ -1,39 +1,39 @@
-/** 
+/**
 * @note This class is in charge of generating data for the simulation engine
 * The area are in ha
 * It generates the following:
   - Number of farm, their size (in term of surface), type of crops + bio farms
    (defined using statistics about Switzerland's Canton/District)
-  - The lands, and land overlays 
-  - Basic suppliers TODO define more precisely  
-  - The agglomerations: 
+  - The lands, and land overlays
+  - Basic suppliers TODO define more precisely
+  - The agglomerations:
     "x = n inhabitants" We create villages(x < 2k), town (2k < x < 5k), small city (5k < x < 20k),
     medium city (20k < x < 50k), big city (50k > x)
-    TODO comment distancer les villes ? inclure une dimension spatiale ? 
+    TODO comment distancer les villes ? inclure une dimension spatiale ?
   - People based on these cities
   - Other entities than farms involved in food supply chain
 * For the moment we do not have any spatial locality, so no ways to known which parcels are neighbors
-* Each generated type of data is stored inside one excel file 
+* Each generated type of data is stored inside one excel file
 */
-package generator 
-import geography.{CadastralParcel, City, Coordinates, LandAdministrator, LandOverlay, LandOverlayPurpose, LocationAdministrator, PointF, RoadNetwork}
+package generation
+
 import Owner._
-import farmpackage._
-import _root_.Simulation.{Person, SimO, Simulation}
-import farmrelated.cooperative.AgriculturalCooperative
 import Securities.Commodities._
+import _root_.Simulation.SimLib.{Mill, Source}
+import _root_.Simulation.{Person, Simulation}
 import breeze.stats.distributions
+import farmpackage._
+import farmrelated.cooperative.AgriculturalCooperative
+import geography._
+import glob.Observator
+import market.{ExternalCommodityDemand, Prices}
 import org.apache.poi.ss.usermodel.WorkbookFactory
 
 import java.io.File
-import _root_.Simulation.SimLib.{Mill, Source}
-import glob.Observator
-import market.{ExternalCommodityDemand, Prices}
-
 import scala.annotation.tailrec
 
 
-class Generator {
+class Generator(canton: String) {
 
   val rnd: scala.util.Random = new scala.util.Random // fix the seed
   val f = new File("/Users/douglasbouchet/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
@@ -67,7 +67,7 @@ class Generator {
    * @param totalSurface, in ha
    * @return the created CadastralParcels
    */
-  /*def generateCadastralParcel(canton: String, maxSize: Double): List[CadastralParcel] = {
+  /*def generateCadastralParcel( maxSize: Double): List[CadastralParcel] = {
     /** Split each parcel into 4 smaller parcels until each parcel is at most maxSize
      * @param maxSize: if a parcel area is greater than maxSize(in ha), then it is split again
      * @note: This is really slow, to generate parcels of max size 0.5 ha, from 60000ha we need ~2 minutes (complexity in O(n^2))
@@ -110,7 +110,7 @@ class Generator {
   @tailrec
   final def generateCities(nCities: Int, cites: List[City], names: List[String] = List[String]("Morges", "Saint-Sulpice", "Cossonay", "Lausanne")): List[City] = {
     if(nCities > 0){
-      // class City(_name: String, _district: String, _canton: String, _centerCoord: (Double, Double))
+      // class City(_name: String, _district: String, _ _centerCoord: (Double, Double))
       val name: String = names.head
       val coord: (Double, Double) = (45 + rnd.nextDouble()*2, 40 + rnd.nextDouble()) //make cities close to each other (as in real life for these cities names)
       generateCities(nCities - 1, cites :+ new City(name, "MORGES", "Vaud", coord), names.tail)
@@ -149,7 +149,7 @@ class Generator {
    * other ranges from 0.03 ha to 2 ha, gaussian distrib of mean 0.06, var TBD
    * TODO add some statistics about each commune in switzerland 
    * generate parcels for each of this communes based on these statististics (to give id to parcels) */ 
-  private def generateParcels(canton: String): (List[CadastralParcel],List[CadastralParcel]) = {
+  private def generateParcels(): (List[CadastralParcel],List[CadastralParcel]) = {
     val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
     val totalArea: Double = totalSurface.filter(_._1 == canton).head._2
     var agriculturalParcels, otherParcels: List[CadastralParcel] = List()
@@ -168,7 +168,7 @@ class Generator {
    *    big farm: from 30 to (60?) (Uniform)
    *  Assign parcels until area reach the number of ha
    */ 
-  private def assignParcelsToFarms(canton: String, _parcels: List[CadastralParcel], s: Simulation, obs: Observator, prices: Prices): List[Farm] = {
+  private def assignParcelsToFarms( _parcels: List[CadastralParcel], s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator): List[Farm] = {
     var parcels : List[CadastralParcel] = _parcels
     val nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
     val nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
@@ -195,19 +195,19 @@ class Generator {
     while(!parcels.isEmpty && (ended == false)){
       if(assignedSmallFarms.length < nSmallFarms){
         area = 2 + scala.util.Random.nextInt(7)
-        var farm: Farm = new Farm(s, obs, prices)
+        var farm: Farm = new Farm(s, obs, prices,landAdmin)
         assignAreas(farm)
         assignedSmallFarms ::= farm
       }
       else if(assignedMedFarms.length < nMedFarms){
         area = 10 + scala.util.Random.nextInt(20)
-        var farm = new Farm(s, obs, prices)
+        var farm = new Farm(s, obs, prices,landAdmin)
         assignAreas(farm)
         assignedMedFarms ::= farm
       }
       else if(assignedBigFarms.length < nBigFarms){
         area = 30 + scala.util.Random.nextInt(31)
-        var farm = new Farm(s, obs, prices)
+        var farm = new Farm(s, obs, prices,landAdmin)
         assignAreas(farm)
         assignedBigFarms ::= farm
       }
@@ -294,7 +294,7 @@ class Generator {
     }
   }
 
-  def generateSources(canton: String, s: Simulation): List[Source] = {
+  def generateSources( s: Simulation): List[Source] = {
     val seedsSeller = new Source(WheatSeeds, 10000000,300, s);
     val seedsSeller1 = new Source(WheatSeeds, 100000,340, s);
     val feedStuffSeller = new Source(FeedStuff, 100000,100, s);
@@ -308,7 +308,7 @@ class Generator {
 
 
 /**Create people living in a canton, and push them on labour_market (i.e they can be hire) */
-private def initPerson(canton: String, s: Simulation): List[Person] = {
+private def initPerson( s: Simulation): List[Person] = {
   val people = (for (i <- 1 to population.filter(_._1 == canton).head._2) yield new Person(s, false)).toList
   println("Generating " + people.length + " people")
   //s.labour_market.pushAll(people)
@@ -316,12 +316,12 @@ private def initPerson(canton: String, s: Simulation): List[Person] = {
   //sims ++= people
 }
 
-private def initLandsAndFarms(canton: String, landAdministrator: LandAdministrator, s: Simulation, obs: Observator, prices: Prices): List[Farm] = {
+private def initLandsAndFarms( landAdministrator: LandAdministrator, s: Simulation, obs: Observator, prices: Prices): List[Farm] = {
   //Init generate parcels, and assign them to farms
-  val allParcels = generateParcels(canton)
+  val allParcels = generateParcels()
   landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
   //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
-  val farms = assignParcelsToFarms(canton, allParcels._1, s, obs, prices)
+  val farms = assignParcelsToFarms(allParcels._1, s, obs, prices,landAdministrator).take(4)
   println(farms.length + " farms created ")
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init)
@@ -332,7 +332,7 @@ private def initLandsAndFarms(canton: String, landAdministrator: LandAdministrat
  *  The production if mills is a pure guess. Change it afterwards
  * @param canton
  */
- private def initMills(canton: String, s: Simulation): List[Mill] = {
+ private def initMills( s: Simulation): List[Mill] = {
   val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
   val tonnesOfWheat: Int = math.round((cropAreas*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)
   /** Assum Mill handle 100T of wheat per turn */
@@ -349,7 +349,7 @@ private def initLandsAndFarms(canton: String, landAdministrator: LandAdministrat
   * @param s
   * @return a list of AgriculturalCooperative
   */
-private def initCoop(canton: String, farms: List[Farm], s: Simulation): List[AgriculturalCooperative] = {
+private def initCoop( farms: List[Farm], s: Simulation): List[AgriculturalCooperative] = {
   //for the moment, only create 1 coop
   List[AgriculturalCooperative](new AgriculturalCooperative(farms, List(Wheat, Fertilizer), s))
 }
@@ -371,7 +371,7 @@ private def initCoop(canton: String, farms: List[Farm], s: Simulation): List[Agr
  * @param landAdministrator: this function create its parcels and land overlays
  * @return a list of all agents, that should be put as argument into init function of simulation
  * */
-def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simulation): Unit = {
+def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = {
 
   //val parcels = generateCadastralParcel(canton, 2)
   val observator: Observator = new Observator(s, List())
@@ -380,12 +380,12 @@ def generateAgents(canton: String, landAdministrator: LandAdministrator, s: Simu
   val nCities = 4
   val cities: List[City] = generateCities(nCities, List())
   LocationAdministrator.init(cities)
-  val people: List[Person] = initPerson(canton, s)
+  val people: List[Person] = initPerson(s)
   s.init(people)
-  val farms: List[Farm] = initLandsAndFarms(canton, landAdministrator, s, observator, prices)
-  val mills: List[Mill] = initMills(canton, s)
-  val coop : List[AgriculturalCooperative] = initCoop(canton, farms, s)
-  val sources: List[Source] = generateSources(canton, s)
+  val farms: List[Farm] = initLandsAndFarms(landAdministrator, s, observator, prices)
+  val mills: List[Mill] = initMills(s)
+  val coop : List[AgriculturalCooperative] = initCoop(farms, s)
+  val sources: List[Source] = generateSources(s)
 
   observator.farms :::= farms
 
