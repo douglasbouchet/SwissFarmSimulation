@@ -8,7 +8,7 @@ import market.Prices
 
   object GLOB {
 
-    val landAdministrator = new LandAdministrator(0,0)
+    val landAdministrator = new LandAdministrator("Glaris")
     val generator = new Generator
     val globalRoadNetwork: RoadNetwork = generator.generateRoadNetwork()
     /** This will update all "Global" classes instances, such as LandAdministrator, Prices (for the moment)

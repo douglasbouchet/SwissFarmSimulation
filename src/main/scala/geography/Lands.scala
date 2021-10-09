@@ -1,7 +1,14 @@
 import Owner._
 //import roadNetwork.Node
+import generation.LandGenerator
 
 package geography {
+
+  import Simulation.SimLib.Mill
+  import Simulation.SimO
+  import farmpackage.Farm
+
+  import scala.collection.mutable
 
 
   case class PointF(x: Double, y: Double) {
@@ -131,8 +138,6 @@ package geography {
    */
   class LandOverlay(aggregation: List[(CadastralParcel, Double)]) {
 
-
-
     /** (CadastralParcel, Percentage occupied on it (0 to 1)) */
     var landsLot: List[(CadastralParcel, Double)] = aggregation
 
@@ -232,35 +237,19 @@ package geography {
   /** Used to perform operation on LandOverlay (split, merge, add/remove
    * parcelles) and get informations (find specific type of landOverlay)
    */
-  class LandAdministrator(parcelsData: Any, landOverlaysData: Any) {
+  class LandAdministrator(canton: String) {
 
-    var cadastralParcels: List[CadastralParcel] = List()
+    val landGenerator = new LandGenerator()
+
+    var cadastralParcels: List[CadastralParcel] = landGenerator.generateParcels(canton)
     var landOverlays: List[LandOverlay] = List[LandOverlay]()
 
-    /** Declare as an inner object, not stored inside the LandOverlay, cause
-     * each time we access a LandOverlay we should pass by the
-     * LandAdministrator
-     */
-    /** Constructor */
-    {
+    val landIndexing: mutable.Map[CadastralParcel, Int] = landGenerator.parcelsToIndex
 
-      /** Create all parcelles, given data Set Owner to ""
-       */
-      def createCadastralParcels(data: Any): List[CadastralParcel] = List()
-
-      /** For each paddoc/field/meadow: Find The list of CadastralParcel part of
-       * and by how much percentage In function of area of parcelles + perc of
-       * CadastralParcel inside overlay + owner find how much does each owner
-       * of overlay possess of it (usefull for computing crops income of
-       * grouped farmers)
-       */
-      def createLandOverlays(data: Any): List[LandOverlay] = List()
-
-      cadastralParcels = createCadastralParcels(parcelsData)
-      landOverlays = createLandOverlays(landOverlaysData)
-
-    } // end constructor
-
+    //get all the agents of a given type, this will be used when looking for near agents of a specific type
+    //i.e search a mill, a supermarket, or whatever. Care to update carefully this list
+    val farmersList : List[Farm] = List()
+    val millsList : List[Mill] = List()
 
   /** Split a land overlay in multiple lands overlays of same/different
      * purpose.
@@ -302,7 +291,7 @@ package geography {
 
       landOverlays :::= into.map(_._1)
 
-      return true
+      true
     }
 
     /** Remove the land Overlay, and create a new One of different type */
@@ -328,10 +317,6 @@ package geography {
         case LandOverlayPurpose.paddock => new Paddock(landsDistrib)
         case LandOverlayPurpose.meadow => new LandOverlay(landsDistrib) //TODO
         case LandOverlayPurpose.noPurpose => new LandOverlay(landsDistrib) //TODO
-        //case landAdministrator.LandOverlayPurpose.wheatField => new Crop(landsDistrib)
-        //case landAdministrator.LandOverlayPurpose.paddock =>  new Paddock(landsDistrib)
-        //case landAdministrator.LandOverlayPurpose.meadow =>  new LandOverlay(landsDistrib) //TODO
-        //case landAdministrator.LandOverlayPurpose.noPurpose => new LandOverlay(landsDistrib) //TODO
       }
       landOverlays ::= landOverlay
       landOverlay
@@ -365,7 +350,7 @@ package geography {
       toMerge.foreach(l_over => landOverlays.filterNot(_ == l_over))
       landOverlays ::= mergedLandOverlay
 
-      return true
+      true
     }
 
     /** Changing owner of a Parcelle, will update this Parcelle's owner inside
@@ -385,6 +370,60 @@ package geography {
     //TODO
     def findParcelAccess(parcel: CadastralParcel) {}
 
+
+
+    /**
+     * Find the n closest farmers, given a current parcel.
+     * Distance compute using L2-norm
+     * @param from parcel from which we want to search
+     * @param n
+     * @return an option of such a list
+     * TODO, see if we replace n by a distance
+     */
+    def findNClosestFarmers(from: CadastralParcel, n: Int): Option[List[(Farm, Double)]] = {
+      val fromIndex = landIndexing.getOrElse(from, -1)
+      val sideLength = landGenerator.sideLength
+      val fromIndexLine = fromIndex / sideLength
+      val fromIndexCol = fromIndex % sideLength
+        require(fromIndex != -1)
+      var agentsByDistance = List[(Farm, Double)]()
+      farmersList.foreach(farmer =>{
+        farmer.parcels.headOption match {
+          case Some(parcel) => {
+            val parcelIndex = landIndexing.getOrElse(parcel, -1)
+            require(parcelIndex != -1)
+            agentsByDistance ::= (farmer, math.sqrt(math.pow(fromIndexLine - parcelIndex / sideLength,2) + math.pow(fromIndexCol - parcelIndex % sideLength,2)))
+          }
+          case None => println("A farmer doesn't got any parcel (findNClosestFarmers)")
+        }
+      })
+      if (agentsByDistance.isEmpty) None
+      else Some(agentsByDistance.sortBy(_._2).takeRight(n))
+    }
+
+    /*def findNClosestMills(from: CadastralParcel, n: Int): Option[List[(Mill, Double)]] = {
+      val fromIndex = landIndexing.getOrElse(from, -1)
+      val sideLength = landGenerator.sideLength
+      val fromIndexLine = fromIndex / sideLength
+      val fromIndexCol = fromIndex % sideLength
+      require(fromIndex != -1)
+      var agentsByDistance = List[(Mill, Double)]()
+      millsList.foreach(mill =>{
+        mill.parcels.headOption match {
+          case Some(parcel) => {
+            val parcelIndex = landIndexing.getOrElse(parcel, -1)
+            require(parcelIndex != -1)
+            agentsByDistance ::= (mill, math.sqrt(math.pow(fromIndexLine - parcelIndex / sideLength,2) + math.pow(fromIndexCol - parcelIndex % sideLength,2)))
+          }
+          case None => println("A mill doesn't got any parcel (findNClosestMills)")
+        }
+      })
+      if (agentsByDistance.isEmpty) None
+      else Some(agentsByDistance.sortBy(_._2).takeRight(n))
+    }
+    */
+
+
     /** Only update quantity of grass on each Paddock at the moment, can be more complex afterwards, like changing caracteristics of lands after a rainfall, etc... */
     def update(): Unit = {
       getPaddocks().foreach(_.grassGrowth())
@@ -396,6 +435,9 @@ package geography {
     def getPaddocks(): List[Paddock] = {
       landOverlays.filter(_.isInstanceOf[Paddock]).map(_.asInstanceOf[Paddock])
     }
+
+    //add the agent in function of its type in the good list
+    def addAgent(agent: SimO) = ???
 
   }
 
