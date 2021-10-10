@@ -156,18 +156,24 @@ class LandAdministrator(canton: String) {
    * TODO, see if we replace n by a distance
    */
   def findNClosestFarmers(from: CadastralParcel, n: Int): Option[List[(Farm, Double)]] = {
+    val x = landIndexing.contains(from)
+    val y = landIndexing.contains(cadastralParcels(0))
     val fromIndex = landIndexing.getOrElse(from, -1)
+    require(fromIndex != -1)
     val sideLength = landGenerator.sideLength
     val fromIndexLine = fromIndex / sideLength
     val fromIndexCol = fromIndex % sideLength
-    require(fromIndex != -1)
     var agentsByDistance = List[(Farm, Double)]()
     farmersList.foreach(farmer =>{
       farmer.parcels.headOption match {
         case Some(parcel) => {
           val parcelIndex = landIndexing.getOrElse(parcel, -1)
           require(parcelIndex != -1)
-          agentsByDistance ::= (farmer, math.sqrt(math.pow(fromIndexLine - parcelIndex / sideLength,2) + math.pow(fromIndexCol - parcelIndex % sideLength,2)))
+          //as we pass the first parcel in from arg, sufficient to check that head != to not put the asking agent
+          if(parcelIndex != fromIndex){
+            agentsByDistance ::= (farmer, math.sqrt(math.pow(fromIndexLine - parcelIndex / sideLength,2) + math.pow(fromIndexCol - parcelIndex % sideLength,2)))
+          }
+
         }
         case None => println("A farmer doesn't got any parcel (findNClosestFarmers)")
       }

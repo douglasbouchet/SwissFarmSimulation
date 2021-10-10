@@ -168,8 +168,8 @@ class Generator(canton: String) {
    *    big farm: from 30 to (60?) (Uniform)
    *  Assign parcels until area reach the number of ha
    */ 
-  private def assignParcelsToFarms( _parcels: List[CadastralParcel], s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator): List[Farm] = {
-    var parcels : List[CadastralParcel] = _parcels
+  private def assignParcelsToFarms(s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator): List[Farm] = {
+    var parcels : List[CadastralParcel] = landAdmin.cadastralParcels
     val nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
     val nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
     val nBigFarms:   Int = nbFarmMore30ha.filter(_._1 == canton).head._2
@@ -195,19 +195,19 @@ class Generator(canton: String) {
     while(!parcels.isEmpty && (ended == false)){
       if(assignedSmallFarms.length < nSmallFarms){
         area = 2 + scala.util.Random.nextInt(7)
-        var farm: Farm = new Farm(s, obs, prices,landAdmin)
+        var farm: Farm = Farm(s, obs, prices,landAdmin)
         assignAreas(farm)
         assignedSmallFarms ::= farm
       }
       else if(assignedMedFarms.length < nMedFarms){
         area = 10 + scala.util.Random.nextInt(20)
-        var farm = new Farm(s, obs, prices,landAdmin)
+        var farm = Farm(s, obs, prices,landAdmin)
         assignAreas(farm)
         assignedMedFarms ::= farm
       }
       else if(assignedBigFarms.length < nBigFarms){
         area = 30 + scala.util.Random.nextInt(31)
-        var farm = new Farm(s, obs, prices,landAdmin)
+        var farm = Farm(s, obs, prices,landAdmin)
         assignAreas(farm)
         assignedBigFarms ::= farm
       }
@@ -216,13 +216,16 @@ class Generator(canton: String) {
     }
 
     val farms: List[Farm] = assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
+    farms
 
     /** we reached the expected number of farm for the canton
      * if some parcels remain, add them to some farms randomly */
-    if(!parcels.isEmpty){
-      parcels.foreach(parcel => (farms(scala.util.Random.nextInt(nFarms)).parcels ::= parcel))
-    }
-    scala.util.Random.shuffle(farms)
+    /** Currently not anymore, cause giving lands for both agricultural purpose and other purpose,
+     * remaining parcels will be used by other agents */
+    //if(!parcels.isEmpty){
+    //  parcels.foreach(parcel => (farms(scala.util.Random.nextInt(nFarms)).parcels ::= parcel))
+    //}
+    //scala.util.Random.shuffle(farms)
   }
 
   // assignParcelsToFarms("Jura", generateParcels("Jura")._1)
@@ -316,16 +319,18 @@ private def initPerson( s: Simulation): List[Person] = {
   //sims ++= people
 }
 
-private def initLandsAndFarms( landAdministrator: LandAdministrator, s: Simulation, obs: Observator, prices: Prices): List[Farm] = {
+private def initLandsAndFarms(landAdministrator: LandAdministrator, s: Simulation, obs: Observator, prices: Prices): List[Farm] = {
   //Init generate parcels, and assign them to farms
-  val allParcels = generateParcels()
-  landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
-  //var farms = generator.assignParcelsToFarms(canton, allParcels._1, this)
-  val farms = assignParcelsToFarms(allParcels._1, s, obs, prices,landAdministrator).take(4)
+  //old way of generating parcels -------
+  //val allParcels = generateParcels()
+  //landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
+  //val farms = assignParcelsToFarms(allParcels._1, s, obs, prices,landAdministrator).take(4)
+  // ------------------------------------
+  val parcels = landAdministrator.cadastralParcels
+  val farms = assignParcelsToFarms(s, obs, prices,landAdministrator).take(4)
   println(farms.length + " farms created ")
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init)
-
   farms
 }
 /** Generate Mills based on production of a canton
