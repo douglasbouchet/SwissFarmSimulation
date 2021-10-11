@@ -32,9 +32,12 @@ package object Commodities {
 
   val Wheat       = Commodity("wheat")  //The Wheat unit is in tonne
   val Pea         = Commodity("pea")
-  val CanolaOil   = Commodity("CanolaOil")
+  val CanolaOil   = Commodity("canola oil")
 
   val Flour       = Commodity("flour")
+  val Bread       = Commodity("bread")
+
+
   val Land        = Commodity("land")
   val MovieTicket = Commodity("ticket")
   val Beef        = Commodity("beef")
@@ -43,7 +46,9 @@ package object Commodities {
   val FeedStuff   = Commodity("feedStuff")
   val Grass       = Commodity("grass")
 
-  val all_commodities = List(WheatSeeds, Wheat, Flour, Land, MovieTicket, Beef, Burger, Fertilizer, FeedStuff, Grass);
+
+
+  val all_commodities = List(WheatSeeds, Wheat, Flour, Bread, Land, MovieTicket, Beef, Burger, Fertilizer, FeedStuff, Grass);
 }
 
 

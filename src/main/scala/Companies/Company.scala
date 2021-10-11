@@ -1,50 +1,80 @@
+/**
+ * This abstract class should be extended for each type of company we want to create, between the farmers and the consumers
+ * We use an abstract class to make it easier when  looking for a specific type of company in land Administrator
+ */
 package Companies
 
-import Owner.Owner
+import Owner.Seller
 import Securities.Commodities._
-import Simulation.Factory.{Factory, ProductionLineSpec}
 import Simulation.Simulation
+import _root_.Simulation.Factory.{Factory, ProductionLineSpec}
 import geography.{CadastralParcel, LandAdministrator}
 
+import scala.collection.mutable
+
 /**
- * This will represent all the agents involved in food supply chain, between the farmers and the consumers
- * @param pls
- * @param shared
- * @param _parcels
- * Milestone 1: Only a factory that has one type of production
- * Milestone 2: add multiple production line, thus we can make a strategy to decide which commodities and in which quantity to produce
+ * @param s the Simulation instance
+ * @param _parcels Each company should be located somewhere (in order to find local suppliers and to be found).
+ * @param lAdmin Used to find some local providers, sellers
+ * @param pls The production Line spec of this company
  */
-abstract class Company(s: Simulation,lAdmin: LandAdministrator, _parcels: List[CadastralParcel]) extends Owner{
-  val parcels = _parcels
-  require(!parcels.isEmpty)
+abstract class Company(s: Simulation, lAdmin: LandAdministrator, _parcels: List[CadastralParcel], pls: ProductionLineSpec) extends Factory(pls, s){
+
+  val parcels: List[CadastralParcel] = _parcels
+  require(parcels.nonEmpty)
 
   //This will be used to decide which production to make in function of the last year demand, + benefits
-  val lastYearDemand = scala.collection.mutable.Map[Commodity, Double]()
-  val lastYearBenefits = scala.collection.mutable.Map[Commodity, Double]()
-  val lastYearIncBenefits = scala.collection.mutable.Map[Commodity, Double]()
+  val lastYearDemand: mutable.Map[Commodity, Double]      = scala.collection.mutable.Map[Commodity, Double]()
+  val lastYearBenefits: mutable.Map[Commodity, Double]    = scala.collection.mutable.Map[Commodity, Double]()
+  val lastYearIncBenefits: mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
 
   /**
    * check inside contact network if we have seller for this commodity
    * If some, call market_buy_order_now with (some)
    * Else get the closest sellers for this type from the landAdministrator (until buy quantity is satisfied)
-   * @param com
+   * @param line (which commodity to buy, how many)
+   * TODO this method is ugly atm, cause no real method to have a map of type of agents -> list of this agent inside land admin
    */
-  def buy(com: Commodity, quantity: Int): Unit = {
-    val usualSellers = contactNetwork.contactsSellingCom(com)
-    if(!usualSellers.isEmpty){
-      s.market(com).market_buy_order_now(s.timer, this, quantity, usualSellers)
+  def buy(line: (Commodity, Int)): Boolean = {
+    val usualSellers = contactNetwork.contactsSellingCom(line._1)
+    if(usualSellers.nonEmpty){
+      s.market(line._1).market_buy_order_now(s.timer, this, line._2, usualSellers) == 0
     }
+    //Look for some agents(near to this one) that could provide the asked supply
     else{
-      var candidates = List()
-      com match {
-        case (Wheat || Pea || CanolaOil) => {
-          lAdmin.findNClosestFarmers(parcels(0), 3) match {
+      var candidates = List[Seller]()
+      line._1 match {
+        case Wheat | Pea | CanolaOil =>
+          lAdmin.findNClosestFarmers(parcels.head, 3) match {
             case Some(value) => candidates = value.map(_._1)
             case None =>
           }
-        }
+        case Flour =>
+          lAdmin.findNClosestMills(parcels.head, 3) match {
+            case Some(value) => candidates = value.map(_._1)
+            case None =>
+          }
+        case Bread =>
+          lAdmin.findNClosestBakery(parcels.head, 3) match {
+            case Some(value) => candidates = value.map(_._1)
+            case None =>
+          }
+        case _ => println("Commodity research not implemented in Company.scala")
       }
-      //val possibleNewSellers =
+      s.market(line._1).market_buy_order_now(s.timer, this, line._2, candidates) == 0
     }
   }
+
+  //TODO check if correctly
+  override def bulk_buy_missing(_l: List[(Commodity, Int)], multiplier: Int) : Boolean = {
+    val l = _l.map(t => {
+      // DANGER: if we have shorted his position, this amount is
+      // not sufficient.
+      val amount = math.max(0, t._2 * multiplier - available(t._1))
+      (t._1, amount)
+    })
+    l.forall(buy)
+  }
 }
+
+

@@ -1,8 +1,8 @@
 package geography
 
-import Companies.Supermarket
+import Companies.{Supermarket, Mill}
 import Owner.Owner
-import Simulation.SimLib.Mill
+//import Simulation.SimLib.Mill
 import Simulation.SimO
 import farmpackage.Farm
 import generation.LandGenerator
@@ -183,6 +183,17 @@ class LandAdministrator(canton: String) {
     if (agentsByDistance.isEmpty) None
     else Some(agentsByDistance.sortBy(_._2).takeRight(n))
   }
+
+  def findNClosestMills(from: CadastralParcel, n: Int): Option[List[(Farm, Double)]] = {
+    //TODO
+    None
+  }
+
+  def findNClosestBakery(from: CadastralParcel, n: Int): Option[List[(Farm, Double)]] = {
+    //TODO
+    None
+  }
+
 
   /*def findNClosestMills(from: CadastralParcel, n: Int): Option[List[(Mill, Double)]] = {
     val fromIndex = landIndexing.getOrElse(from, -1)

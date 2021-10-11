@@ -17,11 +17,9 @@
 */
 package generation
 
-import Owner._
 import Securities.Commodities._
 import _root_.Simulation.SimLib.{Mill, Source}
-import _root_.Simulation.{Person, Simulation}
-import breeze.stats.distributions
+import _root_.Simulation.{Person, SimO, Simulation}
 import farmpackage._
 import farmrelated.cooperative.AgriculturalCooperative
 import geography._
@@ -63,45 +61,6 @@ class Generator(canton: String) {
 
 
   /**
-   * Start from a unique square of surface totalSurface, and split it until we reach parcels of some ha of area
-   * @param totalSurface, in ha
-   * @return the created CadastralParcels
-   */
-  /*def generateCadastralParcel( maxSize: Double): List[CadastralParcel] = {
-    /** Split each parcel into 4 smaller parcels until each parcel is at most maxSize
-     * @param maxSize: if a parcel area is greater than maxSize(in ha), then it is split again
-     * @note: This is really slow, to generate parcels of max size 0.5 ha, from 60000ha we need ~2 minutes (complexity in O(n^2))
-     * */
-    @tailrec
-    def splitParcel(toSplit: CadastralParcel, remainingToSplit: List[CadastralParcel], acc: List[CadastralParcel], maxSize: Double): List[CadastralParcel] = {
-      //
-      if(toSplit == null){
-        acc
-      }
-      else{
-        val newParcels: List[CadastralParcel] = toSplit.splitCadastralParcel()
-        val toBigParcels: List[CadastralParcel] = newParcels.filter(_.coordinates.computeArea() > maxSize)
-        val correctParcels: List[CadastralParcel] = newParcels.diff(toBigParcels) // TODO check maybe do a filter not instead
-        val newParcelsToSplit: List[CadastralParcel] = remainingToSplit ::: toBigParcels
-        newParcelsToSplit.headOption match {
-          case Some(parcel) => splitParcel(parcel, newParcelsToSplit.tail, acc ::: correctParcels, maxSize)
-          case None => splitParcel(null, newParcelsToSplit, acc ::: correctParcels, maxSize)
-        }
-      }
-    }
-
-    //val totalArea = totalSurface.filter(_._1 == canton).head._2 * 10000 // in ha
-    val totalArea = 60000 // in ha
-    val sidelength: Double = math.sqrt(totalArea)
-    val baseCoord = Coordinates(PointF(0,0),PointF(0,sidelength),PointF(sidelength,sidelength),PointF(sidelength,0))
-    val initialParcel: CadastralParcel = new CadastralParcel(("Doug le bg", 1111), new Owner(), List(), baseCoord.computeArea(), baseCoord)
-
-    splitParcel(initialParcel, List[CadastralParcel](), List[CadastralParcel](), maxSize)
-  }
-
-  */
-
-  /**
    * Generate cities belonging to one canton, 1 districts and random location
    * @param nCities, the number of city we want to generate
    * @return the generated cities
@@ -118,47 +77,15 @@ class Generator(canton: String) {
     else cites
   }
 
-  /** Generate random areas until a total area is reached, following a gaussian distribution 
-   * If generated area outside [min,max], generates a new one
-   * @param min: Double, the minimum value
-   * @param max: Double, the maximum value
-   * @param mean: Double, mean of the gaussian
-   * @param variance: Double, variance of the gaussian
-   * @param until: Double, the total area we want to achieve
-  */
-  private def generateRdmArea(min: Double, max: Double, mean: Double, variance: Double, until: Double): List[Double] = {
-    var remainingArea = until
-    val gaussianDist  = distributions.Gaussian(mean,variance)
-    var sample: Double = 0
-    var areas: List[Double] = List()
 
-    while(remainingArea > 0){
-      sample = BigDecimal(gaussianDist.sample()).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble 
-      if(sample >= min && sample <= max){
-        areas = sample :: areas
-        remainingArea -= sample
-      }
-    }
-    areas
+  /** This method is in charge of creating all the companies involved in the food supply chain
+   * will generate the companies according to the canton statistics base crop/herd production
+   * This also assign parcels to companies
+   * TODO tomorrow
+   * */
+  private def CreateCompanies(s: Simulation, lAdmin: LandAdministrator, obs: Observator, canton: String): List[SimO] = {
+    List()
   }
-
-  /** Next we construct the parcels 
-   * We differentiate 2 types of parcels, the agricultural ones, the other
-   * agricultural parcels range from 2 to 10 ha, following gaussian distribution of mean 5, var TBD (rm external values)
-   * (this was a quick guess, try to find more precise infos)
-   * other ranges from 0.03 ha to 2 ha, gaussian distrib of mean 0.06, var TBD
-   * TODO add some statistics about each commune in switzerland 
-   * generate parcels for each of this communes based on these statististics (to give id to parcels) */ 
-  private def generateParcels(): (List[CadastralParcel],List[CadastralParcel]) = {
-    val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
-    val totalArea: Double = totalSurface.filter(_._1 == canton).head._2
-    var agriculturalParcels, otherParcels: List[CadastralParcel] = List()
-    generateRdmArea(2,10,5,2.4,cropAreas).foreach(area => {agriculturalParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area)})
-    generateRdmArea(0.03,2,0.06,2.4,cropAreas).foreach(area => {otherParcels ::= new CadastralParcel(("TBD",0),new Owner, List(), area)})
-
-    (agriculturalParcels,otherParcels)
-  }
-
   /** Assign an amount of parcels to small, medium, big farms.
    * Repeat until number of farm of the canton is reached. Remaining parcels are distributed rdmly among existing farms.
    * For each farm: 
