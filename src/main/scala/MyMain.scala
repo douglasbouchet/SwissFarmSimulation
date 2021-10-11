@@ -11,7 +11,7 @@ import glob._
 object MainSwissFarmSimulation {
   val s = new Simulation
 
-  //val silo         = new Trader(Wheat, 100, s);
+  val silo         = new Trader(Wheat, 100, s);
   //val flour_trader  = new Trader(Flour, 50, s);
   // val flour_buyer     = new Buyer(Flour, () => 40, s);
 

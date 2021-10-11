@@ -1,5 +1,6 @@
 package geography
 
+import Companies.Supermarket
 import Owner.Owner
 import Simulation.SimLib.Mill
 import Simulation.SimO
@@ -25,6 +26,7 @@ class LandAdministrator(canton: String) {
   //i.e search a mill, a supermarket, or whatever. Care to update carefully this list
   var farmersList : List[Farm] = List()
   var millsList : List[Mill] = List()
+  var supermarketsList : List[Supermarket] = List()
 
   /** Split a land overlay in multiple lands overlays of same/different
    * purpose.
@@ -222,8 +224,12 @@ class LandAdministrator(canton: String) {
     agent match {
       case agent@(_ : Farm) => {
         println("the added agent is a farm")
-        farmersList ::= agent.asInstanceOf[Farm]
+        farmersList ::= agent
       }
+      case agent@(_ : Supermarket) => {
+        println("the added agent is a supermarket")
+        supermarketsList ::= agent
+    }
       case _ => println("Unknown type")
     }
   }
