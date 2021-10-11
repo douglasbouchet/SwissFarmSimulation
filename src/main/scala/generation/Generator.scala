@@ -173,7 +173,6 @@ class Generator(canton: String) {
     val nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
     val nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
     val nBigFarms:   Int = nbFarmMore30ha.filter(_._1 == canton).head._2
-    val nFarms:      Int = nbFarmPerCanton.filter(_._1 == canton).head._2
 
     var assignedSmallFarms:List[Farm] = List()
     var assignedMedFarms  :List[Farm] = List()
