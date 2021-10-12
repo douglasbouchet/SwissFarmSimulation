@@ -8,6 +8,7 @@ import Owner.Seller
 import Securities.Commodities._
 import Simulation.Simulation
 import _root_.Simulation.Factory.{Factory, ProductionLineSpec}
+import code.{__do, __forever, __wait}
 import geography.{CadastralParcel, LandAdministrator}
 
 import scala.collection.mutable
@@ -20,8 +21,9 @@ import scala.collection.mutable
  */
 abstract class Company(s: Simulation, lAdmin: LandAdministrator, _parcels: List[CadastralParcel], pls: ProductionLineSpec) extends Factory(pls, s){
 
-  val parcels: List[CadastralParcel] = _parcels
+  var parcels: List[CadastralParcel] = _parcels
   require(parcels.nonEmpty)
+  _parcels.foreach(_.owner = this) //TODO check if correctly assigned
 
   //This will be used to decide which production to make in function of the last year demand, + benefits
   val lastYearDemand: mutable.Map[Commodity, Double]      = scala.collection.mutable.Map[Commodity, Double]()
@@ -75,6 +77,24 @@ abstract class Company(s: Simulation, lAdmin: LandAdministrator, _parcels: List[
     })
     l.forall(buy)
   }
+
+  override protected def algo = __forever(
+    __do {
+      for(i <- (pl.length + 1) to goal_num_pl)
+        add_production_line();
+      for(i <- (goal_num_pl + 1) to pl.length)
+        remove_production_line();
+
+      // TODO: buy more to get better prices?
+      //println("Factory.algo: this=" + this);
+      val still_missing = bulk_buy_missing(pls.consumed, pl.length);
+    },
+    __wait(1),
+    __do {
+      assert(hr.employees.length == pl.length * pls.employees_needed);
+      hr.pay_workers();
+    }
+  )
 }
 
 

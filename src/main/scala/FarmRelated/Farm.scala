@@ -60,7 +60,7 @@ package farmpackage {
     //TODO add here the fact to change the type of agriculture 
     override def algo: __forever = __forever(
       __do {
-        println("Potential candidates:" + landAdmin.findNClosestFarmers(parcels(0), 2))
+        //println("Potential candidates:" + landAdmin.findNClosestFarmers(parcels(0), 2))
         //Each turn, get the emissions of each crop/herd
         updateCropsAndHerdsEmissions()
 

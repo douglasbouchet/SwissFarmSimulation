@@ -17,9 +17,11 @@
 */
 package generation
 
+import Companies.{Mill, Supermarket}
 import Securities.Commodities._
-import _root_.Simulation.SimLib.{Mill, Source}
+import _root_.Simulation.SimLib.{Source}
 import _root_.Simulation.{Person, SimO, Simulation}
+import _root_.Simulation.Factory.ProductionLineSpec
 import farmpackage._
 import farmrelated.cooperative.AgriculturalCooperative
 import geography._
@@ -77,14 +79,65 @@ class Generator(canton: String) {
     else cites
   }
 
+  /**
+   * this will be used to randomly assign the companies all around the country
+   * it modify the parcel's attribut of the company, thus nothing to return
+   * @param company
+   * @param parcels A list of remaining parcels (ownerless parcels)
+   */
+
 
   /** This method is in charge of creating all the companies involved in the food supply chain
    * will generate the companies according to the canton statistics base crop/herd production
    * This also assign parcels to companies
    * TODO tomorrow
    * */
-  private def CreateCompanies(s: Simulation, lAdmin: LandAdministrator, obs: Observator, canton: String): List[SimO] = {
-    List()
+  private def CreateMills(s: Simulation, lAdmin: LandAdministrator, obs: Observator, canton: String): List[Mill] = {
+    //we use the estimated total area used for crop purpose to deduce how much company we will need for the food supply chain
+    val anticipatedWheatProd = totalWheatCropsArea.filter(_._1 == canton).head._2 * CONSTANTS.WHEAT_PRODUCED_PER_HA
+    var remainingParcels: List[CadastralParcel] = rnd.shuffle(lAdmin.getFreeParcels)
+    //from https://www.dsm-fms.ch/fr/donnees/chiffres/moulins/ -> 41 milling Companies
+    val test = remainingParcels.filter(_.owner == null)
+    // !!! for all switzerland, but let's do this atm
+    // val nMills = 41
+    val nMills = 1 //to test
+    var mills = List[Mill]()
+    //same for every mill, change it afterwards
+    val basicPls = ProductionLineSpec(3,
+                                      List(),
+                                      List((Wheat, (anticipatedWheatProd/nMills).toInt)),
+                                      (Flour, (anticipatedWheatProd/nMills *CONSTANTS.CONVERSION_WHEAT_FLOUR).toInt),
+                                      CONSTANTS.FLOUR_PROD_DURATION)
+    for (_ <- 1 to nMills){
+        val parcel = remainingParcels.head
+        require(parcel.owner == null)
+        remainingParcels = remainingParcels.tail
+        mills ::= Mill(s, lAdmin, List(parcel), basicPls)
+    }
+    mills
+  }
+
+  //assume for the moment supermarket make their own bread (add bakery afterwards)
+  private def CreateSupermarket(s: Simulation, lAdmin: LandAdministrator, obs: Observator, canton: String): List[Supermarket] = {
+    //we use the estimated total area used for crop purpose to deduce how much company we will need for the food supply chain
+    val anticipatedFlourProd = totalWheatCropsArea.filter(_._1 == canton).head._2 * CONSTANTS.WHEAT_PRODUCED_PER_HA* CONSTANTS.CONVERSION_WHEAT_FLOUR
+    var remainingParcels: List[CadastralParcel] = rnd.shuffle(lAdmin.getFreeParcels)
+    //val nSupermarket = 30 //Totally random
+    val nSupermarket = 1 //To test
+    var supermarkets = List[Supermarket]()
+    //same for every supermarket, change it afterwards
+    val basicPls = ProductionLineSpec(3,
+                                      List(),
+                                      List((Flour, (anticipatedFlourProd/nSupermarket).toInt)),
+                                      (Bread, (anticipatedFlourProd/(nSupermarket * CONSTANTS.KG_FLOUR_FOR_1_BREAD)).toInt),
+                                      10 * CONSTANTS.TICKS_TIMER_PER_DAY)
+    for (_ <- 1 to nSupermarket){
+      val parcel = remainingParcels.head
+      require(parcel.owner == null)
+      remainingParcels = remainingParcels.tail
+      supermarkets ::= Supermarket(s, lAdmin, List(parcel), basicPls)
+    }
+    supermarkets
   }
   /** Assign an amount of parcels to small, medium, big farms.
    * Repeat until number of farm of the canton is reached. Remaining parcels are distributed rdmly among existing farms.
@@ -114,7 +167,10 @@ class Generator(canton: String) {
           _farm.parcels ::= parcels.head
           parcels = parcels.tail
           sum = 0.0
-          _farm.parcels.foreach(parcel => (sum += parcel.area))
+          _farm.parcels.foreach(parcel => {
+            sum += parcel.area
+            parcel.owner = _farm
+          })
       }
     }
 
@@ -142,6 +198,7 @@ class Generator(canton: String) {
     }
 
     val farms: List[Farm] = assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
+    val test = parcels.filter(_.owner == null)
     farms
 
     /** we reached the expected number of farm for the canton
@@ -314,7 +371,9 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
   val people: List[Person] = initPerson(s)
   s.init(people)
   val farms: List[Farm] = initLandsAndFarms(landAdministrator, s, observator, prices)
-  val mills: List[Mill] = initMills(s)
+  //val mills: List[Mill] = initMills(s)
+  val mills: List[Mill] = CreateMills(s, landAdministrator, observator, canton)
+  val supermarkets: List[Supermarket] = CreateSupermarket(s, landAdministrator, observator, canton)
   val coop : List[AgriculturalCooperative] = initCoop(farms, s)
   val sources: List[Source] = generateSources(s)
 
@@ -325,7 +384,7 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
 
   coop.foreach(_.city = cities(rnd.nextInt(nCities)))
 
-  s.init(List(observator, prices, externalCommodityDemand) ::: farms ::: mills ::: coop ::: sources)
+  s.init(List(observator, prices, externalCommodityDemand) ::: farms ::: coop ::: mills ::: supermarkets ::: sources)
 
   generateRoadNetwork()
 }

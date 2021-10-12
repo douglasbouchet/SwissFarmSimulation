@@ -144,6 +144,11 @@ class LandAdministrator(canton: String) {
     )
   }
 
+  //Return the parcels currently owned by no one, (so they can be assigned to some agents)
+  def getFreeParcels: List[CadastralParcel] = {
+    cadastralParcels.filter(_.owner == null)
+  }
+
   //TODO
   def findParcelAccess(parcel: CadastralParcel) {}
 
@@ -193,6 +198,8 @@ class LandAdministrator(canton: String) {
     //TODO
     None
   }
+
+
 
 
   /*def findNClosestMills(from: CadastralParcel, n: Int): Option[List[(Mill, Double)]] = {
