@@ -3,7 +3,8 @@ package farmpackage {
   import Securities.Commodities._
   import Securities._
   import Simulation._
-  import _root_.Simulation.Factory._
+  //import _root_.Simulation.Factory._
+  import modifyFromKoch.{HR, ProductionLine, ProductionLineSpec}
   import code._
   import farmrelated.Herd
   import farmrelated.cooperative.AgriculturalCooperative

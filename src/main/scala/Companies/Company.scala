@@ -7,7 +7,8 @@ package Companies
 import Owner.Seller
 import Securities.Commodities._
 import Simulation.Simulation
-import _root_.Simulation.Factory.{Factory, ProductionLineSpec}
+//import _root_.Simulation.Factory.{Factory, ProductionLineSpec}
+import modifyFromKoch.{Factory, ProductionLineSpec}
 import code.{__do, __forever, __wait}
 import geography.{CadastralParcel, LandAdministrator}
 

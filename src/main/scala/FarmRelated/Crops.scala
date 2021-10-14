@@ -1,6 +1,7 @@
 package farmrelated.crop
 
-import Simulation.Factory._
+//import Simulation.Factory._
+import modifyFromKoch.{ProductionLineSpec, ProductionLine}
 import code._
 import Securities.Commodities._
 import farmpackage.Farm

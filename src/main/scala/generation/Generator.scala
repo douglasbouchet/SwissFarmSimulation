@@ -19,14 +19,15 @@ package generation
 
 import Companies.{Mill, Supermarket}
 import Securities.Commodities._
-import _root_.Simulation.SimLib.{Source}
-import _root_.Simulation.{Person, SimO, Simulation}
-import _root_.Simulation.Factory.ProductionLineSpec
+import _root_.Simulation.SimLib.Source
+import _root_.Simulation.{SimO, Simulation}
+//import _root_.Simulation.Factory.ProductionLineSpec
 import farmpackage._
 import farmrelated.cooperative.AgriculturalCooperative
 import geography._
 import glob.Observator
 import market.{ExternalCommodityDemand, Prices}
+import modifyFromKoch.{Person, ProductionLineSpec}
 import org.apache.poi.ss.usermodel.WorkbookFactory
 
 import java.io.File
@@ -293,13 +294,25 @@ class Generator(canton: String) {
 //This part contains method to generate the farms/mills/people of the simulation
 
 
-/**Create people living in a canton, and push them on labour_market (i.e they can be hire) */
-private def initPerson( s: Simulation): List[Person] = {
-  val people = (for (i <- 1 to population.filter(_._1 == canton).head._2) yield new Person(s, false)).toList
-  println("Generating " + people.length + " people")
-  //s.labour_market.pushAll(people)
+/**Create people living in a canton, and push them on labour_market (i.e they can be hire)
+ * Assign parcels randomly atm, but should be could to create "Clusters to represent city, in the end"
+ * We put groups of 4 people on the same parcel
+ * */
+private def initPerson(s: Simulation,lAdmin: LandAdministrator): List[Person] = {
+  def recCreatePerson(parcels: List[CadastralParcel], n: Int, acc: List[Person]): List[Person] = {
+    if (n == 0) acc
+    else {
+      require(parcels.nonEmpty)
+      val parcel = parcels.head
+      recCreatePerson(parcels.tail, n - math.min(n, 4), acc ::: (for (_ <- 1 to math.min(n, 4)) yield new Person(s, true, parcel)).toList)
+    }
+  }
+  //val nPeople = population.filter(_._1 == canton).head._2
+  val nPeople = 1000
+  println("Population = " + nPeople)
+  val people = recCreatePerson(rnd.shuffle(lAdmin.getFreeParcels), population.filter(_._1 == canton).head._2, List[Person]())
+  s.labour_market.pushAll(people)
   people
-  //sims ++= people
 }
 
 private def initLandsAndFarms(landAdministrator: LandAdministrator, s: Simulation, obs: Observator, prices: Prices): List[Farm] = {
@@ -368,8 +381,8 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
   val nCities = 4
   val cities: List[City] = generateCities(nCities, List())
   LocationAdministrator.init(cities)
-  val people: List[Person] = initPerson(s)
-  s.init(people)
+  val people: List[Person] = initPerson(s, landAdministrator)
+  //s.init(people)
   val farms: List[Farm] = initLandsAndFarms(landAdministrator, s, observator, prices)
   //val mills: List[Mill] = initMills(s)
   val mills: List[Mill] = CreateMills(s, landAdministrator, observator, canton)
@@ -384,7 +397,7 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
 
   coop.foreach(_.city = cities(rnd.nextInt(nCities)))
 
-  s.init(List(observator, prices, externalCommodityDemand) ::: farms ::: coop ::: mills ::: supermarkets ::: sources)
+  s.init(people ::: List(observator, prices, externalCommodityDemand) ::: farms ::: coop ::: mills ::: supermarkets ::: sources)
 
   generateRoadNetwork()
 }

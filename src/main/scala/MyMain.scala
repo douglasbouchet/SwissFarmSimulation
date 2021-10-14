@@ -6,6 +6,7 @@ import Simulation.Factory._
 import Markets._
 import Simulation.Simulation
 import generation.Generator
+import geography.LandAdministrator
 import glob._
 
 object MainSwissFarmSimulation {
@@ -17,8 +18,9 @@ object MainSwissFarmSimulation {
 
   val canton = "Glaris"
   val generator = new Generator(canton)
+  val landAdministrator = new LandAdministrator(s, canton)
 
-  generator.generateAgents(GLOB.landAdministrator, s)
+  generator.generateAgents(landAdministrator, s)
 
   //def main(argv: Array[String]) {
   //  if((argv.length != 1) || (argv(0).toInt < 1))
@@ -27,15 +29,7 @@ object MainSwissFarmSimulation {
   //    s.run(argv(0).toInt);
   //}
   def main(argv: Array[String]) {
-    
-    //s.run(2);
-    for (i <- 0 to 500){
-      s.run_until(i)
-      GLOB.update()
-    }
-    //s.run(800);
-
-    //GLOB.observator.stats
+    s.run(500);
   }
 }
 

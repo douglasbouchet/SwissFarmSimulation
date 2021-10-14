@@ -180,10 +180,12 @@ class Owner {
     // it's robust under selling to oneself, but such a sell is probably
     // a bug elsewhere.
 
-    if(! GLOBAL.silent)
-      println((this + " sells " + units + "*" + item + " to " + buyer +
-      //println((this + " sells " + availableUnits + "*" + item + " to " + buyer +
-        " at " + (unit_price/100).toInt) + "/unit");
+    //if(! GLOBAL.silent) {
+    //  println((this + " sells " + units + "*" + item + " to " + buyer +
+    //  //println((this + " sells " + availableUnits + "*" + item + " to " + buyer +
+    // " at " + (unit_price/100).toInt) + "/unit");
+    //}
+
 
     if(unit_price < inventory_avg_cost(item))
       println("WARNING: " + this + " is selling at a loss!");

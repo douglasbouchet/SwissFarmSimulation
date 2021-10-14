@@ -1,7 +1,9 @@
 package geography
 
-import Companies.{Supermarket, Mill}
+import Companies.{Mill, Supermarket}
 import Owner.Owner
+import Simulation.Simulation
+import code.{Instruction, __do, __forever, __wait}
 //import Simulation.SimLib.Mill
 import Simulation.SimO
 import farmpackage.Farm
@@ -13,7 +15,7 @@ import scala.collection.mutable
  * parcelles) and get informations (find specific type of landOverlay)
  */
 
-class LandAdministrator(canton: String) {
+class LandAdministrator(s: Simulation, canton: String) extends SimO(s) {
 
   val landGenerator = new LandGenerator()
 
@@ -252,5 +254,13 @@ class LandAdministrator(canton: String) {
     }
   }
 
+  override def mycopy(_shared: Simulation, _substitution: mutable.Map[SimO, SimO]): SimO = ???
+
+  override protected def algo: Instruction = __forever(
+    __do(
+      update()
+    ),
+    __wait(1*CONSTANTS.TICKS_TIMER_PER_DAY)
+  )
 }
 
