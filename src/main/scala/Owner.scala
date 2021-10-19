@@ -200,10 +200,10 @@ class Owner {
     buyer.inventory(item) += units;
           inventory(item) -= units;
 
-    //if the buyer or the seller is a Farm or a coop, compute the distance between them
+    //if the buyer or the seller is a Farmer or a coop, compute the distance between them
     // and add a co2 cost for travelling
     //TODO this will be modified, if we
-    //if(buyer.isInstanceOf[Farm] || buyer.isInstanceOf[Coop] || seller.isInstanceOf[Farm] || seller.isInstanceOf[Coop]){
+    //if(buyer.isInstanceOf[Farmer] || buyer.isInstanceOf[Coop] || seller.isInstanceOf[Farmer] || seller.isInstanceOf[Coop]){
 //
     //}
 

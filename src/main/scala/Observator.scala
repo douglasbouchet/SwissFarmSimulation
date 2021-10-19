@@ -9,13 +9,13 @@ package glob
 import Securities.Commodities.{Commodity, all_commodities}
 import Simulation.{SimO, Simulation}
 import code.{__wait, _}
-import farmpackage.Farm
+import farmpackage.Farmer
 
 import scala.collection.mutable
 
 
 //Should it be an agent, in order to update itself, or we should update him inside the main
-class Observator(s: Simulation, _farms: List[Farm]) extends SimO(s) {
+class Observator(s: Simulation, _farms: List[Farmer]) extends SimO(s) {
 
   //All in Kg
   var year_co2: Double = 0.0
@@ -26,7 +26,7 @@ class Observator(s: Simulation, _farms: List[Farm]) extends SimO(s) {
   var total_methane: Double = 0.0
   var total_ammonia: Double = 0.0
 
-  var farms: List[Farm] = _farms
+  var farms: List[Farmer] = _farms
 
 
   var annualProduction: collection.mutable.Map[Commodity, Double] = collection.mutable.Map[Commodity, Double]()

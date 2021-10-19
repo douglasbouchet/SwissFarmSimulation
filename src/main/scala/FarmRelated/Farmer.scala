@@ -16,7 +16,7 @@ package farmpackage {
   import scala.collection.mutable
 
 
-  case class Farm(s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator) extends SimO(s) with Location {
+  case class Farmer(s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator) extends SimO(s) with Location {
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
@@ -226,7 +226,7 @@ package farmpackage {
      * order is pass to the coop, which sells them back to this when products are buy by coop */ 
     def buyMissingFromCoop(toBuy: List[(Commodity, Int)]): Unit = {
           cooperative match {
-            case None => println("Farm: " + this + "should be part of a cooperative to buy from it")
+            case None => println("Farmer: " + this + "should be part of a cooperative to buy from it")
             case Some(coop) =>
               toBuy.foreach{
                 case(com: Commodity, unit: Int) => (
@@ -240,7 +240,7 @@ package farmpackage {
 
     def sellFromCoop(toSell: List[(Commodity, Int)]): Unit = {
       cooperative match {
-        case None => println("Farm: " + this + "should be part of a cooperative to sell from it")
+        case None => println("Farmer: " + this + "should be part of a cooperative to sell from it")
         case Some(coop) =>
           toSell.foreach{
             case(com: Commodity, unit: Int) =>
@@ -385,11 +385,11 @@ package farmpackage {
 
     
 
-    def canEqual(a: Any): Boolean = a.isInstanceOf[Farm]
+    def canEqual(a: Any): Boolean = a.isInstanceOf[Farmer]
 
     override def equals(that: Any): Boolean =
       that match {
-          case that: Farm => {
+          case that: Farmer => {
               that.canEqual(this) &&
               this.parcels == that.parcels
               //See if add more comparisons

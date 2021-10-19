@@ -2,7 +2,7 @@ package farmrelated.cooperative{
 
   import Securities.Commodities._
   import Simulation._
-  import farmpackage.Farm
+  import farmpackage.Farmer
   import code._
   import geography.{City, Location, LocationAdministrator}
 
@@ -17,27 +17,27 @@ package farmrelated.cooperative{
     *
     * @param _farms:List[farm] : The initial members of the cooperative
     */
-  class AgriculturalCooperative(_farms: List[Farm], _saleableCommodities: List[Commodity], s: Simulation) extends SimO(s) with Location{
+  class AgriculturalCooperative(_farms: List[Farmer], _saleableCommodities: List[Commodity], s: Simulation) extends SimO(s) with Location{
 
     override var city: City = _
 
-    var members: List[Farm] = _farms
+    var members: List[Farmer] = _farms
 
     // Group all commodities, in order to have better price afterwards
     private val commoditiesToBuy = scala.collection.mutable.Map[Commodity, Int]()
     
     //Used as a buffer, to buy/sell all stuff together, and redistribute goods/money
     /** For each member, the commodities and their quantity that coop needs to buy to them */
-    //var buyLogs = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
-    var buyLogs: mutable.Map[Farm, mutable.Map[Commodity, Int]] = scala.collection.mutable.Map[Farm, mutable.Map[Commodity, Int]]()
+    //var buyLogs = scala.collection.mutable.Map[Farmer, List[(Commodity, Int)]]()
+    var buyLogs: mutable.Map[Farmer, mutable.Map[Commodity, Int]] = scala.collection.mutable.Map[Farmer, mutable.Map[Commodity, Int]]()
     /** For each member, the commodities and their quantity that are sold by coop
      * Useful only if we do not pay immediately farmers when they give commodities to coop (not the case atm)*/
-    val sellLogs: mutable.Map[Farm, List[(Commodity, Int)]] = scala.collection.mutable.Map[Farm, List[(Commodity, Int)]]()
+    val sellLogs: mutable.Map[Farmer, List[(Commodity, Int)]] = scala.collection.mutable.Map[Farmer, List[(Commodity, Int)]]()
 
     var saleableCommodities: List[Commodity] = _saleableCommodities
 
     //Used to arrange crop type distribution among members:
-    val membersCropsType: mutable.Map[Farm, mutable.Map[Commodity, Int]] = mutable.Map[Farm, mutable.Map[Commodity, Int]]()
+    val membersCropsType: mutable.Map[Farmer, mutable.Map[Commodity, Int]] = mutable.Map[Farmer, mutable.Map[Commodity, Int]]()
 
     //init
     members.foreach(addMember)
@@ -48,13 +48,13 @@ package farmrelated.cooperative{
     city = LocationAdministrator.cities(scala.util.Random.nextInt(LocationAdministrator.cities.length))
     //end init
 
-    def addMember(member: Farm): Unit = {
+    def addMember(member: Farmer): Unit = {
       member.cooperative = Some(this)
       sellLogs.put(member, List[(Commodity, Int)]())
       buyLogs.put(member, mutable.Map[Commodity, Int]())
     }
 
-    def removeMember(member:Farm): Unit = {
+    def removeMember(member:Farmer): Unit = {
       assert(members.contains(member) && sellLogs.contains(member) && buyLogs.contains(member))
       sellLogs.remove(member)
       buyLogs.remove(member)
