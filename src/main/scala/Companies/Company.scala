@@ -25,7 +25,7 @@ class Company(s: Simulation, lAdmin: LandAdministrator, _parcels: List[Cadastral
                        start_time: Int = 0) extends SimO(s){
 
   var factories : List[Factory] = _factories
-  //s.sims :::= factories
+  s.sims :::= factories
   var parcels: List[CadastralParcel] = _parcels
   //This will be used to decide which production to make in function of the last year demand, + benefits
   val lastYearDemand: mutable.Map[Commodity, Double]      = scala.collection.mutable.Map[Commodity, Double]()
