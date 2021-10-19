@@ -19,6 +19,7 @@ import scala.collection.mutable
     class DomesticPrices(s: Simulation) extends Oscillator(s){
       baseComValue = scala.collection.mutable.Map[Commodity, Double](
         WheatSeeds -> 100.0, //No Idea
+        
         Wheat -> 240.0,
         Flour -> 280.0, //No Idea
         FeedStuff -> 300.0, //No Idea
