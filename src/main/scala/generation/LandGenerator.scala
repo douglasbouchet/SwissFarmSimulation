@@ -8,7 +8,7 @@ import java.io.File
 class LandGenerator() {
   
   private val rnd: scala.util.Random = new scala.util.Random // fix the seed
-  private val f = new File("/Users/douglasbouchet/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
+  private val f = new File("D:/BA5/Projet_de_semestre/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
   private val sheet = WorkbookFactory.create(f).getSheetAt(0)
 
   private var totalWheatCropsArea: List[(String, Int)] = List()
