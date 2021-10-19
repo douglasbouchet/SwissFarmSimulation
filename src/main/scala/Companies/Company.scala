@@ -12,6 +12,7 @@ import code.{__do, __forever, __wait}
 import geography.{CadastralParcel, LandAdministrator}
 
 import scala.collection.mutable
+import Simulation.SimO
 
 /**
  * @param s the Simulation instance
@@ -19,16 +20,23 @@ import scala.collection.mutable
  * @param lAdmin Used to find some local providers, sellers
  * @param pls The production Line spec of this company
  */
-abstract class Company(s: Simulation, lAdmin: LandAdministrator, _parcels: List[CadastralParcel], pls: ProductionLineSpec) extends Factory(pls, s){
+class Company(s: Simulation, lAdmin: LandAdministrator, _parcels: List[CadastralParcel], _factories: List[Factory], 
+                       start_time: Int = 0) extends SimO(s){
 
+  var factories : List[Factory] = _factories
+  //s.sims :::= factories
   var parcels: List[CadastralParcel] = _parcels
-  require(parcels.nonEmpty)
-  _parcels.foreach(_.owner = this) //TODO check if correctly assigned
+  
 
   //This will be used to decide which production to make in function of the last year demand, + benefits
   val lastYearDemand: mutable.Map[Commodity, Double]      = scala.collection.mutable.Map[Commodity, Double]()
   val lastYearBenefits: mutable.Map[Commodity, Double]    = scala.collection.mutable.Map[Commodity, Double]()
   val lastYearIncBenefits: mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
+
+  {require(parcels.nonEmpty)
+  _parcels.foreach(_.owner = this) //TODO check if correctly assigned
+  }
+  
 
   /**
    * check inside contact network if we have seller for this commodity
@@ -68,7 +76,7 @@ abstract class Company(s: Simulation, lAdmin: LandAdministrator, _parcels: List[
   }
 
   //TODO check if correctly
-  override def bulk_buy_missing(_l: List[(Commodity, Int)], multiplier: Int) : Boolean = {
+  /*override def bulk_buy_missing(_l: List[(Commodity, Int)], multiplier: Int) : Boolean = {
     val l = _l.map(t => {
       // DANGER: if we have shorted his position, this amount is
       // not sufficient.
@@ -76,25 +84,24 @@ abstract class Company(s: Simulation, lAdmin: LandAdministrator, _parcels: List[
       (t._1, amount)
     })
     l.forall(buy)
-  }
+  }*/
 
   override protected def algo = __forever(
-    __do {
-      for(i <- (pl.length + 1) to goal_num_pl)
-        add_production_line();
-      for(i <- (goal_num_pl + 1) to pl.length)
-        remove_production_line();
-
-      // TODO: buy more to get better prices?
-      //println("Factory.algo: this=" + this);
-      val still_missing = bulk_buy_missing(pls.consumed, pl.length);
-    },
-    __wait(1),
-    __do {
-      assert(hr.employees.length == pl.length * pls.employees_needed);
-      hr.pay_workers();
-    }
+    __wait(1)
   )
+
+  def add_factory(pls: ProductionLineSpec) = {
+    val factory = new Factory(pls, s)
+    factories = factory :: factories
+    s.sims = factory :: s.sims
+  }
+
+  def remove_factory(commodity: Commodity) = {
+    factories.filter(f => f.pl(0).pls.produced._1 == commodity)
+    s.sims.filter(simO => !simO.equals(commodity)) //à verifier!!
+  }
+  
+  def mycopy(_shared: Simulation, _substitution: collection.mutable.Map[SimO, SimO]): SimO = ???
 }
 
 
