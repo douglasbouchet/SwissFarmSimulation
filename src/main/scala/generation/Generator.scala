@@ -100,8 +100,8 @@ class Generator(canton: String) {
     //from https://www.dsm-fms.ch/fr/donnees/chiffres/moulins/ -> 41 milling Companies
     val test = remainingParcels.filter(_.owner == null)
     // !!! for all switzerland, but let's do this atm
-    // val nMills = 41
-    val nMills = 1 //to test
+    val nMills = 41
+    //val nMills = 1 //to test
     var mills = List[Mill]()
     //same for every mill, change it afterwards
     val basicPls = ProductionLineSpec(3,
@@ -115,6 +115,7 @@ class Generator(canton: String) {
         remainingParcels = remainingParcels.tail
         mills ::= Mill(s, lAdmin, List(parcel), basicPls)
     }
+    println("Number of mills = " + mills.length)
     mills
   }
 
@@ -123,8 +124,8 @@ class Generator(canton: String) {
     //we use the estimated total area used for crop purpose to deduce how much company we will need for the food supply chain
     val anticipatedFlourProd = totalWheatCropsArea.filter(_._1 == canton).head._2 * CONSTANTS.WHEAT_PRODUCED_PER_HA* CONSTANTS.CONVERSION_WHEAT_FLOUR
     var remainingParcels: List[CadastralParcel] = rnd.shuffle(lAdmin.getFreeParcels)
-    //val nSupermarket = 30 //Totally random
-    val nSupermarket = 1 //To test
+    val nSupermarket = 30 //Totally random
+    //val nSupermarket = 1 //To test
     var supermarkets = List[Supermarket]()
     //same for every supermarket, change it afterwards
     val basicPls = ProductionLineSpec(3,
@@ -138,6 +139,7 @@ class Generator(canton: String) {
       remainingParcels = remainingParcels.tail
       supermarkets ::= Supermarket(s, lAdmin, List(parcel), basicPls)
     }
+    println("Number of supermarkets = " + supermarkets.length)
     supermarkets
   }
   /** Assign an amount of parcels to small, medium, big farms.
@@ -230,7 +232,6 @@ class Generator(canton: String) {
     */
   private def createAndAssignLandOverlays(farms: List[Farm], landAdministrator: LandAdministrator) = {
     farms.foreach{farm => {
-      println("Farm: ")
       val nParcels = farm.parcels.length
       var landOverlays: List[LandOverlay] = List()
       if(nParcels == 1){
@@ -259,13 +260,11 @@ class Generator(canton: String) {
           landAdministrator.landOverlays ::= overlay
           val n = scala.util.Random.nextInt(100)
           if (n < 50) {
-            println("Generating a wheat field")
             landOverlays = landOverlays.filterNot(_ == overlay)
             landOverlays ::= landAdministrator.changePurpose(overlay, LandOverlayPurpose.wheatField)
           }
           //else if (n >= 75 && n < 95){
           else{
-            println("Generating a paddock")
             //remove the landOverlay and create a Paddock instead (inherits from landOverlay so no problem)
             landOverlays = landOverlays.filterNot(_ == overlay)
             landOverlays ::= landAdministrator.changePurpose(overlay, LandOverlayPurpose.paddock)
@@ -307,8 +306,8 @@ private def initPerson(s: Simulation,lAdmin: LandAdministrator): List[Person] = 
       recCreatePerson(parcels.tail, n - math.min(n, 4), acc ::: (for (_ <- 1 to math.min(n, 4)) yield new Person(s, true, parcel)).toList)
     }
   }
-  //val nPeople = population.filter(_._1 == canton).head._2
-  val nPeople = 1000
+  val nPeople = population.filter(_._1 == canton).head._2
+  //val nPeople = 1000
   println("Population = " + nPeople)
   val people = recCreatePerson(rnd.shuffle(lAdmin.getFreeParcels), population.filter(_._1 == canton).head._2, List[Person]())
   s.labour_market.pushAll(people)
@@ -322,9 +321,9 @@ private def initLandsAndFarms(landAdministrator: LandAdministrator, s: Simulatio
   //landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
   //val farms = assignParcelsToFarms(allParcels._1, s, obs, prices,landAdministrator).take(4)
   // ------------------------------------
-  val parcels = landAdministrator.cadastralParcels
-  val farms = assignParcelsToFarms(s, obs, prices,landAdministrator).take(4)
-  println(farms.length + " farms created ")
+  //val farms = assignParcelsToFarms(s, obs, prices,landAdministrator).take(4)
+  val farms = assignParcelsToFarms(s, obs, prices,landAdministrator)
+  println("Number of farms = " + farms.length)
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init)
   farms

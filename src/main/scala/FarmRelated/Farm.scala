@@ -99,15 +99,13 @@ package farmpackage {
             herd.newGrassOrdered = false
           }
         })
-      },
-      __wait(1),
-      __do {
         assert(hr.employees.length == crops.map(_.pls.employees_needed).sum +
           herds.foldLeft(0){(acc, num) => acc + num.cows.map(cow => cow.pls.employees_needed).sum })
         hr.pay_workers()
         removeExpiredItems(s.timer)
         sellingStrategy //manage hold commodities
       },
+      __wait(1)
     )
 
     override def mycopy(
@@ -170,7 +168,7 @@ package farmpackage {
               Wheat,
               (area * CONSTANTS.WHEAT_PRODUCED_PER_HA).toInt
             ),
-            CONSTANTS.WHEAT_PROD_DURATION,
+            CONSTANTS.CROP_PROD_DURATION.getOrElse(Wheat, 1000),
             Some(List((Fertilizer, 10, 1.20)))
           )
           hr.hire(worker)

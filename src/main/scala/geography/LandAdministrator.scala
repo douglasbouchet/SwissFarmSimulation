@@ -242,14 +242,15 @@ class LandAdministrator(s: Simulation, canton: String) extends SimO(s) {
   //add the agent in function of its type in the good list
   def addAgent(agent: SimO): Unit = {
     agent match {
-      case agent@(_ : Farm) => {
-        println("the added agent is a farm")
+      case agent@(_ : Farm) =>
         farmersList ::= agent
-      }
-      case agent@(_ : Supermarket) => {
-        println("the added agent is a supermarket")
+
+      case agent@(_ : Supermarket) =>
         supermarketsList ::= agent
-    }
+
+      case agent@(_: Mill) =>
+        millsList ::= agent
+
       case _ => println("Unknown type")
     }
   }

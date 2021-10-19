@@ -23,13 +23,16 @@ import scala.collection.mutable
 abstract class Company(s: Simulation, lAdmin: LandAdministrator, _parcels: List[CadastralParcel], pls: ProductionLineSpec) extends Factory(pls, s){
 
   var parcels: List[CadastralParcel] = _parcels
-  require(parcels.nonEmpty)
-  _parcels.foreach(_.owner = this) //TODO check if correctly assigned
 
   //This will be used to decide which production to make in function of the last year demand, + benefits
   val lastYearDemand: mutable.Map[Commodity, Double]      = scala.collection.mutable.Map[Commodity, Double]()
   val lastYearBenefits: mutable.Map[Commodity, Double]    = scala.collection.mutable.Map[Commodity, Double]()
   val lastYearIncBenefits: mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
+
+  {
+    require(parcels.nonEmpty)
+    _parcels.foreach(_.owner = this) //TODO check if correctly assigned
+  }
 
   /**
    * check inside contact network if we have seller for this commodity

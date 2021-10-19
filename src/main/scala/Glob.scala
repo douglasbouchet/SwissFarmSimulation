@@ -29,15 +29,15 @@ package object CONSTANTS {
   val FERTILIZER_EXPIRY_TIMER_IN_MONTH = 6 * 30 * TICKS_TIMER_PER_DAY
 
 
-  val WHEAT_PROD_DURATION: Int = 364 * TICKS_TIMER_PER_DAY
+
   val FERTILIZER_PROD_DURATION: Int = 30 * TICKS_TIMER_PER_DAY
   val MEATCOW_PROD_DURATION: Int = 364 * 3 * TICKS_TIMER_PER_DAY // assume 3 years before a meat cow can be killed
   val FLOUR_PROD_DURATION: Int = 5 * TICKS_TIMER_PER_DAY
 
   val CROP_PROD_DURATION: collection.mutable.Map[Commodity, Int] = scala.collection.mutable.Map[Commodity, Int](
-    Wheat -> 365 * TICKS_TIMER_PER_DAY,//TODO check real vallues
-    Pea -> 365 * TICKS_TIMER_PER_DAY,//TODO check real vallues
-    CanolaOil -> 365 * TICKS_TIMER_PER_DAY//TODO check real vallues
+    Wheat -> 364 * TICKS_TIMER_PER_DAY,//TODO check real vallues
+    Pea -> 364 * TICKS_TIMER_PER_DAY,//TODO check real vallues
+    CanolaOil -> 364 * TICKS_TIMER_PER_DAY//TODO check real vallues
   )
 
   val CROP_EFFICIENCY: collection.mutable.Map[Commodity, Int] = scala.collection.mutable.Map[Commodity, Int](

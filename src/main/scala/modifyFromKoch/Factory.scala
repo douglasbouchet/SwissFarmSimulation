@@ -64,8 +64,8 @@ case class ProductionLine(
         frac = math.min(frac, n.toDouble / x._2);
       }
       goodwill = costs_consumables;
-      if((frac < 1.0) && (! GLOBAL.silent))
-        println(o + " " + " starts low-efficiency run.");
+      //if((frac < 1.0) && (! GLOBAL.silent))
+      //  println(o + " " + " starts low-efficiency run.");
 
       rpt = 0;
     },
@@ -89,16 +89,16 @@ case class ProductionLine(
       if(units_produced > 0) {
         o.make(pls.produced._1, units_produced, unit_cost);
 
-        if(! GLOBAL.silent)
-          println(o + " produces " + units_produced + "x " +
-            pls.produced._1 + " at efficiency " + frac +
-            " and " + (unit_cost/100).toInt + "/unit.");
+        //if(! GLOBAL.silent)
+        //  println(o + " produces " + units_produced + "x " +
+        //    pls.produced._1 + " at efficiency " + frac +
+        //    " and " + (unit_cost/100).toInt + "/unit.");
       }
       else {
         lost_runs_cost += total_cost;
 
-        if(! GLOBAL.silent)
-          println(o + " had a production line with zero efficiency.");
+        //if(! GLOBAL.silent)
+        //  println(o + " had a production line with zero efficiency.");
       }
       //      log = (get_time, frac) :: log;
     }

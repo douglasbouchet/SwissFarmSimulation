@@ -16,7 +16,6 @@ import geography.{LandOverlayPurpose, Paddock}
  */
 class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType */){
 
-  println("Creating an herd")
   assert(_paddock.purpose == LandOverlayPurpose.paddock)
   //This should change if there is no more grass on this paddock
   var paddock: Paddock = _paddock
