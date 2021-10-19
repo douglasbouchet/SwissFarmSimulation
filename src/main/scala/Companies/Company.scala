@@ -27,27 +27,15 @@ class Company(s: Simulation, lAdmin: LandAdministrator, _parcels: List[Cadastral
   var factories : List[Factory] = _factories
   //s.sims :::= factories
   var parcels: List[CadastralParcel] = _parcels
-<<<<<<< HEAD
-=======
-  
->>>>>>> 4f6a3a967ae610db0842ff2d8553f0f32d2f0058
-
   //This will be used to decide which production to make in function of the last year demand, + benefits
   val lastYearDemand: mutable.Map[Commodity, Double]      = scala.collection.mutable.Map[Commodity, Double]()
   val lastYearBenefits: mutable.Map[Commodity, Double]    = scala.collection.mutable.Map[Commodity, Double]()
   val lastYearIncBenefits: mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
 
-<<<<<<< HEAD
-  {
-    require(parcels.nonEmpty)
-    _parcels.foreach(_.owner = this) //TODO check if correctly assigned
-  }
-=======
+
   {require(parcels.nonEmpty)
   _parcels.foreach(_.owner = this) //TODO check if correctly assigned
   }
-  
->>>>>>> 4f6a3a967ae610db0842ff2d8553f0f32d2f0058
 
   /**
    * check inside contact network if we have seller for this commodity

@@ -8,9 +8,8 @@ package Companies
 import Securities.Commodities.Bread
 import Simulation.Simulation
 //import _root_.Simulation.Factory.ProductionLineSpec
-import modifyFromKoch.ProductionLineSpec
+import modifyFromKoch.{ProductionLineSpec, Factory}
 import geography.{CadastralParcel, LandAdministrator}
-import Simulation.Factory.Factory
 import Simulation.SimO
 import scala.collection.mutable
 

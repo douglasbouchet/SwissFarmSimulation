@@ -1,0 +1,32 @@
+Price in the farms are determined by a 3-year average (section 3.2.1)
+
+Data found on FADN, but only for european member, switzerland isn't ??? 
+
+At t0 (first year), farms has the following infos:
+- Production ressources 
+- Biographical attributes
+- georeferences attributes
+(find what they are, but at one point we want to add them)
+
+Farmers make their production decision based on:
+- price and yield expectation of previous year (for animals and crop activities)
+
+DIFFERENCE we might do: as mentioned, they make an estimation (based on FADN data of base year + price trends and annual changes), WE can have this number for real (p 17)
+
+
+The LAND LEASE
+ADD to the farm a successor (with a certain probability, 12.5 % of farms should not have any children) (which will take relay when current farmer goes after 65)
+If successor, then just transfer the farm 
+Else call a land Leasing algorithm 
+
+Farmer also exit of farming if the incomes are negative for for the past 5 years (simple rule but let's implement this atm)
+(rules described in chapter 3.3.3 (really read this before coding, they propose an approach at the end of the chapter)
+
+Land Leasing alg: TODO 
+
+
+THE CONVERSION TO ORGANIC FARMING 
+
+Conversion to organic farming using a bayesean network (obtained from their questionnaires -> fetch what are the data inside those query in chapter 3.3.4 (first paragrahph) e.g farm size, age, sex, educational background)
+ 
+TODO 3.3.5 (modéliser le recrutement des gens )
