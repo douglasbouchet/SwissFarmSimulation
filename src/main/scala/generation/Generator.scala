@@ -152,21 +152,21 @@ class Generator(canton: String) {
    *    big farm: from 30 to (60?) (Uniform)
    *  Assign parcels until area reach the number of ha
    */ 
-  private def assignParcelsToFarms(s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator): List[Farm] = {
+  private def assignParcelsToFarms(s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator): List[Farmer] = {
     var parcels : List[CadastralParcel] = landAdmin.cadastralParcels
     val nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
     val nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
     val nBigFarms:   Int = nbFarmMore30ha.filter(_._1 == canton).head._2
 
-    var assignedSmallFarms:List[Farm] = List()
-    var assignedMedFarms  :List[Farm] = List()
-    var assignedBigFarms  :List[Farm] = List()
+    var assignedSmallFarms:List[Farmer] = List()
+    var assignedMedFarms  :List[Farmer] = List()
+    var assignedBigFarms  :List[Farmer] = List()
 
     var sum: Double = 0.0
     var area: Double = 0.0
     var ended: Boolean = false
 
-    def assignAreas(_farm: Farm) {
+    def assignAreas(_farm: Farmer) {
     while(sum < area && !parcels.isEmpty){
           _farm.parcels ::= parcels.head
           parcels = parcels.tail
@@ -181,19 +181,19 @@ class Generator(canton: String) {
     while(!parcels.isEmpty && (ended == false)){
       if(assignedSmallFarms.length < nSmallFarms){
         area = 2 + scala.util.Random.nextInt(7)
-        var farm: Farm = Farm(s, obs, prices,landAdmin)
+        var farm: Farmer = Farmer(s, obs, prices,landAdmin)
         assignAreas(farm)
         assignedSmallFarms ::= farm
       }
       else if(assignedMedFarms.length < nMedFarms){
         area = 10 + scala.util.Random.nextInt(20)
-        var farm = Farm(s, obs, prices,landAdmin)
+        var farm = Farmer(s, obs, prices,landAdmin)
         assignAreas(farm)
         assignedMedFarms ::= farm
       }
       else if(assignedBigFarms.length < nBigFarms){
         area = 30 + scala.util.Random.nextInt(31)
-        var farm = Farm(s, obs, prices,landAdmin)
+        var farm = Farmer(s, obs, prices,landAdmin)
         assignAreas(farm)
         assignedBigFarms ::= farm
       }
@@ -201,7 +201,7 @@ class Generator(canton: String) {
       sum = 0.0 
     }
 
-    val farms: List[Farm] = assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
+    val farms: List[Farmer] = assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
     val test = parcels.filter(_.owner == null)
     farms
 
@@ -231,7 +231,7 @@ class Generator(canton: String) {
     * @param farms: the farms on which we want to assign land overlays
     * @note farm is the only possessor of a land overlay. But this can change by time
     */
-  private def createAndAssignLandOverlays(farms: List[Farm], landAdministrator: LandAdministrator) = {
+  private def createAndAssignLandOverlays(farms: List[Farmer], landAdministrator: LandAdministrator) = {
     farms.foreach{farm => {
       val nParcels = farm.parcels.length
       var landOverlays: List[LandOverlay] = List()
@@ -315,7 +315,7 @@ private def initPerson(s: Simulation,lAdmin: LandAdministrator): List[Person] = 
   people
 }
 
-private def initLandsAndFarms(landAdministrator: LandAdministrator, s: Simulation, obs: Observator, prices: Prices): List[Farm] = {
+private def initLandsAndFarms(landAdministrator: LandAdministrator, s: Simulation, obs: Observator, prices: Prices): List[Farmer] = {
   //Init generate parcels, and assign them to farms
   //old way of generating parcels -------
   //val allParcels = generateParcels()
@@ -350,7 +350,7 @@ private def initLandsAndFarms(landAdministrator: LandAdministrator, s: Simulatio
   * @param s
   * @return a list of AgriculturalCooperative
   */
-private def initCoop( farms: List[Farm], s: Simulation): List[AgriculturalCooperative] = {
+private def initCoop(farms: List[Farmer], s: Simulation): List[AgriculturalCooperative] = {
   //for the moment, only create 1 coop
   List[AgriculturalCooperative](new AgriculturalCooperative(farms, List(Wheat, Fertilizer), s))
 }
@@ -362,8 +362,8 @@ private def initCoop( farms: List[Farm], s: Simulation): List[AgriculturalCooper
   /*private def initRelations(owners: List[Owner], radius: Double): Unit = {
 
   owners.foreach{
-    //If instance of Farm, we should add one source, and
-    case owner@(_: Farm) => {}
+    //If instance of Farmer, we should add one source, and
+    case owner@(_: Farmer) => {}
   }
   }*/
 
@@ -383,7 +383,7 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
   LocationAdministrator.init(cities)
   val people: List[Person] = initPerson(s, landAdministrator)
   //s.init(people)
-  val farms: List[Farm] = initLandsAndFarms(landAdministrator, s, observator, prices)
+  val farms: List[Farmer] = initLandsAndFarms(landAdministrator, s, observator, prices)
   //val mills: List[Mill] = initMills(s)
   val mills: List[Mill] = CreateMills(s, landAdministrator, observator, canton)
   val supermarkets: List[Supermarket] = CreateSupermarket(s, landAdministrator, observator, canton)

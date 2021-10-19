@@ -1,7 +1,7 @@
 package Simulation
 import SimLib._
 import Securities.Commodities._
-import farmpackage.Farm
+import farmpackage.Farmer
 import Simulation.Factory._
 import Markets._
 import Simulation.Simulation

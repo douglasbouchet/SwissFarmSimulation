@@ -4,7 +4,7 @@ import Securities.Commodities.{Beef, Commodity, Grass}
 import Simulation.Factory.{ProductionLine, ProductionLineSpec}
 import Simulation.Simulation
 import code._
-import farmpackage.Farm
+import farmpackage.Farmer
 import geography.{LandOverlayPurpose, Paddock}
 
 /**
@@ -14,7 +14,7 @@ import geography.{LandOverlayPurpose, Paddock}
  * @param nCows
  * @param salary
  */
-class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType */){
+class Herd(owner: Farmer, _paddock: Paddock, nCows: Int, salary: Int/**AnimalType */){
 
   assert(_paddock.purpose == LandOverlayPurpose.paddock)
   //This should change if there is no more grass on this paddock
@@ -69,7 +69,7 @@ class Herd(owner: Farm, _paddock: Paddock, nCows: Int, salary: Int /**AnimalType
    * @param pls The productionLineSpec of this productionLine
    * @param salary TODO understamnd
    */
-  class MeatCow(o: Farm,
+  class MeatCow(o: Farmer,
                 herd: Herd, //Used to buy for the all herd and not a single cow (avoid multiple buy in a simple way)
                 _paddock: Paddock,
                 s: Simulation,

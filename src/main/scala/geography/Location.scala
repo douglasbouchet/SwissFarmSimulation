@@ -90,7 +90,7 @@ class City(_name: String, _district: String, _canton: String, _centerCoord: (Dou
   val centerCoord: (Double, Double) = _centerCoord
 
   //The agents currently inside the city (can be farms, markets, ...)
-  //Maybe in next version consider a Map[SimO instance (e.g Farm, Mill,...) -> List of those]
+  //Maybe in next version consider a Map[SimO instance (e.g Farmer, Mill,...) -> List of those]
   var agents: List[SimO] = List[SimO]()
 
   def addAgent(agent: SimO): Unit = {

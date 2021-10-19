@@ -357,7 +357,7 @@ class Factory(pls: ProductionLineSpec,
       {
         prev_mgmt_action = shared.timer; // call before tactics to avoid
         // immediate recursion in nested simulation.
-        tactics(); // changes goal_num_pl
+        //tactics(); // changes goal_num_pl
       }
 
       for(i <- (pl.length + 1) to goal_num_pl)

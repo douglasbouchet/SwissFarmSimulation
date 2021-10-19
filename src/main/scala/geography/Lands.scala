@@ -6,7 +6,7 @@ package geography {
 
   import Simulation.SimLib.Mill
   import Simulation.SimO
-  import farmpackage.Farm
+  import farmpackage.Farmer
 
   import scala.collection.mutable
 

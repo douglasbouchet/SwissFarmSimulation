@@ -6,7 +6,7 @@ import Simulation.Simulation
 import code.{Instruction, __do, __forever, __wait}
 //import Simulation.SimLib.Mill
 import Simulation.SimO
-import farmpackage.Farm
+import farmpackage.Farmer
 import generation.LandGenerator
 
 import scala.collection.mutable
@@ -26,7 +26,7 @@ class LandAdministrator(s: Simulation, canton: String) extends SimO(s) {
 
   //get all the agents of a given type, this will be used when looking for near agents of a specific type
   //i.e search a mill, a supermarket, or whatever. Care to update carefully this list
-  var farmersList : List[Farm] = List()
+  var farmersList : List[Farmer] = List()
   var millsList : List[Mill] = List()
   var supermarketsList : List[Supermarket] = List()
 
@@ -164,7 +164,7 @@ class LandAdministrator(s: Simulation, canton: String) extends SimO(s) {
    * @return an option of such a list
    * TODO, see if we replace n by a distance
    */
-  def findNClosestFarmers(from: CadastralParcel, n: Int): Option[List[(Farm, Double)]] = {
+  def findNClosestFarmers(from: CadastralParcel, n: Int): Option[List[(Farmer, Double)]] = {
     val x = landIndexing.contains(from)
     val y = landIndexing.contains(cadastralParcels(0))
     val fromIndex = landIndexing.getOrElse(from, -1)
@@ -172,7 +172,7 @@ class LandAdministrator(s: Simulation, canton: String) extends SimO(s) {
     val sideLength = landGenerator.sideLength
     val fromIndexLine = fromIndex / sideLength
     val fromIndexCol = fromIndex % sideLength
-    var agentsByDistance = List[(Farm, Double)]()
+    var agentsByDistance = List[(Farmer, Double)]()
     farmersList.foreach(farmer =>{
       farmer.parcels.headOption match {
         case Some(parcel) => {
@@ -191,12 +191,12 @@ class LandAdministrator(s: Simulation, canton: String) extends SimO(s) {
     else Some(agentsByDistance.sortBy(_._2).takeRight(n))
   }
 
-  def findNClosestMills(from: CadastralParcel, n: Int): Option[List[(Farm, Double)]] = {
+  def findNClosestMills(from: CadastralParcel, n: Int): Option[List[(Farmer, Double)]] = {
     //TODO
     None
   }
 
-  def findNClosestBakery(from: CadastralParcel, n: Int): Option[List[(Farm, Double)]] = {
+  def findNClosestBakery(from: CadastralParcel, n: Int): Option[List[(Farmer, Double)]] = {
     //TODO
     None
   }
@@ -242,7 +242,7 @@ class LandAdministrator(s: Simulation, canton: String) extends SimO(s) {
   //add the agent in function of its type in the good list
   def addAgent(agent: SimO): Unit = {
     agent match {
-      case agent@(_ : Farm) =>
+      case agent@(_ : Farmer) =>
         farmersList ::= agent
 
       case agent@(_ : Supermarket) =>

@@ -4,28 +4,28 @@ package farmrelated.crop
 import modifyFromKoch.{ProductionLineSpec, ProductionLine}
 import code._
 import Securities.Commodities._
-import farmpackage.Farm
+import farmpackage.Farmer
 import geography.{Crop, LandOverlay}
 
 /** Add an access to a landOverlay, in order to compute unit produced, and the fact that crops should influence soil (quality, dryness)*/
 class CropProductionLine(
-  _crop: Crop,
-  pls: ProductionLineSpec,
-  o: Farm,
-  salary: Int,
-  start_time: Int,
-  //goodwill : Double = 0.0,
-  //lost_runs_cost : Double = 0.0,
-  private var rpt : Int = 0,
-  private var frac : Double = 1.0,
-  private var costs_consumables : Double = 0.0) extends ProductionLine(pls,o,salary,start_time) {
+                          _crop: Crop,
+                          pls: ProductionLineSpec,
+                          o: Farmer,
+                          salary: Int,
+                          start_time: Int,
+                          //goodwill : Double = 0.0,
+                          //lost_runs_cost : Double = 0.0,
+                          private var rpt : Int = 0,
+                          private var frac : Double = 1.0,
+                          private var costs_consumables : Double = 0.0) extends ProductionLine(pls,o,salary,start_time) {
 
     var Co2Emitted: Double = 0.0
     var fertilized: Boolean = false 
     var efficiency: Double = 1.0
     var crop: LandOverlay = _crop
 
-    //Used to compute average price in Farm
+    //Used to compute average price in Farmer
     var unitPrice: Double = 0
     var quantity: Int = 0
 
