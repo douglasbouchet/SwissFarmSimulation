@@ -16,7 +16,7 @@ package farmpackage {
   import scala.collection.mutable
 
 
-  case class Farmer(s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator) extends SimO(s) with Location {
+  case class Farmer(s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator, _age: Int, _child: Boolean) extends SimO(s) with Location {
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
@@ -32,8 +32,14 @@ package farmpackage {
     //Strategy for selling
     var prevPrices: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
     var toSellEachTurn: scala.collection.mutable.Map[Commodity, Int] = scala.collection.mutable.Map[Commodity, Int]()
-
     var cropRotationSchedule: mutable.Map[CropProductionLine, List[Commodity]] = collection.mutable.Map[CropProductionLine,List[Commodity]]()
+
+    //Stuff concening LandLeasing
+    var age: Int = _age
+    var child: Boolean = _child
+    //head = last year, second = 2 years before,...
+    var last5HouseHoldIncomes: List[Int] = List[Int](0,0,0,0,0)
+
 
     def addParcels(newParcels: List[CadastralParcel]): Unit = {
       parcels :::= newParcels
@@ -104,6 +110,11 @@ package farmpackage {
         hr.pay_workers()
         removeExpiredItems(s.timer)
         sellingStrategy //manage hold commodities
+      },
+      __if(s.timer % 365*CONSTANTS.TICKS_TIMER_PER_DAY == 0){
+        __do{
+          age += 1
+        }
       },
       __wait(1)
     )
@@ -383,7 +394,48 @@ package farmpackage {
       inventory_avg_cost.getOrElse(com, 0.0)
     }
 
-    
+
+    //---Methods for land leasing due to exiting---------
+
+    def farmerExiting: Unit = ???
+    /**
+     * Same logic as SwissLand
+     * @return true if past 5 years household incomes were negative or farmer older than 65
+     */
+    def shouldExit: Boolean =  age >= 65 || last5HouseHoldIncomes.forall(_ < 0)
+
+    /**
+     * Same logic as SwissLand
+     * @return true if Farmer has a child, and household incomes are slightly above a regional average
+     */
+    def childShouldInherit: Boolean = child && last5HouseHoldIncomes.head > 1.01 * regionalAverageHouseHoldIncomes
+
+
+    /**
+     * get the regional households incomes (e.g by iterating over all farmers located at less than 50km or whatever)
+     * @return
+     */
+    def regionalAverageHouseHoldIncomes: Double = {
+      val regionalFarmers = landAdmin.findNClosestFarmers(parcels.head, 20).getOrElse(List()).map(_._1)
+      val lastIncomes = regionalFarmers.map(_.last5HouseHoldIncomes.head)
+      lastIncomes.foldLeft(0.0)(_ + _) / lastIncomes.length
+    }
+
+
+    //TODO see how to implement this logic, for the moment, only buy if can market buy it i.e really greedy
+    def shouldByParcel(parcel: CadastralParcel): Boolean = {
+      val price = parcel.area * CONSTANTS.M_SQUARE_PRICE
+      capital > price
+    }
+
+
+
+
+
+    //----------------------------------------------------
+
+
+
 
     def canEqual(a: Any): Boolean = a.isInstanceOf[Farmer]
 

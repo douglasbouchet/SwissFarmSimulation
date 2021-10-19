@@ -23,7 +23,9 @@ package object CONSTANTS {
   val KG_FLOUR_FOR_1_BREAD: Double = 0.3
   
   var workercounter: Int = 0
-  
+
+  val M_SQUARE_PRICE: Int =  10 //francs
+
   //If timer tick = 1 per month, last 2 month. If 2x faster TICKS_TIMER_PER_MONTH -> Still last 2 month (but requires 4 ticks)
   val WHEAT_EXPIRY_TIMER_IN_MONTH = 2 * 30 * TICKS_TIMER_PER_DAY
   val FERTILIZER_EXPIRY_TIMER_IN_MONTH = 6 * 30 * TICKS_TIMER_PER_DAY

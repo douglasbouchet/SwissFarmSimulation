@@ -16,7 +16,7 @@ SwissFarmingSimulator:
 -----------New Attributs to Farmer-----------
 - Age: Int (condition for exiting)
 - Child: Boolean (If some children are present, they can handle the exiting farm, otherwise lease to other people)
-- House hold income: List[(year from current year, Int )] (benefits of the farm, condition for exiting). This is also a list, because if incomes were negatives for the past 4 years, farm should exit
+- House hold income: List[Int] (benefits of the farm, condition for exiting). This is also a list, because if incomes were negatives for the past 5 years, farm should exit
 
 
 
