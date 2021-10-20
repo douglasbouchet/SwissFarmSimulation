@@ -26,6 +26,8 @@ package object CONSTANTS {
 
   val M_SQUARE_PRICE: Int =  10 //francs
 
+  val CHILD_TAKE_OVER_AGE: Int = 35 //constant for the moment, afterwards we can model child as a person and give differents starting ages
+
   //If timer tick = 1 per month, last 2 month. If 2x faster TICKS_TIMER_PER_MONTH -> Still last 2 month (but requires 4 ticks)
   val WHEAT_EXPIRY_TIMER_IN_MONTH = 2 * 30 * TICKS_TIMER_PER_DAY
   val FERTILIZER_EXPIRY_TIMER_IN_MONTH = 6 * 30 * TICKS_TIMER_PER_DAY

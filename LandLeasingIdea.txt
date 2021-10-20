@@ -15,7 +15,8 @@ SwissFarmingSimulator:
 
 -----------New Attributs to Farmer-----------
 - Age: Int (condition for exiting)
-- Child: Boolean (If some children are present, they can handle the exiting farm, otherwise lease to other people)
+- Child: Option[Person] (If some children are present, they can handle the exiting farm, otherwise lease to other people). Assume if child takes over,
+ it has age 35, and some child with probability (0.875)
 - House hold income: List[Int] (benefits of the farm, condition for exiting). This is also a list, because if incomes were negatives for the past 5 years, farm should exit
 
 
