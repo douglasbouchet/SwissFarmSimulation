@@ -114,6 +114,8 @@ package farmpackage {
       },
       __if(s.timer % 365*CONSTANTS.TICKS_TIMER_PER_DAY == 0){
         __do{
+          //Each year, check if a farmer needs to retire, and if so, handle it
+          farmerExiting
           age += 1
         }
       },
@@ -473,7 +475,7 @@ package farmpackage {
 
     /** Sell the parcel to the buyer (i.e money transfer), change owner, and add/remove parcel inside parcels of buyer/seller*/
     def transferParcelFrom(parcel: CadastralParcel, farmer: Farmer): Unit = {
-      val price = parcel.area * CONSTANTS.M_SQUARE_PRICE
+      val price = (parcel.area * CONSTANTS.M_SQUARE_PRICE).toInt
       capital += price
       farmer.capital -= price
 
@@ -514,7 +516,7 @@ package farmpackage {
             case None => addCrop(landAdmin.addLandOverlay(List((parcel, 100)), geography.LandOverlayPurpose.wheatField).asInstanceOf[Crop])
           }
         case geography.LandOverlayPurpose.paddock =>
-          paddocks ::= landAdmin.addLandOverlay(List((parcel, 100)), geography.LandOverlayPurpose.paddock)
+          paddocks ::= landAdmin.addLandOverlay(List((parcel, 100)), geography.LandOverlayPurpose.paddock).asInstanceOf[Paddock]
 
         case geography.LandOverlayPurpose.meadow =>
           addParcels(List(parcel))
@@ -528,8 +530,6 @@ package farmpackage {
     }
 
     //----------------------------------------------------
-
-
 
 
     def canEqual(a: Any): Boolean = a.isInstanceOf[Farmer]
