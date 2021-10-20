@@ -14,7 +14,7 @@ libraryDependencies  ++= Seq(
   "org.scalanlp" %% "breeze" % "1.2",
   "org.scalanlp" %% "breeze-viz" % "1.2",
   "org.scalactic" %% "scalactic" % "3.2.9",
-  "org.scalatest" %% "scalatest" % "3.2.9" % "test", 
+  "org.scalatest" %% "scalatest" % "3.2.9" % "test",
   ////Added for scalax 
   "org.scala-graph" %% "graph-core" % "1.13.2",
 //
