@@ -1,0 +1,30 @@
+How to implement the interactions between the farmers and the companies
+- We may want to use the seller market:
+	- Farmer propose a selling price with some benefits
+	- Companies buy by increasing price -> max benefits
+	- If not all farmers produce their com. at the same time, companies could wait some time, in order to get offers from all farmers
+
+- We may not want a global seller market, but rather a seller market inside each municipality (depends on what they did on SwissLand)
+
+
+----------------Methods---------------------------------
+
+----------------Farmer side-----------------------------
+
+put on market (already done by add_seller, but maybe as production could change
+each year, we could reset the seller market, and farmer should add their self asseller each time they start producing a new com. type, and rm from seller marketif they stop producing a com. 
+
+
+startProduceNewCom(com: Commodity)
+broadcast to seller market (will be asked by companies)
+
+stopProduceCom(com: Commodity)
+will not be consider anymore as a seller of this com by companies
+
+price (already done)
+
+---------------Companies side---------------------------
+
+marketbuy (already done)
+
+

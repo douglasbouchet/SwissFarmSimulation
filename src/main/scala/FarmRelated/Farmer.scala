@@ -470,6 +470,14 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       inventory_avg_cost.getOrElse(com, 0.0)
     }
 
+    //------methods for handling production of commodities-------
+
+
+
+    //-----------------------------------------------------------
+
+
+
     //---Methods for land leasing due to exiting---------
 
     /** This should be called every year, decides if the farmer needs to exit, and handle the inheriting of the farm
@@ -600,12 +608,42 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       }
     }
     */
-
-
     //----------------------------------------------------
 
+  //--------Main algorithm for behavior of farmer-------
 
-    def canEqual(a: Any): Boolean = a.isInstanceOf[Farmer]
+  /**
+   * - 1 epoch = 1 month/day, can change
+   * The behavior of the farmer is the following,
+   * For each epoch:
+   *    - check if he must retire, and if so, either lease its land to farmer of its municipality, or his child(ren) takes over
+   *    - check if some companies wants to buy commodities
+   *    - if commodities have been sold
+   *       - call the oracle (Gams optimiser for profit), by giving its land resources (i.e lands he possess)
+   *    and a budget (capital for the moment)
+   *       - ?? decide if wants to be pass to an organic farming (this should influence its choice of land uses (i.e which crops to grow,
+   *       have livestock, ...))
+   *       - decide of the using of its land in function of response of oracle + personal choice
+   *
+   * @note can we assume that the oracle could schedule multiple usage of a same land for the same year ?
+   *       i.e growing in first half of the year wheat, and then leasing the land, or growing winter wheat,....
+   * In that case, return oracle = List[(LandOverlay, List(LandOverlayPurpose))] i.e on parcel (1,2) -> wheat, winter wheat, leasing
+   * And we can get the timing of each production with some constants
+   */
+  def behave : __forever = __forever(
+    __do{
+      farmerExiting //(1)
+      //update productions
+      //val await = sellToCompanies //this should block the execution until all commodities are sold
+
+    },
+    __wait(30*CONSTANTS.TICKS_TIMER_PER_DAY)
+  )
+  //----------------------------------------------------
+
+
+
+  def canEqual(a: Any): Boolean = a.isInstanceOf[Farmer]
 
     override def equals(that: Any): Boolean =
       that match {
