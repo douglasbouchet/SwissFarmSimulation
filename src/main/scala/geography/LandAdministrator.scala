@@ -6,7 +6,7 @@ import Simulation.Simulation
 import code.{Instruction, __do, __forever, __wait}
 //import Simulation.SimLib.Mill
 import Simulation.SimO
-import farmpackage.Farmer
+import FarmRelated.Farmer
 import generation.LandGenerator
 
 import scala.collection.mutable

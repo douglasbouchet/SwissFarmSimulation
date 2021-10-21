@@ -9,7 +9,7 @@ package glob
 import Securities.Commodities.{Commodity, all_commodities}
 import Simulation.{SimO, Simulation}
 import code.{__wait, _}
-import farmpackage.Farmer
+import FarmRelated.Farmer
 
 import scala.collection.mutable
 
