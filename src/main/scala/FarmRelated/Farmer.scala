@@ -531,6 +531,8 @@ package farmpackage {
 
     //----------------------------------------------------
 
+    def sellToCompanies: Boolean = ???
+
 
     //--------Main algorithm for behavior of farmer-------
 
@@ -552,9 +554,17 @@ package farmpackage {
      * In that case, return oracle = List[(LandOverlay, List(LandOverlayPurpose))] i.e on parcel (1,2) -> wheat, winter wheat, leasing
      * And we can get the timing of each production with some constants
      */
-    def behave: Unit = {
+    def behave : __forever = __forever(
+      __do{
+        farmerExiting //(1)
+        //update productions
+        val await = sellToCompanies //this should block the execution until all commodities are sold
 
-    }
+
+      },
+      __wait(30*CONSTANTS.TICKS_TIMER_PER_DAY)
+    )
+
 
 
 
