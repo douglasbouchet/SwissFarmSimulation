@@ -532,6 +532,35 @@ package farmpackage {
     //----------------------------------------------------
 
 
+    //--------Main algorithm for behavior of farmer-------
+
+    /**
+     * - 1 epoch = 1 month/day, can change
+     * The behavior of the farmer is the following,
+     * For each epoch:
+     *    - check if he must retire, and if so, either lease its land to farmer of its municipality, or his child(ren) takes over
+     *    - check if some companies wants to buy commodities
+     *    - if commodities have been sold
+     *       - call the oracle (Gams optimiser for profit), by giving its land resources (i.e lands he possess)
+     *    and a budget (capital for the moment)
+     *       - ?? decide if wants to be pass to an organic farming (this should influence its choice of land uses (i.e which crops to grow,
+     *       have livestock, ...))
+     *       - decide of the using of its land in function of response of oracle + personal choice
+     *
+     * @note can we assume that the oracle could schedule multiple usage of a same land for the same year ?
+     *       i.e growing in first half of the year wheat, and then leasing the land, or growing winter wheat,....
+     * In that case, return oracle = List[(LandOverlay, List(LandOverlayPurpose))] i.e on parcel (1,2) -> wheat, winter wheat, leasing
+     * And we can get the timing of each production with some constants
+     */
+    def behave: Unit = {
+
+    }
+
+
+
+    //----------------------------------------------------
+
+
     def canEqual(a: Any): Boolean = a.isInstanceOf[Farmer]
 
     override def equals(that: Any): Boolean =
