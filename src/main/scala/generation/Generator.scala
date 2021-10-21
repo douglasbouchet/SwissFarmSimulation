@@ -179,21 +179,36 @@ class Generator(canton: String) {
     }
 
     while(!parcels.isEmpty && (ended == false)){
+      //TODO assign an age and a child to a farmer
+
+      //Here we assign a child to a farmer with probability 0.875 and give an age according to
+      //distribution of figure 3.3 of Swissland report (p. 21)
+      val child = rnd.nextFloat() < 0.875
+      var age = 0
+      val n = rnd.nextFloat()
+      if (n < 0.038) age = 22
+      else if(n < 0.137)  age = 66
+      else if(n < 0.797)  age = 30
+      else if(n < 0.3787) age = 40
+      else if(n < 0.7937) age = 50
+      else age = 64
+
+
       if(assignedSmallFarms.length < nSmallFarms){
         area = 2 + scala.util.Random.nextInt(7)
-        var farm: Farmer = Farmer(s, obs, prices,landAdmin)
+        var farm: Farmer = Farmer(s, obs, prices,landAdmin, age, child)
         assignAreas(farm)
         assignedSmallFarms ::= farm
       }
       else if(assignedMedFarms.length < nMedFarms){
         area = 10 + scala.util.Random.nextInt(20)
-        var farm = Farmer(s, obs, prices,landAdmin)
+        var farm = Farmer(s, obs, prices,landAdmin, age, child)
         assignAreas(farm)
         assignedMedFarms ::= farm
       }
       else if(assignedBigFarms.length < nBigFarms){
         area = 30 + scala.util.Random.nextInt(31)
-        var farm = Farmer(s, obs, prices,landAdmin)
+        var farm = Farmer(s, obs, prices,landAdmin, age, child)
         assignAreas(farm)
         assignedBigFarms ::= farm
       }
@@ -201,9 +216,7 @@ class Generator(canton: String) {
       sum = 0.0 
     }
 
-    val farms: List[Farmer] = assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
-    val test = parcels.filter(_.owner == null)
-    farms
+   assignedSmallFarms ::: assignedMedFarms ::: assignedBigFarms
 
     /** we reached the expected number of farm for the canton
      * if some parcels remain, add them to some farms randomly */
@@ -307,8 +320,8 @@ private def initPerson(s: Simulation,lAdmin: LandAdministrator): List[Person] = 
       recCreatePerson(parcels.tail, n - math.min(n, 4), acc ::: (for (_ <- 1 to math.min(n, 4)) yield new Person(s, true, parcel)).toList)
     }
   }
-  val nPeople = population.filter(_._1 == canton).head._2
-  //val nPeople = 1000
+  //val nPeople = population.filter(_._1 == canton).head._2
+  val nPeople = 1000
   println("Population = " + nPeople)
   val people = recCreatePerson(rnd.shuffle(lAdmin.getFreeParcels), population.filter(_._1 == canton).head._2, List[Person]())
   s.labour_market.pushAll(people)

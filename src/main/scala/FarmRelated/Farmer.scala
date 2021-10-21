@@ -3,6 +3,7 @@ package farmpackage {
   import Securities.Commodities._
   import Securities._
   import Simulation._
+  import geography.LandOverlayPurpose
   //import _root_.Simulation.Factory._
   import modifyFromKoch.{HR, ProductionLine, ProductionLineSpec}
   import code._
@@ -16,7 +17,7 @@ package farmpackage {
   import scala.collection.mutable
 
 
-  case class Farmer(s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator) extends SimO(s) with Location {
+  case class Farmer(s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator, _age: Int, _child: Boolean) extends SimO(s) with Location {
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
@@ -32,8 +33,14 @@ package farmpackage {
     //Strategy for selling
     var prevPrices: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
     var toSellEachTurn: scala.collection.mutable.Map[Commodity, Int] = scala.collection.mutable.Map[Commodity, Int]()
-
     var cropRotationSchedule: mutable.Map[CropProductionLine, List[Commodity]] = collection.mutable.Map[CropProductionLine,List[Commodity]]()
+
+    //Stuff concening LandLeasing
+    var age: Int = _age
+    var child: Boolean = _child
+    //head = last year, second = 2 years before,...
+    var last5HouseHoldIncomes: List[Int] = List[Int](0,0,0,0,0)
+
 
     def addParcels(newParcels: List[CadastralParcel]): Unit = {
       parcels :::= newParcels
@@ -105,6 +112,13 @@ package farmpackage {
         removeExpiredItems(s.timer)
         sellingStrategy //manage hold commodities
       },
+      __if(s.timer % 365*CONSTANTS.TICKS_TIMER_PER_DAY == 0){
+        __do{
+          //Each year, check if a farmer needs to retire, and if so, handle it
+          farmerExiting
+          age += 1
+        }
+      },
       __wait(1)
     )
 
@@ -112,6 +126,39 @@ package farmpackage {
         _shared: Simulation,
         _substitution: mutable.Map[SimO, SimO]
     ): SimO = ???
+
+    //TODO after ened imlmentation of exit, test if it workds inside the init method
+    def addCrop(crop: Crop): Unit = {
+      val area: Double = crop.getSurface
+      val nWorker = math.round((area / CONSTANTS.HA_PER_WORKER).toFloat)
+      val worker = if (nWorker > 0) nWorker else 1
+      CONSTANTS.workercounter += worker
+      val prodSpec: ProductionLineSpec = ProductionLineSpec(
+        worker,
+        List(/** (
+         * WheatSeeds,
+         * (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt) */),
+        List(
+          (WheatSeeds, (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt
+
+            /** * 1000 */
+          ),
+        ),
+        (
+          Wheat,
+          (area * CONSTANTS.WHEAT_PRODUCED_PER_HA).toInt
+        ),
+        CONSTANTS.CROP_PROD_DURATION.getOrElse(Wheat, 1000),
+        Some(List((Fertilizer, 10, 1.20)))
+      )
+      hr.hire(worker)
+      val prodL = new CropProductionLine(crop, prodSpec, this, hr.salary, s.timer)
+      crops ::= prodL
+      s.market(prodSpec.produced._1).add_seller(this)
+
+      //add the basic crop rotation schedule
+      cropRotationSchedule.put(prodL, List(Pea, CanolaOil, Wheat, Wheat))
+    }
 
     /** Create a factory for each landOverlay of purpose the farm has
       * ProductionLineSpec is determined in function of area, and purpose of
@@ -137,7 +184,7 @@ package farmpackage {
       var paddockOccupied: Boolean = false
 
       landOverlays.foreach {
-        case lOver@(_: Paddock) => {
+        case lOver@(_: Paddock) =>
           if(!paddockOccupied){
             val herd: Herd = new Herd(this, lOver, 20, hr.salary) //TODO check ca
             herd.initHerd()
@@ -147,38 +194,9 @@ package farmpackage {
           }
           paddocks ::= lOver
 
-        }
-        case lOver@(crop: Crop) => {
-          //afterwards we could add more complex attributes for productivity
-          val area: Double = crop.getSurface
-          val nWorker = math.round((area / CONSTANTS.HA_PER_WORKER).toFloat)
-          val worker = if (nWorker > 0) nWorker else 1
-          CONSTANTS.workercounter += worker
-          val prodSpec: ProductionLineSpec = ProductionLineSpec(
-            worker,
-            List(/** (
-             * WheatSeeds,
-             * (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt) */),
-            List(
-              (WheatSeeds, (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt
-                /** * 1000 */
-              ),
-            ),
-            (
-              Wheat,
-              (area * CONSTANTS.WHEAT_PRODUCED_PER_HA).toInt
-            ),
-            CONSTANTS.CROP_PROD_DURATION.getOrElse(Wheat, 1000),
-            Some(List((Fertilizer, 10, 1.20)))
-          )
-          hr.hire(worker)
-          val prodL = new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
-          crops ::= prodL
-          s.market(prodSpec.produced._1).add_seller(this)
+        case lOver@(crop: Crop) =>
+          addCrop(crop: Crop)
 
-          //add the basic crop rotation schedule
-          cropRotationSchedule.put(prodL, List(Pea, CanolaOil, Wheat, Wheat))
-        }
         case _ => {} //we already did above, implement with crop when done
       }
     }
@@ -383,7 +401,136 @@ package farmpackage {
       inventory_avg_cost.getOrElse(com, 0.0)
     }
 
-    
+
+    //---Methods for land leasing due to exiting---------
+
+    /** This should be called every year, decides if the farmer needs to exit, and handle the inheriting of the farm
+     * i.e transferring to a child or try to sell to other farmers */
+    def farmerExiting: Unit = {
+
+      /**
+       * Same logic as SwissLand
+       * @return true if past 5 years household incomes were negative or farmer older than 65
+       */
+      def shouldExit: Boolean =  age >= 65 || last5HouseHoldIncomes.forall(_ < 0)
+
+      /**
+       * Same logic as SwissLand
+       * @return true if Farmer has a child, and household incomes are slightly above a regional average
+       */
+      def childShouldInherit: Boolean = child && last5HouseHoldIncomes.head > 1.01 * regionalAverageHouseHoldIncomes
+
+      /** Keeps all the herds, crops, contact network,... So just reset the age to 35 (assume) and give a child with probability 0.875 (respect probability used by SwissLand)*/
+      def transferToChild: Unit = {
+        //no problem like in Terminator where John Connor is older than Sarah Connor cause if exit before 65, this is because
+        //house holds are negative, thus son will not take over (only if all regional incomes are negative but in this case there is a problem)
+        age = CONSTANTS.CHILD_TAKE_OVER_AGE
+        child = scala.util.Random.nextFloat() < 0.875
+      }
+
+      /**
+       * Reproducing selling mechanism used by SwissLand (i.e only ask the 5 closest farmers to lease the lands)
+       * @return true if all parcels have been sold
+       */
+      def sellToOtherFarmer: Boolean = {
+        def recSell(parcel: CadastralParcel, buyers: List[Farmer]): Boolean = {
+          if(buyers.isEmpty) false
+          else if(buyers.head.shouldByParcel(parcel, this)) {
+            true
+          } else recSell(parcel, buyers.tail)
+        }
+        //try to sell each parcel to a farmer
+        if(parcels.nonEmpty){
+          val buyers = landAdmin.findNClosestFarmers(parcels.head,5).getOrElse(List()).map(_._1)
+          parcels.forall(recSell(_, buyers))
+          }
+        else {
+          println("There is no parcels to sell, strange...")
+          true
+        }
+      }
+
+      /**
+       * get the regional households incomes (e.g by iterating over all farmers located at less than 50km or whatever)
+       * @return
+       */
+      def regionalAverageHouseHoldIncomes: Double = {
+        val regionalFarmers = landAdmin.findNClosestFarmers(parcels.head, 20).getOrElse(List()).map(_._1)
+        val lastIncomes = regionalFarmers.map(_.last5HouseHoldIncomes.head)
+        lastIncomes.foldLeft(0.0)(_ + _) / lastIncomes.length
+      }
+
+
+      if (shouldExit) {
+        if(childShouldInherit){
+          transferToChild
+        }
+        else{
+          if(!sellToOtherFarmer){
+            print("All the parcels haven't been sold to other farmers, TODO what do we do in that case ? ")
+          }
+        }
+      }
+    }
+
+    /** Sell the parcel to the buyer (i.e money transfer), change owner, and add/remove parcel inside parcels of buyer/seller*/
+    def transferParcelFrom(parcel: CadastralParcel, farmer: Farmer): Unit = {
+      val price = (parcel.area * CONSTANTS.M_SQUARE_PRICE).toInt
+      capital += price
+      farmer.capital -= price
+
+      landAdmin.changeCadastralParcelOwner(parcel, farmer) //TODO check if parcel is well removed from landOverlay
+      parcels = parcels.filter(_ != parcel)
+      farmer.addParcels(List(parcel))
+    }
+
+
+    //TODO see how to implement this logic, for the moment, only buy if can market buy it i.e really greedy
+    def shouldByParcel(parcel: CadastralParcel, from: Farmer): Boolean = {
+      val price = parcel.area * CONSTANTS.M_SQUARE_PRICE
+      if(capital > price){
+
+        //if a farmer wants to buy the new land, sell it to him
+        transferParcelFrom(parcel, from)
+        //decide what will the farmer do with its parcel
+        //TODO here we should implement a strategy (rmd decision for the moment)
+        if(scala.util.Random.nextFloat() < 0.5) handleNewParcel(parcel, LandOverlayPurpose.wheatField)
+        else handleNewParcel(parcel, LandOverlayPurpose.paddock)
+
+      }
+      capital > price
+
+    }
+
+    /** If the new purpose is a wheat field, we pick the head crop (if exist, and extend it with the new land)
+     * If no crops exist, add a new one
+     * If new purpose is a paddock, add the parcel as a new paddock to paddock's list
+     * Meadow and no purpose, just add them to list of parcels atm*/
+    def handleNewParcel(parcel: CadastralParcel, new_purpose : LandOverlayPurpose.Value): Unit = {
+      new_purpose match {
+        case geography.LandOverlayPurpose.wheatField =>
+          crops.headOption match {
+            case Some(cropProdLine) =>
+              landAdmin.removeLandOverlay(cropProdLine.crop)
+              addCrop(landAdmin.addLandOverlay(cropProdLine.crop.landsLot :+ (parcel, 100), geography.LandOverlayPurpose.wheatField).asInstanceOf[Crop])
+            case None => addCrop(landAdmin.addLandOverlay(List((parcel, 100)), geography.LandOverlayPurpose.wheatField).asInstanceOf[Crop])
+          }
+        case geography.LandOverlayPurpose.paddock =>
+          paddocks ::= landAdmin.addLandOverlay(List((parcel, 100)), geography.LandOverlayPurpose.paddock).asInstanceOf[Paddock]
+
+        case geography.LandOverlayPurpose.meadow =>
+          addParcels(List(parcel))
+          println("TODO IMPLEMENT ME")
+
+        case geography.LandOverlayPurpose.noPurpose =>
+          addParcels(List(parcel))
+          println("TODO IMPLEMENT ME")
+
+      }
+    }
+
+    //----------------------------------------------------
+
 
     def canEqual(a: Any): Boolean = a.isInstanceOf[Farmer]
 

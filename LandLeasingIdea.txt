@@ -1,0 +1,70 @@
+Differences between Swissland implementation and ours:
+
+- Finding who can lease some lands after retirement (so if no children is here to do the job):
+SwissLand:
+- Candidates to buy the land = 5 nearest farmers
+- Base price for selling obtain from regional stats on FADN
+- Reduce by 20% the price of leasing to reduce optimization # of runs ?? pas trop compris 
+
+SwissFarmingSimulator:
+- There is a method to find the closest 5 farms, we can use this. Or we take as candidates all farmers inside a certain radius
+- Base price currently random, but we can use thoses on FADN once we got the data
+- Implement it, if no other farmers wants to lease the lands 
+
+
+
+-----------New Attributs to Farmer-----------
+- Age: Int (condition for exiting)
+- Child: Option[Person] (If some children are present, they can handle the exiting farm, otherwise lease to other people). Assume if child takes over,
+ it has age 35, and some child with probability (0.875)
+- House hold income: List[Int] (benefits of the farm, condition for exiting). This is also a list, because if incomes were negatives for the past 5 years, farm should exit
+
+
+
+----------New methods to have Inside farm----------------
+- One method to decide if farmer should exit 
+- One method to decide if children will inherit the farm (and if not put on leasing for others)
+- One method that outputs if current farm income are above a regional average of minimum incomes (min average could be just hardocded for the moment, or just don't call this function while we don't have the data. But implement it in prevention)
+- One method (for the farmer who could lease some lands) outputing boolean, given a parcel (simple for the moment)
+
+----------Modifications inside generator class----------------
+- randomly add ages + child to farm (12.5% of farmer don't got children, + see age repartition inside BN in doc)
+
+
+
+---------Main method for managing land exiting inside LandAdministrator-------
+- In case child available, don't create a new instance (thus keeping contact network, ... as in real life) 
+- Else perfom the selling operation to all farmers (top5 closest to leaving farmer)
+
+
+----------minor things to add---------------------------------
+- Constant price m^2, (used to compute price for leasing)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

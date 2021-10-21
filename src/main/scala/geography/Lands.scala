@@ -198,7 +198,7 @@ package geography {
       }
     }
 
-    def getCadastralParcels: List[CadastralParcel] = landsLot.map(_._1).toList
+    def getCadastralParcels: List[CadastralParcel] = landsLot.map(_._1)
 
     class Meadow {
       //var remainingQuantityOfGrass: Double
