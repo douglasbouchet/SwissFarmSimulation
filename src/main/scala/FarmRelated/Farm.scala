@@ -16,7 +16,7 @@ package farmpackage {
   import scala.collection.mutable
 
 
-  case class Farm(s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator) extends SimO(s) with Location {
+  case class Farm(s: Simulation, obs: Observator, landAdmin: LandAdministrator) extends SimO(s) {
 
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
