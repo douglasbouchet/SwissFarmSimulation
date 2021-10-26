@@ -8,4 +8,4 @@ project/
 .idea/
 .scalafmt.conf
 explanations.md
-.bsp/
+.bsp
