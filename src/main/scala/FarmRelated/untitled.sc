@@ -1,32 +1,15 @@
-import Companies.Production
-import FarmRelated.Farmer
-import Owner.Owner
-//import Securities.Commodities.{Commodity, Flour, Wheat, all_commodities}
-import Securities.Commodities._
-import Simulation.Simulation
-import geography.CadastralParcel
-import modifyFromKoch.Person
-
-val s = new Simulation()
-val owner = new Owner()
-owner.make(WheatSeeds, 50, 1)
-val nEmployee = 0
-val salary = 2000
-val consumed = List((WheatSeeds, 100))
-val produced = List((Wheat, 100))
-val timeToComplete = 10
-val employees = scala.collection.mutable.Stack[Person]()
-val parcel = new CadastralParcel(("doug", 1111), owner ,List(), 10)
-
-val prod = new Production(s, owner, nEmployee, salary, consumed, produced, timeToComplete, employees)
-
-print(owner.inventory_to_string())
-for (i <- 1 to 20){
-  println()
-  print("s timer =" + s.timer)
-  print("turn " + i + "get prod = " + prod.getProduction)
-  s.timer += 1
+class x(v: Boolean) {
+  def get: Boolean = v
 }
 
-print(owner.inventory_to_string())
 
+val q = new x(true)
+val w = new x(true)
+val z = new x(true)
+val u = new x(true)
+val e = new x(false)
+
+
+val l = List(q,w,e)
+
+l.forall(_.get)

@@ -48,6 +48,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     var municipality : List[Farmer] = List() //TODO fix, create a class instead of a list of farmer
     //head = last year, second = 2 years before,...*/
     var last5HouseHoldIncomes: List[Int] = List[Int](0,0,0,0,0)
+
+    var productions: List[Production] = List()
     
     //var bank: Bank
     //var tools: List[someStuff]
@@ -80,7 +82,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     }
 
     //TODO Will be replaced by behave
-    override def algo: __forever = __forever(
+    //override def algo: __forever = __forever(
       /*
       __do {
         //println("Potential candidates:" + landAdmin.findNClosestFarmers(parcels(0), 2))
@@ -140,7 +142,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       __wait(1)
 
        */
-    )
+    //)
 
     override def mycopy(
         _shared: Simulation,
@@ -472,8 +474,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     }
     //------methods for handling polluting emission--------------
 
-    //should iterate over all landOverlays and pollute in function of their type (i.e WheatCrop, Paddock,....)
-
+    //should iterate over all landOverlays and pollute in function of their type (i.e WheatCrop, Paddock,....) TODO
     /** See how to define the method */
     def pollute(): Unit = ???
 
@@ -486,6 +487,14 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     /** call the payWorkers method of each Companies.Production */
     def payWorkers(): Unit = ???
 
+    /** For each Production, call the getProduction method (handle creation of new commodities in case production ended
+     * + dying of the production)
+     * Should be call each epoch inside "algo"*/
+    def updateProductions(): Boolean = productions.forall(_.getProduction)
+
+
+    //Should be called every year (as work for SwissLand). Should also reset inventory avg cost of each produced commodity
+    def updatePrices(): Unit = ???
 
     //-----------------------------------------------------------
 
@@ -495,7 +504,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
 
     /** This should be called every year, decides if the farmer needs to exit, and handle the inheriting of the farm
      * i.e transferring to a child or try to sell to other farmers */
-    def farmerExiting: Unit = {
+    def farmerExiting(): Unit = {
 
       /**
        * Same logic as SwissLand
@@ -549,7 +558,6 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
         lastIncomes.foldLeft(0.0)(_ + _) / lastIncomes.length
       }
 
-
       if (shouldExit) {
         if(childShouldInherit){
           transferToChild
@@ -572,7 +580,6 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       parcels = parcels.filter(_ != parcel)
       farmer.addParcels(List(parcel))
     }
-
 
     //TODO see how to implement this logic, for the moment, only buy if can market buy it i.e really greedy
     def shouldByParcel(parcel: CadastralParcel, from: Farmer): Boolean = {
@@ -627,6 +634,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
 
   /**
    * - 1 epoch = 1 month/day, can change
+   *
    * The behavior of the farmer is the following,
    * For each epoch:
    *    - check if he must retire, and if so, either lease its land to farmer of its municipality, or his child(ren) takes over
@@ -645,9 +653,11 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
    * In that case, return oracle = List[(LandOverlay, List(LandOverlayPurpose))] i.e on parcel (1,2) -> wheat, winter wheat, leasing
    * And we can get the timing of each production with some constants
    */
-  def behave : __forever = __forever(
+  override def algo : __forever = __forever(
     __do{
-      farmerExiting //(1)
+      farmerExiting()
+      updateProductions()
+
       //update productions
       //val await = sellToCompanies //this should block the execution until all commodities are sold
 

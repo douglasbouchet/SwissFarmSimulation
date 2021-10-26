@@ -97,15 +97,15 @@ class Production(
   /** Should be called each epoch by the owner:
    * Check if production has ended
    * If so, call computeProduction and die
-   * @return true if the production has ended
+   * @return false if the production has ended
    * */
   def getProduction: Boolean = {
     if(s.timer >= endProductionTimer){
       computeProduction()
       die()
-      true
+      false
     }
-    else false
+    else true
   }
 
 }
