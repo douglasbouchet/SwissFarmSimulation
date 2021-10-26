@@ -197,6 +197,6 @@ Add different type of production line in a farm:
 e.g 
   - production line requiring seeds and produce cereals (not harvested)
   - production line requiring not harveseted cereal, harvester and produce cereals
-3. Production line should have a timer based on a global timer to start, i.e if you cannot afford seeds, you cannot start a production of wheat in May, you need to wait until October.
+3. Companies.Production line should have a timer based on a global timer to start, i.e if you cannot afford seeds, you cannot start a production of wheat in May, you need to wait until October.
 4. Add an attribut to production line which represents commodities that are not obligated to run the production line, but increase productivity (ex: fertilizer)
 

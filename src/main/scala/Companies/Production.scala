@@ -1,12 +1,13 @@
-package FarmRelated
+package Companies
+
 import Owner.Owner
 import Securities.Commodities.Commodity
 import Simulation.Simulation
-import modifyFromKoch.Person
 import geography.{LandOverlay, LandOverlayPurpose}
+import modifyFromKoch.Person
 
 /**
- * We assume that before creating the Production, the owner has already bought the consumed commodities
+ * We assume that before creating the Companies.Production, the owner has already bought the consumed commodities
  * (If the consumed quantities are not filled, efficiency is reduced -> production is lower)
  * @param s the main Simulation
  * @param owner the owner (produced and consumed commodities are put/taken from its inventory)
@@ -83,7 +84,7 @@ class Production(
   }
 
   /** fire all employee
-   *  if some LandOverlay was given, set its purpose to LandOverlayPurpose.noPurpose (can be used for other Production/usage) */
+   *  if some LandOverlay was given, set its purpose to LandOverlayPurpose.noPurpose (can be used for other Companies.Production/usage) */
   def die(): Unit = {
     employees.foreach(s.labour_market.push(_))
     employees.clear()

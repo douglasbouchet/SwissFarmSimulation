@@ -1,3 +1,4 @@
+import Companies.Production
 import FarmRelated.Farmer
 import Owner.Owner
 //import Securities.Commodities.{Commodity, Flour, Wheat, all_commodities}
@@ -5,7 +6,6 @@ import Securities.Commodities._
 import Simulation.Simulation
 import geography.CadastralParcel
 import modifyFromKoch.Person
-import FarmRelated.Production
 
 val s = new Simulation()
 val owner = new Owner()

@@ -13,6 +13,7 @@ import market.Prices
 import glob.Observator
 
 import scala.collection.mutable
+import Companies.Production
 
 
 class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _age: Int, _children: List[Child]) extends SimO(_s) {
@@ -482,7 +483,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
 
     def instantiateProductionFromLandOverlay(lOver : LandOverlay): Production = ???
 
-    /** call the payWorkers method of each Production */
+    /** call the payWorkers method of each Companies.Production */
     def payWorkers(): Unit = ???
 
 

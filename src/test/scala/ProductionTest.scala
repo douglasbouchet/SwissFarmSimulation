@@ -1,5 +1,5 @@
+import Companies.Production
 import org.scalatest.funsuite
-import FarmRelated.Production
 import Owner.Owner
 import Securities.Commodities._
 import Simulation.{SimO, Simulation}
