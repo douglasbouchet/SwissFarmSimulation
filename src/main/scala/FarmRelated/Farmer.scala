@@ -617,13 +617,15 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
    * The behavior of the farmer is the following,
    * For each epoch:
    *    - check if he must retire, and if so, either lease its land to farmer of its municipality, or his child(ren) takes over
-   *    - check if some companies wants to buy commodities
-   *    - if commodities have been sold
+   *    - update the productions (~ with counter and time to complete)
+   *    - if commodities have been sold (say most parts)
    *       - call the oracle (Gams optimiser for profit), by giving its land resources (i.e lands he possess)
    *    and a budget (capital for the moment)
    *       - ?? decide if wants to be pass to an organic farming (this should influence its choice of land uses (i.e which crops to grow,
    *       have livestock, ...))
    *       - decide of the using of its land in function of response of oracle + personal choice
+   *       - purchase the consumed commodities for its production
+   *       - put itself on the seller market of commodities it will produce
    *
    * @note can we assume that the oracle could schedule multiple usage of a same land for the same year ?
    *       i.e growing in first half of the year wheat, and then leasing the land, or growing winter wheat,....
@@ -651,16 +653,18 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
           that.canEqual(this) &&
             this.parcels == that.parcels
           //See if add more comparisons
+
+
         }
          case _ => false
       }
 
     type A <: LandOverlay
-    def getOracleStartegy(budget: Double, landResources: List[CadastralParcel]) : List[A] = ???
+    def getOracleStrategy(budget: Double, landResources: List[CadastralParcel]) : List[A] = ???
 
     def strategicComToBuy(): List[(Commodity, Double)] = {
         var ls = List()
-        val overlays = getOracleStartegy(capital, parcels)
+        val overlays = getOracleStrategy(capital, parcels)
         overlays.foreach(o => 
           if (o.purpose == LandOverlayPurpose.wheatField) 
               ls = List(Commodity("wheat seeds"), o.getSurface * CONSTANTS.WHEAT_SEEDS_PER_HA) ::: ls

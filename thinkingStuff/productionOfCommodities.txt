@@ -1,0 +1,18 @@
+---------Price determination-------------
+
+---------Initial Prices (i.e when starting simulation)
+Price of first year = expectation based on last 3-years (data from FADN) * previous year’s annual relative price trends
+(computed in swiss Land demand module)
+
+
+
+
+
+
+
+
+
+
+
+--------The Market-------------------------------
+
