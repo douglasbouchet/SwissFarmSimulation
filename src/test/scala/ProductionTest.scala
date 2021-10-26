@@ -1,10 +1,9 @@
 import org.scalatest.funsuite
-import org.scalatest._
 import FarmRelated.Production
 import Owner.Owner
 import Securities.Commodities._
 import Simulation.{SimO, Simulation}
-import geography.CadastralParcel
+import geography.{CadastralParcel, LandOverlay, LandOverlayPurpose}
 import modifyFromKoch.Person
 
 import scala.collection.mutable
@@ -21,11 +20,12 @@ class ProductionTest extends funsuite.AnyFunSuite {
   val timeToComplete = 10
   val employees: mutable.Stack[SimO] = scala.collection.mutable.Stack[SimO]()
   val parcel = new CadastralParcel(("doug city", 1111), owner, List(), 1)
+  val lOver = new LandOverlay(List((parcel, 1.0)))
   val persons: List[SimO] = (for (_ <- 1 to 10) yield new Person(s, false, parcel).asInstanceOf[SimO]).toList
   employees.pushAll(persons)
   s.labour_market = employees
 
-  test("Frac and Produced Quantites and number hired people are correct"){
+  test("Frac and Produced Quantities and number hired people are correct"){
     val poorOwner = new Owner()
     poorOwner.make(WheatSeeds, 50, 1)
     print(poorOwner.inventory_to_string())
@@ -51,6 +51,15 @@ class ProductionTest extends funsuite.AnyFunSuite {
     assert(prodNull.frac === 0)
     s.timer += timeToComplete
     assert(poorOwner.available(Wheat) === 50)
+  }
+
+  test("LandOverlayPurpose correctly reset to noPurpose after die"){
+    lOver.purpose = LandOverlayPurpose.wheatField
+    val prod = new Production(s, new Owner(), nEmployee, salary, consumed, produced, timeToComplete, landOverlay=Some(lOver))
+    assert(lOver.purpose == LandOverlayPurpose.wheatField)
+    prod.die()
+    assert(lOver.purpose == LandOverlayPurpose.noPurpose)
+
   }
 
 }

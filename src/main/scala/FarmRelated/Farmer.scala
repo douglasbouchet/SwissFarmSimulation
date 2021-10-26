@@ -469,9 +469,21 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     def sendInvCost(com: Commodity): Double = {
       inventory_avg_cost.getOrElse(com, 0.0)
     }
+    //------methods for handling polluting emission--------------
+
+    //should iterate over all landOverlays and pollute in function of their type (i.e WheatCrop, Paddock,....)
+
+    /** See how to define the method */
+    def pollute(): Unit = ???
+
+    //-----------------------------------------------------------
 
     //------methods for handling production of commodities-------
 
+    def instantiateProductionFromLandOverlay(lOver : LandOverlay): Production = ???
+
+    /** call the payWorkers method of each Production */
+    def payWorkers(): Unit = ???
 
 
     //-----------------------------------------------------------
