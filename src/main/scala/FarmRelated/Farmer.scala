@@ -663,14 +663,14 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     def getOracleStrategy(budget: Double, landResources: List[CadastralParcel]) : List[A] = ???
 
     def strategicComToBuy(): List[(Commodity, Double)] = {
-        var ls = List()
+        var ls = List[(Commodity, Double)]()
         val overlays = getOracleStrategy(capital, parcels)
         overlays.foreach(o => 
           if (o.purpose == LandOverlayPurpose.wheatField) 
-              ls = List(Commodity("wheat seeds"), o.getSurface * CONSTANTS.WHEAT_SEEDS_PER_HA) ::: ls
+              ls = List((Commodity("wheat seeds"), o.getSurface * CONSTANTS.WHEAT_SEEDS_PER_HA)) ::: ls
           else if (o.isInstanceOf[Paddock]){
             val nb_cows = 3*o.getSurface * CONSTANTS.KG_GRASS_PER_PADDOCK_HA / (CONSTANTS.KG_OF_GRASS_PER_COW_DAY*365*3) //case of 1 year production
-            ls = List(Commodity("grass"), o.getSurface * CONSTANTS.KG_GRASS_PER_PADDOCK_HA) ::: ls
+            ls = List((Commodity("grass"), o.getSurface * CONSTANTS.KG_GRASS_PER_PADDOCK_HA)) ::: ls
           }
         )
         ls

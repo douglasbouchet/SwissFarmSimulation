@@ -23,9 +23,11 @@ class Person(
     p
   }
 
-  private val properties : Map[Commodity, Map[String, Int]] =
-    Map((Bread  -> Map("calories" -> 100)),
-      (Burger -> Map("calories" -> 500)));
+  private val properties : Map[Commodity, Map[String, Int]] = {
+    Map(/**Bread  -> Map("calories" -> 100),*/
+      Burger -> Map("calories" -> 500))
+
+  }
 
   private val foodstuffs = List(Bread, Burger);
 
