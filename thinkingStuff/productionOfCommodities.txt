@@ -1,0 +1,24 @@
+---------Price determination-------------
+
+---------Initial Prices (i.e when starting simulation)
+Price of first year = expectation based on last 3-years (data from FADN) * previous year’s annual relative price trends
+(computed in swiss Land demand module)
+
+--------The Market-------------------------------
+
+
+
+--------Complete life of the Productions--------
+
+"Production" == instance that creates some commodities after a certain time
+Each time a call to oracle is made, some landOverlays with purpose are returned
+-> based on this response + personal choice, we create some Productions based on those landOverlays caracteristics. 
+
+- Once production has ended, we add the farmer as a seller if the produced commodity
+- We also make a call to the oracle, to know what to do with this LandOverlay that was used for the production, and which is now without purpose (or maybe, we wait until multiple landOverlays purposes are "noPurpose", before making this call)
+
+Periodically (let's say every epoch), for all commodities own by the farmer:
+- If the quantity is 0 (i.e all have been sold, we remove the farmer from the seller market of this commodity)
+
+
+

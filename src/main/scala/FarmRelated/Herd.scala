@@ -1,10 +1,9 @@
-package farmrelated
+package FarmRelated
 
 import Securities.Commodities.{Beef, Commodity, Grass}
 import Simulation.Factory.{ProductionLine, ProductionLineSpec}
 import Simulation.Simulation
 import code._
-import farmpackage.Farmer
 import geography.{LandOverlayPurpose, Paddock}
 
 /**

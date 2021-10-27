@@ -1,13 +1,9 @@
 package Simulation
 import SimLib._
 import Securities.Commodities._
-import farmpackage.Farmer
-import Simulation.Factory._
 import Markets._
-import Simulation.Simulation
 import generation.Generator
 import geography.LandAdministrator
-import glob._
 
 object MainSwissFarmSimulation {
   val s = new Simulation
@@ -19,6 +15,8 @@ object MainSwissFarmSimulation {
   val canton = "Glaris"
   val generator = new Generator(canton)
   val landAdministrator = new LandAdministrator(s, canton)
+
+  print("asds------------------" + all_commodities)
 
   generator.generateAgents(landAdministrator, s)
 

@@ -1,8 +1,7 @@
-package farmrelated.cooperative{
+package FarmRelated
 
   import Securities.Commodities._
   import Simulation._
-  import farmpackage.Farmer
   import code._
   import geography.{City, Location, LocationAdministrator}
 
@@ -135,5 +134,4 @@ package farmrelated.cooperative{
       },
       __wait(1)
     )
-  }
 }

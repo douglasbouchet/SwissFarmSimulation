@@ -3,7 +3,7 @@ Price in the farms are determined by a 3-year average (section 3.2.1)
 Data found on FADN, but only for european member, switzerland isn't ??? 
 
 At t0 (first year), farms has the following infos:
-- Production ressources 
+- Companies.Production ressources
 - Biographical attributes
 - georeferences attributes
 (find what they are, but at one point we want to add them)

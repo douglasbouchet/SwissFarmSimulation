@@ -1,11 +1,10 @@
-package farmrelated.crop
+package FarmRelated
 
-//import Simulation.Factory._
 import modifyFromKoch.{ProductionLineSpec, ProductionLine}
 import code._
 import Securities.Commodities._
-import farmpackage.Farmer
 import geography.{Crop, LandOverlay}
+import glob.Observator
 
 /** Add an access to a landOverlay, in order to compute unit produced, and the fact that crops should influence soil (quality, dryness)*/
 class CropProductionLine(
@@ -141,13 +140,13 @@ class CropProductionLine(
           //Hold all the wheat, then call selling strategy in farm to decide when to sell it
           pls.produced._1 match {
             case Wheat => {
-              o.holdCommodity(Wheat, units_produced, Some(o.s.timer + CONSTANTS.WHEAT_EXPIRY_TIMER_IN_MONTH))
-              o.toSellEachTurn.update(pls.produced._1, o.toSellEachTurn.getOrElse(pls.produced._1,0) + units_produced)
+              //o.holdCommodity(Wheat, units_produced, Some(o.s.timer + CONSTANTS.WHEAT_EXPIRY_TIMER_IN_MONTH))
+              //o.toSellEachTurn.update(pls.produced._1, o.toSellEachTurn.getOrElse(pls.produced._1,0) + units_produced)
             }
             case Fertilizer => {
               //Put half of fertilizer on the market, remaining is for own use
-              o.holdCommodity(Wheat, units_produced/2, Some(o.s.timer + CONSTANTS.FERTILIZER_EXPIRY_TIMER_IN_MONTH))
-              o.toSellEachTurn.update(pls.produced._1, o.toSellEachTurn.getOrElse(pls.produced._1,0) + units_produced)
+              //o.holdCommodity(Wheat, units_produced/2, Some(o.s.timer + CONSTANTS.FERTILIZER_EXPIRY_TIMER_IN_MONTH))
+              //o.toSellEachTurn.update(pls.produced._1, o.toSellEachTurn.getOrElse(pls.produced._1,0) + units_produced)
             }
             case _ => println("This type of crop is unknown")
           }
@@ -179,9 +178,10 @@ class CropProductionLine(
 
 
     private def keepForFarmUse(com: Commodity, units_produced: Int): Int = {
+      /*
       var ownUse: Int = 0
       if(pls.produced._1 == com){
-        o.crops.foreach(crop => {
+        //o.crops.foreach(crop => {
             crop.pls.consumed.filter(elem => elem._1 == com) match {
               case head :: next => ownUse = Math.min(ownUse + head._2, units_produced)
               case Nil => {}
@@ -189,6 +189,8 @@ class CropProductionLine(
         })
       }
       ownUse
+      */
+      -1
     }
 
 
