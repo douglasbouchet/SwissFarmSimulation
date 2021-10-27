@@ -11,6 +11,7 @@ import glob._
 import geography.{CadastralParcel, City, Crop, LandAdministrator, LandOverlay, Location, LocationAdministrator, Paddock}
 import market.Prices
 import glob.Observator
+import CONSTANTS._
 
 import scala.collection.mutable
 import Companies.Production
@@ -50,7 +51,10 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     var last5HouseHoldIncomes: List[Int] = List[Int](0,0,0,0,0)
 
     var productions: List[Production] = List()
-    
+    var prices: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
+    var totalCostPerCom: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
+    var relatedCommodities: List[List[Commodity]] = List[List[Commodity]]()
+
     //var bank: Bank
     //var tools: List[someStuff]
 
@@ -82,7 +86,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     }
 
     //TODO Will be replaced by behave
-    //override def algo: __forever = __forever(
+    //override def algo: __forever = _*_forever(
       /*
       __do {
         //println("Potential candidates:" + landAdmin.findNClosestFarmers(parcels(0), 2))
@@ -129,7 +133,6 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
         removeExpiredItems(s.timer)
         sellingStrategy //manage hold commodities
       },
-<<<<<<< HEAD
       __if(s.timer % 365*CONSTANTS.TICKS_TIMER_PER_DAY == 0){
         __do{
           //Each year, check if a farmer needs to retire, and if so, handle it
@@ -137,8 +140,6 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
           age += 1
         }
       },
-=======
->>>>>>> 19f9ca5364738b05dc1e803fc7bab7e7f70c0691
       __wait(1)
 
        */
@@ -217,44 +218,9 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
           }
           paddocks ::= lOver
 
-<<<<<<< HEAD
         case lOver@(crop: Crop) =>
           addCrop(crop: Crop)
 
-=======
-        }
-        case lOver@(crop: Crop) => {
-          //afterwards we could add more complex attributes for productivity
-          val area: Double = crop.getSurface
-          val nWorker = math.round((area / CONSTANTS.HA_PER_WORKER).toFloat)
-          val worker = if (nWorker > 0) nWorker else 1
-          CONSTANTS.workercounter += worker
-          val prodSpec: ProductionLineSpec = ProductionLineSpec(
-            worker,
-            List(/** (
-             * WheatSeeds,
-             * (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt) */),
-            List(
-              (WheatSeeds, (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt
-                /** * 1000 */
-              ),
-            ),
-            (
-              Wheat,
-              (area * CONSTANTS.WHEAT_PRODUCED_PER_HA).toInt
-            ),
-            CONSTANTS.CROP_PROD_DURATION.getOrElse(Wheat, 1000),
-            Some(List((Fertilizer, 10, 1.20)))
-          )
-          hr.hire(worker)
-          val prodL = new CropProductionLine(lOver, prodSpec, this, hr.salary, s.timer)
-          crops ::= prodL
-          s.market(prodSpec.produced._1).add_seller(this)
-
-          //add the basic crop rotation schedule
-          cropRotationSchedule.put(prodL, List(Pea, CanolaOil, Wheat, Wheat))
-        }
->>>>>>> 19f9ca5364738b05dc1e803fc7bab7e7f70c0691
         case _ => {} //we already did above, implement with crop when done
       }
        */
@@ -484,8 +450,13 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
 
     /**  Instantiate a new Production
      *  Consumed & Produced are based on the MAP que tu viens de définir
-     * TODO YOUSSEF */
-    def instantiateProductionFromLandOverlay(lOver : LandOverlay): Production = ???
+     */
+    def instantiateProductionFromLandOverlay(lOver : LandOverlay): Production = {
+      var prod = new Production(s, this, 3, 1000, PROD_MAP(lOver.purpose)._1, PROD_MAP(lOver.purpose)._2, 
+                                ACTIVITIES_PROD_DURATION(lOver.purpose), landOverlay = Some(lOver))
+      productions = prod :: productions
+      prod
+    }
 
     /** call the payWorkers method of each Companies.Production */
     def payWorkers(): Unit = ???
@@ -493,10 +464,33 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     /** For each Production, call the getProduction method (handle creation of new commodities in case production ended
      * + dying of the production)
      * Should be call each epoch inside "algo"*/
-    def updateProductions(): Unit = productions.foreach(_.getProduction) //TODO getProd ret boolean commea ca on remove the productions après ce call)
+    def updateProductions(): Unit = {
+      productions.foreach(p => {
+        if (!p.getProduction){
+          p._produced.map(x => totalCostPerCom(x._1) = inventory_total_cost(x._1))
+          p.die()
+        }
+      }) //TODO getProd ret boolean commea ca on remove the productions après ce call)
+      
+    }
 
     //Should be called every year (as work for SwissLand). Should also reset inventory avg cost of each produced commodity
-    def updatePrices(): Unit = ???
+    def updatePrice(commodity: Commodity): Unit = {
+
+      val prevBenefits = prevIncomes(commodity) - totalCostPerCom(commodity)
+      val margin = 20/100
+      val sameCommType = relatedCommodities.filter(ls => ls.contains(commodity)).flatten
+
+      if (prevBenefits > 0 || inventory(commodity) == 0)
+        sameCommType.map(c => prices(c) += prices(c)*margin)
+
+      else if (inventory(commodity) > 0)
+        sameCommType.map(c => prices(c) -= prices(c)*margin)
+          
+    }
+
+    //Initialise commodity prices, related commodities, land purpose,...
+    def initialise(): Unit = ???
 
 
     //-----------------------------------------------------------
@@ -696,22 +690,19 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
          case _ => false
       }
 
-    type A <: LandOverlay
-    def getOracleStrategy(budget: Double, landResources: List[CadastralParcel]) : List[A] = ???
-
-    def strategicComToBuy(): List[(Commodity, Double)] = {
-        var ls = List[(Commodity, Double)]()
-        val overlays = getOracleStrategy(capital, parcels)
-        overlays.foreach(o =>
-          if (o.purpose == LandOverlayPurpose.wheatField)
-              ls = List((Commodity("wheat seeds"), o.getSurface * CONSTANTS.WHEAT_SEEDS_PER_HA)) ::: ls
-          else if (o.isInstanceOf[Paddock]){
-            val nb_cows = 3*o.getSurface * CONSTANTS.KG_GRASS_PER_PADDOCK_HA / (CONSTANTS.KG_OF_GRASS_PER_COW_DAY*365*3) //case of 1 year production
-            ls = List((Commodity("grass"), o.getSurface * CONSTANTS.KG_GRASS_PER_PADDOCK_HA)) ::: ls
-          }
+  type A <: LandOverlay
+  def getOracleStrategy(budget: Double, landResources: List[CadastralParcel]) : List[A] = ???
+  
+  def strategicComToBuy(): List[(Commodity, Double)] = {
+      var ls = List[(Commodity, Double)]()
+      val overlays = getOracleStrategy(capital, parcels)
+      overlays.foreach(o => 
+        PROD_MAP(o.purpose)._1.map(
+          x => { ls = List((x._1, o.getSurface * x._2)) ::: ls } 
         )
-        ls
-    }
+      )
+    ls
+  }
 
 }
 

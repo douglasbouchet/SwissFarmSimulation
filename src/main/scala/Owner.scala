@@ -97,7 +97,7 @@ class Owner {
 //  override def toString = "(" + capital/100 + " " +
 //    inventory_to_string() + " " + total_value_destroyed + " " + probfail + ")"
 
-  private def inventory_total_cost(item: ITEM_T) : Double =
+  protected def inventory_total_cost(item: ITEM_T) : Double =
     inventory(item) * inventory_avg_cost(item)
 
   /** This method is to be called *before* the inventory is updated. */
