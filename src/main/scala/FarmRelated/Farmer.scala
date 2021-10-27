@@ -482,6 +482,9 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
 
     //------methods for handling production of commodities-------
 
+    /**  Instantiate a new Production
+     *  Consumed & Produced are based on the MAP que tu viens de définir
+     * TODO YOUSSEF */
     def instantiateProductionFromLandOverlay(lOver : LandOverlay): Production = ???
 
     /** call the payWorkers method of each Companies.Production */
@@ -490,13 +493,24 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     /** For each Production, call the getProduction method (handle creation of new commodities in case production ended
      * + dying of the production)
      * Should be call each epoch inside "algo"*/
-    def updateProductions(): Boolean = productions.forall(_.getProduction)
-
+    def updateProductions(): Unit = productions.foreach(_.getProduction) //TODO getProd ret boolean commea ca on remove the productions après ce call)
 
     //Should be called every year (as work for SwissLand). Should also reset inventory avg cost of each produced commodity
     def updatePrices(): Unit = ???
 
+
     //-----------------------------------------------------------
+
+    /** This function should be called each epoch
+     * In case some LandOverlays don't have any purpose, call the oracle to decide what to do with these LandOverlays
+     * @param n: Int, once this number of LandOverlays without purpose is reached, call the oracle
+     * */
+    def callOracle(n: Int): List[A] = {
+        val withoutPurpose = landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose)
+        val budget = capital //TODO maybe not use all capital
+        //if(withoutPurpose.length > n) getOracleStrategy(budget, withoutPurpose)
+      List()
+    }
 
 
 
@@ -688,8 +702,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     def strategicComToBuy(): List[(Commodity, Double)] = {
         var ls = List[(Commodity, Double)]()
         val overlays = getOracleStrategy(capital, parcels)
-        overlays.foreach(o => 
-          if (o.purpose == LandOverlayPurpose.wheatField) 
+        overlays.foreach(o =>
+          if (o.purpose == LandOverlayPurpose.wheatField)
               ls = List((Commodity("wheat seeds"), o.getSurface * CONSTANTS.WHEAT_SEEDS_PER_HA)) ::: ls
           else if (o.isInstanceOf[Paddock]){
             val nb_cows = 3*o.getSurface * CONSTANTS.KG_GRASS_PER_PADDOCK_HA / (CONSTANTS.KG_OF_GRASS_PER_COW_DAY*365*3) //case of 1 year production

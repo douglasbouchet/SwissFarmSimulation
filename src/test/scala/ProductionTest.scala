@@ -69,8 +69,8 @@ class ProductionTest extends funsuite.AnyFunSuite {
     s.labour_market = employees
     val owner = new Seller()
     owner.make(WheatSeeds, 100, 1)
-    val producedd = List((Wheat, 100), (Beef, 100))
-    val prod = new Production(s, owner, nEmployee, salary, consumed, producedd, timeToComplete, landOverlay=Some(lOver))
+    val produced = List((Wheat, 100), (Beef, 100))
+    val prod = new Production(s, owner, nEmployee, salary, consumed, produced, timeToComplete, landOverlay=Some(lOver))
     assert(s.market(Wheat).sellers.isEmpty && s.market(Beef).sellers.isEmpty)
     s.timer += 10
     prod.getProduction

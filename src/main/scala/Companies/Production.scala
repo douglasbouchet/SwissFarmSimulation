@@ -94,13 +94,11 @@ class Production(
     }
   }
 
+  /** for all produced commodities, we add the owner as a seller */
   def addAsSeller(): Unit = {
-    println("produced = " + produced)
     produced.foreach{
       case(com: Commodity, _ : Int) =>
         s.market(com).add_seller(owner)
-        println("state of" + com + " =  " + s.market(com).sellers)
-
     }
   }
 
@@ -109,14 +107,11 @@ class Production(
    * If so, call computeProduction and die
    * @return false if the production has ended
    * */
-  def getProduction: Boolean = {
+  def getProduction: Unit = {
     if(s.timer >= endProductionTimer){
       computeProduction()
       die()
       if(frac > 0) addAsSeller
-      false
     }
-    else true
   }
-
 }
