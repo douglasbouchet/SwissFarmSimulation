@@ -1,6 +1,6 @@
 package Companies
 
-import Owner.Owner
+import Owner.{Owner, Seller}
 import Securities.Commodities.Commodity
 import Simulation.Simulation
 import geography.{LandOverlay, LandOverlayPurpose}
@@ -19,7 +19,7 @@ import modifyFromKoch.Person
  */
 class Production(
                 s: Simulation,
-                owner: Owner,
+                owner: Seller,
                 nEmployee: Int,
                 salary: Int,
                 consumed: List[(Commodity, Int)],
@@ -94,6 +94,16 @@ class Production(
     }
   }
 
+  def addAsSeller(): Unit = {
+    println("produced = " + produced)
+    produced.foreach{
+      case(com: Commodity, _ : Int) =>
+        s.market(com).add_seller(owner)
+        println("state of" + com + " =  " + s.market(com).sellers)
+
+    }
+  }
+
   /** Should be called each epoch by the owner:
    * Check if production has ended
    * If so, call computeProduction and die
@@ -103,6 +113,7 @@ class Production(
     if(s.timer >= endProductionTimer){
       computeProduction()
       die()
+      if(frac > 0) addAsSeller
       false
     }
     else true
