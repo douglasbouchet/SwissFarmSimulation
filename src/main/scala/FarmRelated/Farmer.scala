@@ -4,6 +4,8 @@ import Securities.Commodities._
 import Securities._
 import Simulation._
 import geography.LandOverlayPurpose
+
+import scala.concurrent.duration.Duration
 //import _root_.Simulation.Factory._
 import modifyFromKoch.{HR, ProductionLine, ProductionLineSpec}
 import code._
@@ -14,6 +16,10 @@ import glob.Observator
 
 import scala.collection.mutable
 import Companies.Production
+
+import scala.concurrent.{ Await, Future }
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 
 class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _age: Int, _children: List[Child]) extends SimO(_s) {
@@ -501,6 +507,18 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
 
     //-----------------------------------------------------------
 
+    type A <: LandOverlay
+
+  /**
+   *
+   * @param budget
+   * @param landResources
+   * @return
+   */
+    def getOracleStrategy(budget: Double, landResources: List[LandOverlay]) : Future[List[A]] = {
+      //Municipality.newStrategy(this,budget,landResources)
+      Future(List[A]())
+    }
     /** This function should be called each epoch
      * In case some LandOverlays don't have any purpose, call the oracle to decide what to do with these LandOverlays
      * @param n: Int, once this number of LandOverlays without purpose is reached, call the oracle
@@ -508,7 +526,11 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     def callOracle(n: Int): List[A] = {
         val withoutPurpose = landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose)
         val budget = capital //TODO maybe not use all capital
-        //if(withoutPurpose.length > n) getOracleStrategy(budget, withoutPurpose)
+        if(withoutPurpose.length > n) {
+          val f: Future[List[A]] = getOracleStrategy(budget, withoutPurpose)
+          val res: List[A] = Await.result(f, Duration.Inf)
+
+        }
       List()
     }
 
@@ -697,7 +719,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       }
 
     type A <: LandOverlay
-    def getOracleStrategy(budget: Double, landResources: List[CadastralParcel]) : List[A] = ???
+    def getOracleStrategy(budget: Double, landResources: List[LandOverlay]) : List[A] = ???
 
     def strategicComToBuy(): List[(Commodity, Double)] = {
         var ls = List[(Commodity, Double)]()
