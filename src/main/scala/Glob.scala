@@ -1,6 +1,8 @@
 import Securities.Commodities._
 import geography.LandOverlayPurpose._
 import geography.LandOverlayPurpose
+
+import scala.collection.mutable
 // This object will be here to allow for putting for example co2 emission, get prices, get lands,...
 //some global stuff
 
@@ -65,6 +67,16 @@ package object CONSTANTS {
     paddock -> (List((Grass, KG_GRASS_PER_PADDOCK_HA)), List((Grass, KG_GRASS_PER_PADDOCK_HA))),
     noPurpose -> (List(), List())
     
+  )
+
+  val LAND_OVERLAY_PURPOSE_TO_COMMODITY: scala.collection.mutable.Map[LandOverlayPurpose, Commodity] = scala.collection.mutable.Map[LandOverlayPurpose, Commodity](
+    wheatField -> Wheat,
+    paddock -> Beef,
+  )
+
+  val COMMODITY_TO_LAND_OVERLAY_PURPOSE: scala.collection.mutable.Map[Commodity, LandOverlayPurpose] = scala.collection.mutable.Map[Commodity, LandOverlayPurpose](
+     Wheat -> wheatField,
+     Beef -> paddock,
   )
 
 }
