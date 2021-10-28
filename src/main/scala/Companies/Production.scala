@@ -45,6 +45,9 @@ class Production(
       else
         println("Lacking of people to hire")
     }
+
+    //TODO this could be do inside the instantiate method instead
+
   }
 
   /** Pay the salary, the cost is added to the production cost
@@ -114,4 +117,5 @@ class Production(
       if(frac > 0) addAsSeller
     }
   }
+  override def toString = "Production = " + produced + ", Owner = " + owner
 }

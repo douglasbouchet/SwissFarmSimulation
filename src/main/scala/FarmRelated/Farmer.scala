@@ -69,13 +69,13 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     /** For each dummy, make an average over all crops that produces this dummy */
     //TODO there should be one method to tell the company that production is ready, with only inventory avg cost,
     //and one that accept a price proposed by a company
-    override def price(dummy: Commodity): Option[Double] = {
+    override def price(com: Commodity): Option[Double] = {
       //println(s"The actual price for com $dummy is : " + 1.05 * inventory_avg_cost.getOrElse(dummy, 0.0))
       //println("The market price is : " + s.prices.getPriceOf(dummy))
+      Some(1.05 * inventory_avg_cost.getOrElse(com, 0.0))
       //if (crops.nonEmpty && (saleableUnits(dummy) > 0))
       //  Some(1.05 * inventory_avg_cost.getOrElse(dummy, 0.0))
       //else None
-      Some(0)
     }
 
     //private def changeActivity(newState: Boolean, prodL: ProductionLine) {prodL.active = newState}
@@ -505,9 +505,13 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     def updatePrices(): Unit = ???
 
 
+    def updateToSellerMarket: Unit = ??? //Currently seller is never removed from a seller market, no problem if we just
+    // condition on number of items holded in the inventory (i.e if 0 items, no price is given)
+
+
     //-----------------------------------------------------------
 
-    type A <: LandOverlay
+    //type A <: LandOverlay
 
   /**
    *
@@ -515,10 +519,10 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
    * @param landResources
    * @return
    */
-    def getOracleStrategy(budget: Double, landResources: List[LandOverlay]) : Future[List[A]] = {
-      //Municipality.newStrategy(this,budget,landResources)
-      Future(List[A]())
-    }
+    //def getOracleStrategy(budget: Double, landResources: List[LandOverlay]) : Future[List[A]] = {
+    //  //Municipality.newStrategy(this,budget,landResources)
+    //  Future(List[A]())
+    //}
     /** This function should be called each epoch
      * In case some LandOverlays don't have any purpose, call the oracle to decide what to do with these LandOverlays
      * @param n: Int, once this number of LandOverlays without purpose is reached, call the oracle
@@ -723,7 +727,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
 
     def strategicComToBuy(): List[(Commodity, Double)] = {
         var ls = List[(Commodity, Double)]()
-        val overlays = getOracleStrategy(capital, parcels)
+        val overlays = getOracleStrategy(capital, landOverlays)
         overlays.foreach(o =>
           if (o.purpose == LandOverlayPurpose.wheatField)
               ls = List((Commodity("wheat seeds"), o.getSurface * CONSTANTS.WHEAT_SEEDS_PER_HA)) ::: ls
