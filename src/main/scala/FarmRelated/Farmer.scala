@@ -4,6 +4,8 @@ import Securities.Commodities._
 import Securities._
 import Simulation._
 import geography.LandOverlayPurpose
+
+import scala.List
 //import _root_.Simulation.Factory._
 import modifyFromKoch.{HR, ProductionLine, ProductionLineSpec}
 import code._
@@ -496,8 +498,10 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     //Initialise commodity prices, related commodities, land purpose,...
     def initialise(): Unit = ???
 
+    def computeBenef(com: Commodity): Double = prevIncomes.getOrElse(com, 0.0) - totalCostPerCom.getOrElse(com, 0.0)
 
-    //-----------------------------------------------------------
+
+  //-----------------------------------------------------------
 
     /** This function should be called each epoch
      * In case some LandOverlays don't have any purpose, call the oracle to decide what to do with these LandOverlays
@@ -510,6 +514,45 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       List()
     }
 
+    type A <: LandOverlay
+    //TODO this needs tests
+    //def getOracleStrategy(budget: Double, landResources: List[CadastralParcel]) : List[A] = ???
+    def chooseNextProduction: List[LandOverlay] = {
+      //iterate over unusedLOver, for each produced commodity, get its benefits
+      var producedCommodities: List[Commodity] = List[Commodity]()
+      landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose).foreach((lOver: LandOverlay) => {
+        val res : (List[(Commodity, Int)], List[(Commodity, Int)]) = PROD_MAP.getOrElse(lOver.purpose, List((),()))
+        if(res != List((),())){
+          producedCommodities ::= res._2.head._1
+        }
+        else{
+          println("The asked LandOverlayPurpose " + lOver.purpose + " does not exists")
+        }
+      })
+      assert(producedCommodities.length == producedCommodities.distinct.length)
+      //Order the commodity by decreasing benef (i.e max benef first)
+      val orderedByBenef: List[(Commodity, Double)] = producedCommodities.map(com => (com, computeBenef(com))).sortBy(- _._2)
+      //If we have at least 2 landOverlays, we give one parcel of the worst to the best
+      if(orderedByBenef.length >= 2){
+        //we increase production of best commodity by 20%, and reduce the production of worst commodity according to this.
+        val bestLandOverlay : LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.get(orderedByBenef.head._1)).head
+        val worstLandOverlay: LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.get(orderedByBenef.last._1)).head
+        //val toIncreaseArea: Double        = math.min(bestLandOverlay.getSurface * 0.20, worstLandOverlay.getSurface)
+        bestLandOverlay.landsLot ::= (worstLandOverlay.landsLot.head,  1.0)
+        worstLandOverlay.landsLot = worstLandOverlay.landsLot.tail
+        if(worstLandOverlay.landsLot.length == 0){
+          //In that case, we remove the worst land Overlay and give all its remaining parcel to the best landOverlay
+          _landAdmin.removeLandOverlay(worstLandOverlay)
+          landOverlays = landOverlays.filterNot(_ == worstLandOverlay)
+        }
+      }
+      //next we return landOverlays with the same purpose as their prevPurpose TODO can be complexified after
+      val newLandOverlays: List[LandOverlay] = landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose)
+      newLandOverlays.foreach((lOver: LandOverlay) => {
+        lOver.purpose = lOver.prevPurpose
+      })
+      newLandOverlays
+    }
 
 
     //---Methods for land leasing due to exiting---------
@@ -645,39 +688,6 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     def sellToCompanies: Boolean = ???
 
 
-    //--------Main algorithm for behavior of farmer-------
-
-    /**
-     * - 1 epoch = 1 month/day, can change
-     * The behavior of the farmer is the following,
-     * For each epoch:
-     *    - check if he must retire, and if so, either lease its land to farmer of its municipality, or his child(ren) takes over
-     *    - check if some companies wants to buy commodities
-     *    - if commodities have been sold
-     *       - call the oracle (Gams optimiser for profit), by giving its land resources (i.e lands he possess)
-     *    and a budget (capital for the moment)
-     *       - ?? decide if wants to be pass to an organic farming (this should influence its choice of land uses (i.e which crops to grow,
-     *       have livestock, ...))
-     *       - decide of the using of its land in function of response of oracle + personal choice
-     *
-     * @note can we assume that the oracle could schedule multiple usage of a same land for the same year ?
-     *       i.e growing in first half of the year wheat, and then leasing the land, or growing winter wheat,....
-     * In that case, return oracle = List[(LandOverlay, List(LandOverlayPurpose))] i.e on parcel (1,2) -> wheat, winter wheat, leasing
-     * And we can get the timing of each production with some constants
-     */
-    def behave : __forever = __forever(
-      __do{
-        farmerExiting //(1)
-        //update productions
-        val await = sellToCompanies //this should block the execution until all commodities are sold
-
-
-      },
-      __wait(30*CONSTANTS.TICKS_TIMER_PER_DAY)
-    )
-
-
-
 
     //----------------------------------------------------
 
@@ -734,8 +744,6 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
          case _ => false
       }
 
-  type A <: LandOverlay
-  def getOracleStrategy(budget: Double, landResources: List[CadastralParcel]) : List[A] = ???
   
   def strategicComToBuy(): List[(Commodity, Double)] = {
       var ls = List[(Commodity, Double)]()

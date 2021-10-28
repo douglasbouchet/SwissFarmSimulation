@@ -89,8 +89,9 @@ class Production(
   def die(): Unit = {
     employees.foreach(s.labour_market.push(_))
     employees.clear()
-    //If some landOverlay were assigned to this production, mark its purpose as
+    //If some landOverlay were assigned to this production, save current purpose, and mark the new one as no purpose
     if(landOverlay.isDefined) {
+      landOverlay.get.prevPurpose = landOverlay.get.purpose
       landOverlay.get.purpose = LandOverlayPurpose.noPurpose
     }
   }
