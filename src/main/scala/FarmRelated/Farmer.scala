@@ -475,25 +475,34 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       
     }
 
-    //Should be called every year (as work for SwissLand). Should also reset inventory avg cost of each produced commodity
-    def updatePrice(commodity: Commodity): Unit = {
+    //Should be called every year (as work for SwissLand).
+    def updatePrice: Unit = {
+      //useful to not update multiple time price of commodities of the same type
+      var increasedCommodities: List[Commodity] = List[Commodity]()
+      all_commodities.foreach((com: Commodity) => {
+        if (inventory.contains(com)) {
+          val prevBenefits = computeBenef(com)
+          val margin = 20.0 / 100 //TODO pass it as a constant, easier to change policy
+          val sameCommType: List[Commodity] = relatedCommodities.filter(ls => ls.contains(com)).flatten
+          //increase price of each concurrent commodity by margin%. If no previous price in prices, gives inventory avg cost
+          if (prevBenefits > 0 || inventory(com) == 0 && sameCommType.exists(increasedCommodities.contains)) {
+            increasedCommodities ::= com
+            sameCommType.foreach((c: Commodity) =>
+              prices.put(c, prices.getOrElse(c, inventory_avg_cost.getOrElse(c, 0.0)) * (1 + margin)))
+          }
+          //we should only decrease price if not everything was sold
+          else if (inventory(com) > 0  && sameCommType.exists(increasedCommodities.contains))
+            increasedCommodities ::= com
+            sameCommType.foreach((c: Commodity) =>
+              prices.put(c, prices.getOrElse(c, inventory_avg_cost.getOrElse(c, 0.0)) * (1 - margin)))
 
-      val prevBenefits = prevIncomes(commodity) - totalCostPerCom(commodity)
-      val margin = 20.0/100 //TODO pass it as a constant, easier to change policy
-      val sameCommType: List[Commodity] = relatedCommodities.filter(ls => ls.contains(commodity)).flatten
+          //TODO do we reset the inventory average cost ?
+        }
+      })
 
-      //increase price of each concurrent commodity by margin%. If no previous price in prices, gives inventory avg cost
-      if (prevBenefits > 0 || inventory(commodity) == 0) {
-        sameCommType.foreach((c: Commodity) =>
-          prices.put(c, prices.getOrElse(c, inventory_avg_cost.getOrElse(c, 0.0)) * (1 + margin)))
-      }
-
-      //we should only decrease price if not everything was sold
-      else if (inventory(commodity) > 0)
-        sameCommType.foreach((c: Commodity) =>
-          prices.put(c, prices.getOrElse(c, inventory_avg_cost.getOrElse(c, 0.0)) * (1 - margin)))
 
     }
+
 
     //Initialise commodity prices, related commodities, land purpose,...
     def initialise(): Unit = ???
@@ -535,8 +544,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       //If we have at least 2 landOverlays, we give one parcel of the worst to the best
       if(orderedByBenef.length >= 2){
         //we increase production of best commodity by 20%, and reduce the production of worst commodity according to this.
-        val bestLandOverlay : LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.get(orderedByBenef.head._1)).head
-        val worstLandOverlay: LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.get(orderedByBenef.last._1)).head
+        val bestLandOverlay : LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.getOrElse(orderedByBenef.head._1, null)).head
+        val worstLandOverlay: LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.getOrElse(orderedByBenef.last._1, null)).head
         //val toIncreaseArea: Double        = math.min(bestLandOverlay.getSurface * 0.20, worstLandOverlay.getSurface)
         bestLandOverlay.landsLot ::= (worstLandOverlay.landsLot.head,  1.0)
         worstLandOverlay.landsLot = worstLandOverlay.landsLot.tail
