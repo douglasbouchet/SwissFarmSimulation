@@ -34,6 +34,7 @@ class Production(
   var frac : Double = 1.0
   frac = computeFrac
   var endProductionTimer: Int = s.timer + timeToComplete
+  val _produced: List[(Commodity, Int)] = produced
 
   //Constructor
   {
@@ -107,11 +108,14 @@ class Production(
    * If so, call computeProduction and die
    * @return false if the production has ended
    * */
-  def getProduction: Unit = {
+  def getProduction: Boolean = {
     if(s.timer >= endProductionTimer){
       computeProduction()
       die()
+      
       if(frac > 0) addAsSeller
+      return false
     }
+    return true
   }
 }
