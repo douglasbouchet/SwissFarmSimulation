@@ -475,8 +475,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       
     }
 
-    //Should be called every year (as work for SwissLand).
-    def updatePrice: Unit = {
+    //Should be called at the end of every year (as work for SwissLand).
+    def updatePrice(): Unit = {
       //useful to not update multiple time price of commodities of the same type
       var increasedCommodities: List[Commodity] = List[Commodity]()
       all_commodities.foreach((com: Commodity) => {
@@ -728,11 +728,14 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     __do{
       farmerExiting()
       updateProductions()
-
       //update productions
       //val await = sellToCompanies //this should block the execution until all commodities are sold
-
     },
+    __if(s.timer % 364 == 0)(
+      __do{
+        updatePrice()
+      }
+    ),
     __wait(30*CONSTANTS.TICKS_TIMER_PER_DAY)
   )
   //----------------------------------------------------
@@ -756,7 +759,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
   
   def strategicComToBuy(): List[(Commodity, Double)] = {
       var ls = List[(Commodity, Double)]()
-      val overlays = getOracleStrategy(capital, parcels)
+      //val overlays = getOracleStrategy(capital, parcels)
+      val overlays = chooseNextProduction
       overlays.foreach(o => 
         PROD_MAP(o.purpose)._1.map(
           x => {ls :::= List((x._1, o.getSurface * x._2))}
