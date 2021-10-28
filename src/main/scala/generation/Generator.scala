@@ -341,8 +341,8 @@ private def initLandsAndFarms(landAdministrator: LandAdministrator, s: Simulatio
   //landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
   //val farms = assignParcelsToFarms(allParcels._1, s, obs, prices,landAdministrator).take(4)
   // ------------------------------------
-  //val farms = assignParcelsToFarms(s, obs, prices,landAdministrator).take(4)
-  val farms = assignParcelsToFarms(s, obs, prices,landAdministrator)
+  val farms = assignParcelsToFarms(s, obs, prices,landAdministrator).take(4)
+  //val farms = assignParcelsToFarms(s, obs, prices,landAdministrator)
   println("Number of farms = " + farms.length)
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init)

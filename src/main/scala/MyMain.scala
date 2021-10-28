@@ -16,8 +16,6 @@ object MainSwissFarmSimulation {
   val generator = new Generator(canton)
   val landAdministrator = new LandAdministrator(s, canton)
 
-  print("asds------------------" + all_commodities)
-
   generator.generateAgents(landAdministrator, s)
 
   //def main(argv: Array[String]) {

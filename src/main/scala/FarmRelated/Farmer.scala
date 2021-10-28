@@ -242,7 +242,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       }
       l.forall(successfully_bought)
     }
-  
+
     /** The commodities asks may not be available immediately
      * order is pass to the coop, which sells them back to this when products are buy by coop */ 
     def buyMissingFromCoop(toBuy: List[(Commodity, Int)]): Unit = {
