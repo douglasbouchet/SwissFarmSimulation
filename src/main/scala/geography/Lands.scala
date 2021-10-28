@@ -147,6 +147,7 @@ package geography {
     var ownershipDistrib: List[(Owner, Double)] = cmptOwnershipDistrib(landsLot)
 
     var purpose: LandOverlayPurpose.Value = LandOverlayPurpose.noPurpose
+    var prevPurpose: LandOverlayPurpose.Value = LandOverlayPurpose.noPurpose
 
     var soilQuality: Double = 1.0
 

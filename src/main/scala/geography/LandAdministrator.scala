@@ -43,7 +43,7 @@ class LandAdministrator(s: Simulation, canton: String) extends SimO(s) {
   def splitLandOverlay(
                         current: LandOverlay,
                         into: List[(LandOverlay, LandOverlayPurpose.Value)]
-                      ): Boolean = {
+                      ): List[LandOverlay] = {
 
     assert(landOverlays.contains(current))
 
@@ -70,7 +70,7 @@ class LandAdministrator(s: Simulation, canton: String) extends SimO(s) {
 
     landOverlays :::= into.map(_._1)
 
-    true
+    into.map(_._1)
   }
 
   /** Remove the land Overlay, and create a new One of different type */
@@ -100,6 +100,8 @@ class LandAdministrator(s: Simulation, canton: String) extends SimO(s) {
     landOverlays ::= landOverlay
     landOverlay
   }
+
+
 
   def mergeLandOverlay(
                         toMerge: List[LandOverlay],
@@ -144,6 +146,11 @@ class LandAdministrator(s: Simulation, canton: String) extends SimO(s) {
     cadastralParcel.partOf.keys.foreach(key =>
       key.cmptOwnershipDistrib(key.landsLot)
     )
+  }
+
+  def moveParcel(parcel: CadastralParcel, from: LandOverlay, to: LandOverlay): Unit = {
+    to.addCadastralParcel(parcel, 1.0)
+    from.removeCadastralParcel(parcel)
   }
 
   //Return the parcels currently owned by no one, (so they can be assigned to some agents)
