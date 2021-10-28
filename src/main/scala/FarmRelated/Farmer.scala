@@ -22,31 +22,20 @@ import Companies.Production
 class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _age: Int, _children: List[Child]) extends SimO(_s) {
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
-    //var crops: List[CropProductionLine] = List[CropProductionLine]()
-    //var paddocks: List[Paddock] = List[Paddock]() // TODO don't forget to update this if reassigning landoverlay to other purpose
-    //var herds: List[Herd] = List[Herd]()
     var cooperative: Option[AgriculturalCooperative] = None
     val obs = _obs
     val s = _s
 
-   /* //This are assigned by the generator atm (some random district/cities name atm)
-    override var city: City = _
-
-    protected var hr: HR = HR(s, this)
 
     //Strategy for selling
     var prevPrices: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
     var toSellEachTurn: scala.collection.mutable.Map[Commodity, Int] = scala.collection.mutable.Map[Commodity, Int]()
     var cropRotationSchedule: mutable.Map[CropProductionLine, List[Commodity]] = collection.mutable.Map[CropProductionLine,List[Commodity]]()
 
-    //Stuff concening LandLeasing
-    var age: Int = _age
-    var child: Boolean = _child
-    */
 
     var landAdmin: LandAdministrator = _landAdmin
     val children: List[Child] = _children
-    var age: Integer = _age
+    var age: Int = _age
     var prevIncomes: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
     var municipality : List[Farmer] = List() //TODO fix, create a class instead of a list of farmer
     //head = last year, second = 2 years before,...*/
@@ -203,6 +192,11 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       capital += 20000000
       make(WheatSeeds, 1300, 10)
       make(Fertilizer, 7, 2)
+      landOverlays.foreach(lOver =>
+        productions ::= instantiateProductionFromLandOverlay(lOver)
+      )
+
+      val x = 2
       //TODO also rethink all the init function, should only add some basic capital/material, as land overlays
       //use is now call if they are empty (i.e no purpose)
       /*
@@ -530,8 +524,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       //iterate over unusedLOver, for each produced commodity, get its benefits
       var producedCommodities: List[Commodity] = List[Commodity]()
       landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose).foreach((lOver: LandOverlay) => {
-        val res : (List[(Commodity, Int)], List[(Commodity, Int)]) = PROD_MAP.getOrElse(lOver.purpose, List((),()))
-        if(res != List((),())){
+        val res : (List[(Commodity, Int)], List[(Commodity, Int)]) = PROD_MAP.getOrElse(lOver.purpose, (List(), List()))
+        if(res != (List(), List())){
           producedCommodities ::= res._2.head._1
         }
         else{
@@ -547,7 +541,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
         val bestLandOverlay : LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.getOrElse(orderedByBenef.head._1, null)).head
         val worstLandOverlay: LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.getOrElse(orderedByBenef.last._1, null)).head
         //val toIncreaseArea: Double        = math.min(bestLandOverlay.getSurface * 0.20, worstLandOverlay.getSurface)
-        bestLandOverlay.landsLot ::= (worstLandOverlay.landsLot.head,  1.0)
+        bestLandOverlay.landsLot = bestLandOverlay.landsLot :+ (worstLandOverlay.landsLot.head.asInstanceOf[CadastralParcel],  1.0)
         worstLandOverlay.landsLot = worstLandOverlay.landsLot.tail
         if(worstLandOverlay.landsLot.length == 0){
           //In that case, we remove the worst land Overlay and give all its remaining parcel to the best landOverlay
@@ -728,10 +722,9 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     __do{
       farmerExiting()
       updateProductions()
-      //update productions
-      //val await = sellToCompanies //this should block the execution until all commodities are sold
     },
     __if(s.timer % 364 == 0)(
+      //at the end of each year, update prices base on selling performances
       __do{
         updatePrice()
       }
@@ -750,8 +743,6 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
           that.canEqual(this) &&
             this.parcels == that.parcels
           //See if add more comparisons
-
-
         }
          case _ => false
       }

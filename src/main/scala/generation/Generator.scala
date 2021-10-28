@@ -36,8 +36,8 @@ import scala.annotation.tailrec
 class Generator(canton: String) {
 
   val rnd: scala.util.Random = new scala.util.Random // fix the seed
-  private val f = new File("C:/Users/youss/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
-  //val f = new File("/Users/douglasbouchet/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
+  //private val f = new File("C:/Users/youss/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
+  val f = new File("/Users/douglasbouchet/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
   val sheet = WorkbookFactory.create(f).getSheetAt(0)  
 
   /** this will be used to assign a number of parcels to each farm 
@@ -183,35 +183,38 @@ class Generator(canton: String) {
       //Here we assign a child to a farmer with probability 0.875 and give an age according to
       //distribution of figure 3.3 of Swissland report (p. 21)
       var children = List[Child]()
-      if (rnd.nextFloat() < 0.875){
-        children ::= new Child(s: Simulation, 30, "male", true)
+      for (_ <- 0 to rnd.nextInt(3)) {
+        if(rnd.nextFloat() < 0.5){
+          //only male can work, and what to take over with proba 80%
+          children ::= new Child(s: Simulation, 30, "male", rnd.nextFloat() < 0.8)
+        }
       }
-
       var age = 0
       val n = rnd.nextFloat()
-      if (n < 0.038) age = 22
-      else if(n < 0.137)  age = 66
-      else if(n < 0.797)  age = 30
-      else if(n < 0.3787) age = 40
-      else if(n < 0.7937) age = 50
-      else age = 64
+      //if (n < 0.038) age = 22
+      //else if(n < 0.137)  age = 66
+      //else if(n < 0.797)  age = 30
+      //else if(n < 0.3787) age = 40
+      //else if(n < 0.7937) age = 50
+      //else age = 64
+      age = 62 // just to test they all exit
 
 
       if(assignedSmallFarms.length < nSmallFarms){
         area = 2 + scala.util.Random.nextInt(7)
-        var farm: Farmer = new Farmer(s, obs,landAdmin, age, children)
+        val farm: Farmer = new Farmer(s, obs,landAdmin, age, children)
         assignAreas(farm)
         assignedSmallFarms ::= farm
       }
       else if(assignedMedFarms.length < nMedFarms){
         area = 10 + scala.util.Random.nextInt(20)
-        var farm = new Farmer(s, obs,landAdmin, age, children)
+        val farm = new Farmer(s, obs,landAdmin, age, children)
         assignAreas(farm)
         assignedMedFarms ::= farm
       }
       else if(assignedBigFarms.length < nBigFarms){
         area = 30 + scala.util.Random.nextInt(31)
-        var farm = new Farmer(s, obs,landAdmin, age, children)
+        val farm = new Farmer(s, obs,landAdmin, age, children)
         assignAreas(farm)
         assignedBigFarms ::= farm
       }
