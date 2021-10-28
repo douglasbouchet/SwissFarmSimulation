@@ -242,30 +242,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       }
       l.forall(successfully_bought)
     }
-
-  //TODO this needs a complete reset (even now can be useless)
-    override def run_until(until: Int): Option[Int] = {
-      /*
-      // this ordering is important, so that bulk buying
-      // happens before consumption.
-      val nxt1 = super.run_until(until).get
-      if (crops.isEmpty && herds.isEmpty){
-        Some(nxt1)
-      }
-      else if(crops.isEmpty && herds.nonEmpty){
-        Some(math.min(nxt1, herds.map(herd => herd.cows.map(_.run_until(until).get).min).min))
-      }
-      else if(crops.nonEmpty && herds.isEmpty){
-        Some(math.min(nxt1, crops.map(_.run_until(until).get).min))
-      }
-      else{
-        Some(math.min(nxt1, math.min(herds.map(herd => herd.cows.map(_.run_until(until).get).min).min, crops.map(_.run_until(until).get).min)))
-      }
-
-     */
-      Some(1)
-    }
-
+  
     /** The commodities asks may not be available immediately
      * order is pass to the coop, which sells them back to this when products are buy by coop */ 
     def buyMissingFromCoop(toBuy: List[(Commodity, Int)]): Unit = {
@@ -448,10 +425,11 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
      *  Consumed & Produced are based on the MAP que tu viens de définir
      */
     def instantiateProductionFromLandOverlay(lOver : LandOverlay): Production = {
-      var prod = new Production(s, this, 3, 1000, PROD_MAP(lOver.purpose)._1, PROD_MAP(lOver.purpose)._2, 
+      val prod = new Production(s, this, 1, 1000, PROD_MAP(lOver.purpose)._1, PROD_MAP(lOver.purpose)._2,
                                 ACTIVITIES_PROD_DURATION(lOver.purpose), landOverlay = Some(lOver))
       productions = prod :: productions
       prod
+      //TODO not correct, the produced quantities should depend on the area of the land Overlay
     }
 
     /** call the payWorkers method of each Companies.Production */
@@ -718,7 +696,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
    * In that case, return oracle = List[(LandOverlay, List(LandOverlayPurpose))] i.e on parcel (1,2) -> wheat, winter wheat, leasing
    * And we can get the timing of each production with some constants
    */
-  override def algo : __forever = __forever(
+  override def algo = __forever(
     __do{
       farmerExiting()
       updateProductions()

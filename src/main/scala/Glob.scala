@@ -62,9 +62,10 @@ package object CONSTANTS {
   )
 
   //Map(LandPurpose -> (ls_consumed, ls_produced))
+  //assume 10 cows per paddock atm
   val PROD_MAP: collection.mutable.Map[LandOverlayPurpose, (List[(Commodity, Int)], List[(Commodity, Int)])] = scala.collection.mutable.Map[LandOverlayPurpose, (List[(Commodity, Int)], List[(Commodity, Int)])](
     wheatField -> (List((WheatSeeds, WHEAT_SEEDS_PER_HA)), List((Wheat, WHEAT_PRODUCED_PER_HA))),
-    paddock -> (List((Grass, KG_GRASS_PER_PADDOCK_HA)), List((Grass, KG_GRASS_PER_PADDOCK_HA))),
+    paddock -> (List((Grass, KG_GRASS_PER_PADDOCK_HA)), List((Beef, KG_OF_BEEF_PER_MEATCOW))),
     noPurpose -> (List(), List())
     
   )
