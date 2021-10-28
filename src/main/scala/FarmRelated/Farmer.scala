@@ -466,10 +466,9 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
      * Should be call each epoch inside "algo"*/
     def updateProductions(): Unit = {
       productions.foreach(p => {
-        if (!p.getProduction){
+        if (!p.getProduction)
           p._produced.map(x => totalCostPerCom(x._1) = inventory_total_cost(x._1))
-          p.die()
-        }
+
       }) //TODO getProd ret boolean commea ca on remove the productions après ce call)
       
     }
@@ -478,15 +477,20 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     def updatePrice(commodity: Commodity): Unit = {
 
       val prevBenefits = prevIncomes(commodity) - totalCostPerCom(commodity)
-      val margin = 20/100
-      val sameCommType = relatedCommodities.filter(ls => ls.contains(commodity)).flatten
+      val margin = 20.0/100 //TODO pass it as a constant, easier to change policy
+      val sameCommType: List[Commodity] = relatedCommodities.filter(ls => ls.contains(commodity)).flatten
 
-      if (prevBenefits > 0 || inventory(commodity) == 0)
-        sameCommType.map(c => prices(c) += prices(c)*margin)
+      //increase price of each concurrent commodity by margin%. If no previous price in prices, gives inventory avg cost
+      if (prevBenefits > 0 || inventory(commodity) == 0) {
+        sameCommType.foreach((c: Commodity) =>
+          prices.put(c, prices.getOrElse(c, inventory_avg_cost.getOrElse(c, 0.0)) * (1 + margin)))
+      }
 
+      //we should only decrease price if not everything was sold
       else if (inventory(commodity) > 0)
-        sameCommType.map(c => prices(c) -= prices(c)*margin)
-          
+        sameCommType.foreach((c: Commodity) =>
+          prices.put(c, prices.getOrElse(c, inventory_avg_cost.getOrElse(c, 0.0)) * (1 - margin)))
+
     }
 
     //Initialise commodity prices, related commodities, land purpose,...
@@ -738,7 +742,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       val overlays = getOracleStrategy(capital, parcels)
       overlays.foreach(o => 
         PROD_MAP(o.purpose)._1.map(
-          x => { ls = List((x._1, o.getSurface * x._2)) ::: ls } 
+          x => {ls :::= List((x._1, o.getSurface * x._2))}
         )
       )
     ls
