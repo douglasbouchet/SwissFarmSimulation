@@ -5,7 +5,7 @@ project/
 .bloop/
 .metals/
 .vscode/
-.idea/
+.idea
 .scalafmt.conf
 explanations.md
 .bsp
