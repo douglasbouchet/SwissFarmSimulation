@@ -81,6 +81,7 @@ class Production(
         val totalCost : Double = costsConsumables + personnelCosts
         val unitCost = totalCost / unitsProduced
         if(unitsProduced > 0) owner.make(com, unitsProduced, unitCost)
+        println(this + "produced:" + com + " " + unitsProduced)
     }
   }
 

@@ -18,7 +18,7 @@
 package generation
 
 import Companies.{Mill, Supermarket}
-import Securities.Commodities._
+import Securities.Commodities.{FeedStuff, Fertilizer, Flour, Wheat, WheatSeeds, Bread, Grass}
 import _root_.Simulation.SimLib.Source
 import _root_.Simulation.{SimO, Simulation}
 //import _root_.Simulation.Factory.ProductionLineSpec
@@ -100,8 +100,8 @@ class Generator(canton: String) {
     //from https://www.dsm-fms.ch/fr/donnees/chiffres/moulins/ -> 41 milling Companies
     val test = remainingParcels.filter(_.owner == null)
     // !!! for all switzerland, but let's do this atm
-    val nMills = 41
-    //val nMills = 1 //to test
+    //val nMills = 41
+    val nMills = 1 //to test
     var mills = List[Mill]()
     //same for every mill, change it afterwards
     val basicPls = ProductionLineSpec(3,
@@ -124,8 +124,8 @@ class Generator(canton: String) {
     //we use the estimated total area used for crop purpose to deduce how much company we will need for the food supply chain
     val anticipatedFlourProd = totalWheatCropsArea.filter(_._1 == canton).head._2 * CONSTANTS.WHEAT_PRODUCED_PER_HA* CONSTANTS.CONVERSION_WHEAT_FLOUR
     var remainingParcels: List[CadastralParcel] = rnd.shuffle(lAdmin.getFreeParcels)
-    val nSupermarket = 30 //Totally random
-    //val nSupermarket = 1 //To test
+    //val nSupermarket = 30 //Totally random
+    val nSupermarket = 1 //To test
     var supermarkets = List[Supermarket]()
     //same for every supermarket, change it afterwards
     val basicPls = ProductionLineSpec(3,
@@ -329,38 +329,20 @@ private def initPerson(s: Simulation,lAdmin: LandAdministrator): List[Person] = 
   //val nPeople = population.filter(_._1 == canton).head._2
   val nPeople = 1000
   println("Population = " + nPeople)
-  val people = recCreatePerson(rnd.shuffle(lAdmin.getFreeParcels), population.filter(_._1 == canton).head._2, List[Person]())
+  val people = recCreatePerson(rnd.shuffle(lAdmin.getFreeParcels), nPeople, List[Person]())
   s.labour_market.pushAll(people)
   people
 }
 
 private def initLandsAndFarms(landAdministrator: LandAdministrator, s: Simulation, obs: Observator, prices: Prices): List[Farmer] = {
-  //Init generate parcels, and assign them to farms
-  //old way of generating parcels -------
-  //val allParcels = generateParcels()
-  //landAdministrator.cadastralParcels = allParcels._1 ::: allParcels._2
-  //val farms = assignParcelsToFarms(allParcels._1, s, obs, prices,landAdministrator).take(4)
-  // ------------------------------------
-  val farms = assignParcelsToFarms(s, obs, prices,landAdministrator).take(4)
+
   //val farms = assignParcelsToFarms(s, obs, prices,landAdministrator)
+  val farms = assignParcelsToFarms(s, obs, prices,landAdministrator).take(4)
   println("Number of farms = " + farms.length)
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init)
+  obs.farms :::= farms
   farms
-}
-/** Generate Mills based on production of a canton
- *  The production if mills is a pure guess. Change it afterwards
- * @param canton
- */
- private def initMills( s: Simulation): List[Mill] = {
-  val cropAreas: Double = totalCropsArea.filter(_._1 == canton).head._2
-  val tonnesOfWheat: Int = math.round((cropAreas*CONSTANTS.WHEAT_PRODUCED_PER_HA).toFloat)
-  /** Assum Mill handle 100T of wheat per turn */
-  val nMills = tonnesOfWheat/100000  
-  //(for (i <- 1 to nMills) yield Mill(s)).toList
-  //(for (i <- 1 to 2) yield new Mill(s)).toList
-  List[Mill]()
-
 }
 
 /** Create some cooperatives, and assign them farms
@@ -407,7 +389,7 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
   val coop : List[AgriculturalCooperative] = initCoop(farms, s)
   val sources: List[Source] = generateSources(s)
 
-  observator.farms :::= farms
+
 
 
   //we place farms and cooperative inside cities
@@ -416,7 +398,7 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
 
   s.init(people ::: List(observator, prices, externalCommodityDemand) ::: farms ::: coop ::: mills ::: supermarkets ::: sources)
 
-  generateRoadNetwork()
+  //generateRoadNetwork()
 }
 
 def generateRoadNetwork(): RoadNetwork = {

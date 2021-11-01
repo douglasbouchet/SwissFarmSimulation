@@ -1,7 +1,6 @@
 package modifyFromKoch
 
-import Securities.Commodities._
-
+import Securities.Commodities.{Bread, _}
 import Simulation.{SimO, Simulation}
 import code._
 import geography.CadastralParcel
@@ -24,7 +23,7 @@ class Person(
   }
 
   private val properties : Map[Commodity, Map[String, Int]] = {
-    Map(/**Bread  -> Map("calories" -> 100),*/
+    Map(Bread  -> Map("calories" -> 100),
       Burger -> Map("calories" -> 500))
 
   }

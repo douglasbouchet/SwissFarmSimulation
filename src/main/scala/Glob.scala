@@ -1,4 +1,4 @@
-import Securities.Commodities._
+import Securities.Commodities.{CanolaOil, Pea, _}
 import geography.LandOverlayPurpose._
 import geography.LandOverlayPurpose
 
@@ -43,7 +43,7 @@ package object CONSTANTS {
   val FLOUR_PROD_DURATION: Int = 5 * TICKS_TIMER_PER_DAY
 
   val ACTIVITIES_PROD_DURATION: collection.mutable.Map[LandOverlayPurpose, Int] = scala.collection.mutable.Map[LandOverlayPurpose, Int](
-    wheatField -> 364 * TICKS_TIMER_PER_DAY,//TODO check real vallues
+    wheatField -> 100 * TICKS_TIMER_PER_DAY,//TODO check real vallues
     paddock -> MEATCOW_PROD_DURATION, 
    // Pea -> 364 * TICKS_TIMER_PER_DAY,//TODO check real vallues
     //CanolaOil -> 364 * TICKS_TIMER_PER_DAY//TODO check real vallues

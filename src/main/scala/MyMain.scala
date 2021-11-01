@@ -7,6 +7,7 @@ import geography.LandAdministrator
 
 object MainSwissFarmSimulation {
   val s = new Simulation
+  print(all_commodities)
 
   val silo         = new Trader(Wheat, 100, s);
   //val flour_trader  = new Trader(Flour, 50, s);
@@ -25,7 +26,7 @@ object MainSwissFarmSimulation {
   //    s.run(argv(0).toInt);
   //}
   def main(argv: Array[String]) {
-    s.run(500);
+    s.run(180);
   }
 }
 
