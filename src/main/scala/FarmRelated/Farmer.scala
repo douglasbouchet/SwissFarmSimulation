@@ -29,14 +29,15 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
 
 
     //Strategy for selling
-    var prevPrices: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
-    var toSellEachTurn: scala.collection.mutable.Map[Commodity, Int] = scala.collection.mutable.Map[Commodity, Int]()
-    var cropRotationSchedule: mutable.Map[CropProductionLine, List[Commodity]] = collection.mutable.Map[CropProductionLine,List[Commodity]]()
+    //var prevPrices: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
+    //var toSellEachTurn: scala.collection.mutable.Map[Commodity, Int] = scala.collection.mutable.Map[Commodity, Int]()
+    //var cropRotationSchedule: mutable.Map[CropProductionLine, List[Commodity]] = collection.mutable.Map[CropProductionLine,List[Commodity]]()
 
 
     var landAdmin: LandAdministrator = _landAdmin
     val children: List[Child] = _children
     var age: Int = _age
+    //updated inside Owner class
     var prevIncomes: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
     var municipality : List[Farmer] = List() //TODO fix, create a class instead of a list of farmer
     //head = last year, second = 2 years before,...*/
@@ -45,7 +46,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     var productions: List[Production] = List()
     var prices: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
     var totalCostPerCom: scala.collection.mutable.Map[Commodity, Double] = scala.collection.mutable.Map[Commodity, Double]()
-    var relatedCommodities: List[List[Commodity]] = List[List[Commodity]]()
+    var relatedCommodities: List[List[Commodity]] = List[List[Commodity]](List(Wheat, Pea),List(Grass))
+
 
     //var bank: Bank
     //var tools: List[someStuff]
@@ -340,17 +342,16 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
           val margin = 20.0 / 100 //TODO pass it as a constant, easier to change policy
           val sameCommType: List[Commodity] = relatedCommodities.filter(ls => ls.contains(com)).flatten
           //increase price of each concurrent commodity by margin%. If no previous price in prices, gives inventory avg cost
-          if (prevBenefits > 0 || inventory(com) == 0 && sameCommType.exists(increasedCommodities.contains)) {
+          if (prevBenefits > 0 && sameCommType.exists(increasedCommodities.contains)) {
             increasedCommodities ::= com
             sameCommType.foreach((c: Commodity) =>
               prices.put(c, prices.getOrElse(c, inventory_avg_cost.getOrElse(c, 0.0)) * (1 + margin)))
           }
           //we should only decrease price if not everything was sold
-          else if (inventory(com) > 0  && sameCommType.exists(increasedCommodities.contains))
+          else if (prevBenefits < 0  && sameCommType.exists(increasedCommodities.contains))
             increasedCommodities ::= com
             sameCommType.foreach((c: Commodity) =>
               prices.put(c, prices.getOrElse(c, inventory_avg_cost.getOrElse(c, 0.0)) * (1 - margin)))
-
           //TODO do we reset the inventory average cost ?
         }
       })

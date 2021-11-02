@@ -50,7 +50,7 @@ package object CONSTANTS {
   )
 
   val CROP_EFFICIENCY: collection.mutable.Map[Commodity, Int] = scala.collection.mutable.Map[Commodity, Int](
-    Wheat -> 6000,
+    Wheat -> WHEAT_PRODUCED_PER_HA, // in tones
     Pea -> 4000,//TODO check real vallues
     CanolaOil -> 5000//TODO check real vallues
   )
