@@ -101,7 +101,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       capital += 20000000
       make(WheatSeeds, 1300, 10)
       make(Fertilizer, 7, 2)
-      landOverlays.foreach(lOver =>
+      landOverlays.filter(_.purpose != LandOverlayPurpose.noPurpose).foreach(lOver =>
         productions ::= instantiateProductionFromLandOverlay(lOver)
       )
     }
@@ -409,6 +409,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
 
 
   /**
+   * IF AT LEAST 2 landOverlays are without purpose, we do the following:
    * Give one parcel of the Production that had the lowest benefits (or loss) and give it to the best
    * Assume for the moment, landOverlay new purpose is the same as the old one
    * Then instantiate the new productions, and buy the missing consumed commodities
@@ -416,44 +417,46 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
    * @return the new LandOverlays with purpose assigned
    */
     def chooseAndInstantiateNextProduction(): Unit = {
-      //iterate over unusedLOver, for each produced commodity, get its benefits
-      var producedCommodities: List[Commodity] = List[Commodity]()
-      landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose).foreach((lOver: LandOverlay) => {
-        val res : (List[(Commodity, Int)], List[(Commodity, Int)]) = PROD_MAP.getOrElse(lOver.prevPurpose, (List(), List()))
-        if(res != (List(), List())){
-          producedCommodities ::= res._2.head._1
+      val withoutPurpose: List[LandOverlay] = landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose)
+      if(withoutPurpose.length > 1 || landOverlays.length == 1){
+        //iterate over unusedLOver, for each produced commodity, get its benefits
+        var producedCommodities: List[Commodity] = List[Commodity]()
+        withoutPurpose.foreach((lOver: LandOverlay) => {
+          val res : Commodity = LAND_OVERLAY_PURPOSE_TO_COMMODITY.getOrElse(lOver.prevPurpose, null)
+          if(res != null){
+            producedCommodities ::= res
+          }
+        })
+        assert(producedCommodities.length == producedCommodities.distinct.length)
+        //Order the commodity by decreasing benef (i.e max benef first)
+        val orderedByBenef: List[(Commodity, Double)] = producedCommodities.map(com => (com, computeBenef(com))).sortBy(- _._2)
+        //If we have at least 2 landOverlays, we give one parcel of the worst to the best
+        if(orderedByBenef.length >= 2){
+          //we increase production of best commodity by 20%, and reduce the production of worst commodity according to this.
+          val bestLandOverlay : LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.getOrElse(orderedByBenef.head._1, null)).head
+          val worstLandOverlay: LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.getOrElse(orderedByBenef.last._1, null)).head
+          //val toIncreaseArea: Double        = math.min(bestLandOverlay.getSurface * 0.20, worstLandOverlay.getSurface)
+          bestLandOverlay.landsLot = bestLandOverlay.landsLot :+ (worstLandOverlay.landsLot.head.asInstanceOf[CadastralParcel],  1.0)
+          worstLandOverlay.landsLot = worstLandOverlay.landsLot.tail
+          //TODO merge prevpurpose == nopurpose land overlays with the best one
+          if(worstLandOverlay.landsLot.length == 0){
+            //In that case, we remove the worst land Overlay and give all its remaining parcel to the best landOverlay
+            _landAdmin.removeLandOverlay(worstLandOverlay)
+            landOverlays = landOverlays.filterNot(_ == worstLandOverlay)
+          }
         }
-        else{
-          println("The asked LandOverlayPurpose " + lOver.purpose + " does not exists")
-        }
-      })
-      assert(producedCommodities.length == producedCommodities.distinct.length)
-      //Order the commodity by decreasing benef (i.e max benef first)
-      val orderedByBenef: List[(Commodity, Double)] = producedCommodities.map(com => (com, computeBenef(com))).sortBy(- _._2)
-      //If we have at least 2 landOverlays, we give one parcel of the worst to the best
-      if(orderedByBenef.length >= 2){
-        //we increase production of best commodity by 20%, and reduce the production of worst commodity according to this.
-        val bestLandOverlay : LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.getOrElse(orderedByBenef.head._1, null)).head
-        val worstLandOverlay: LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.getOrElse(orderedByBenef.last._1, null)).head
-        //val toIncreaseArea: Double        = math.min(bestLandOverlay.getSurface * 0.20, worstLandOverlay.getSurface)
-        bestLandOverlay.landsLot = bestLandOverlay.landsLot :+ (worstLandOverlay.landsLot.head.asInstanceOf[CadastralParcel],  1.0)
-        worstLandOverlay.landsLot = worstLandOverlay.landsLot.tail
-        if(worstLandOverlay.landsLot.length == 0){
-          //In that case, we remove the worst land Overlay and give all its remaining parcel to the best landOverlay
-          _landAdmin.removeLandOverlay(worstLandOverlay)
-          landOverlays = landOverlays.filterNot(_ == worstLandOverlay)
+        //next we return landOverlays with the same purpose as their prevPurpose TODO can be complexified after
+        val newLandOverlays: List[LandOverlay] = landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose)
+        newLandOverlays.foreach((lOver: LandOverlay) => {
+          lOver.purpose = lOver.prevPurpose
+        })
+        //next setup a Production for each LandOverlay that needs to produce
+        newLandOverlays.filter(_.purpose != LandOverlayPurpose.noPurpose).foreach(instantiateProductionFromLandOverlay(_))
+        if(!strategicComToBuy(newLandOverlays)){
+          println("some commodities for new productions couldn't be bought")
         }
       }
-      //next we return landOverlays with the same purpose as their prevPurpose TODO can be complexified after
-      val newLandOverlays: List[LandOverlay] = landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose)
-      newLandOverlays.foreach((lOver: LandOverlay) => {
-        lOver.purpose = lOver.prevPurpose
-      })
-      //next setup a Production for each LandOverlay that needs to produce
-      newLandOverlays.foreach(instantiateProductionFromLandOverlay(_))
-      if(!strategicComToBuy(newLandOverlays)){
-        println("some commodities for new productions couldn't be bought")
-      }
+
     }
 
 

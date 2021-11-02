@@ -275,21 +275,11 @@ class Generator(canton: String) {
         landOverlays ::= new LandOverlay(splittedParcels(2))
       }
       
-      //randomly select a purpose to each landOverlay
-      landOverlays.foreach {overlay => {
-          landAdministrator.landOverlays ::= overlay
-          val n = scala.util.Random.nextInt(100)
-          if (n < 50) {
-            landAdministrator.changePurpose(overlay, LandOverlayPurpose.wheatField)
-          }
-          //else if (n >= 75 && n < 95){
-          else{
-            landAdministrator.changePurpose(overlay, LandOverlayPurpose.paddock)
-          }
-          //else{
-          //  landAdministrator.purposeOfLandOverlay += (overlay -> meadow)
-          //  overlay.purpose = meadow
-          //}
+      //assign in priority
+      if(landOverlays.length >= 1){
+        landAdministrator.changePurpose(landOverlays(0), LandOverlayPurpose.wheatField)
+        if(landOverlays.length >= 2){
+          landAdministrator.changePurpose(landOverlays(1), LandOverlayPurpose.paddock)
         }
       }
       farm.landOverlays :::= landOverlays
