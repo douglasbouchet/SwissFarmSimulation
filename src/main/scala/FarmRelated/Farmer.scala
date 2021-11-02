@@ -390,29 +390,32 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       List()
     }
 
-    def strategicComToBuy: List[(Commodity, Double)] = {
-      var ls = List[(Commodity, Double)]()
+  /**
+   * Buy missing commodities for new Productions
+   * @param overlays the land overlays whom to buy consumed
+   * @return true if all commodities were successfully bought
+   */
+    def strategicComToBuy(overlays : List[LandOverlay]): Boolean = {
+      var ls = List[(Commodity, Int)]()
       //val overlays = getOracleStrategy(capital, parcels)
-      val overlays = chooseAndInstantiateNextProduction
       overlays.foreach(o =>
         PROD_MAP(o.purpose)._1.map(
-          x => {ls :::= List((x._1, o.getSurface * x._2))}
+          x => {ls :::= List((x._1, (o.getSurface * x._2).toInt))}
         )
       )
-      ls
+      //next we buy the consumed commodities by our new productions
+      bulk_buy_missing(ls, 1)
     }
 
-
-    //TODO this needs tests
-    //def getOracleStrategy(budget: Double, landResources: List[CadastralParcel]) : List[A] = ???
 
   /**
    * Give one parcel of the Production that had the lowest benefits (or loss) and give it to the best
    * Assume for the moment, landOverlay new purpose is the same as the old one
+   * Then instantiate the new productions, and buy the missing consumed commodities
    * After: Induce some changes (e.g by making new activities)
    * @return the new LandOverlays with purpose assigned
    */
-    def chooseAndInstantiateNextProduction: List[LandOverlay] = {
+    def chooseAndInstantiateNextProduction(): Unit = {
       //iterate over unusedLOver, for each produced commodity, get its benefits
       var producedCommodities: List[Commodity] = List[Commodity]()
       landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose).foreach((lOver: LandOverlay) => {
@@ -448,7 +451,9 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       })
       //next setup a Production for each LandOverlay that needs to produce
       newLandOverlays.foreach(instantiateProductionFromLandOverlay(_))
-      newLandOverlays
+      if(!strategicComToBuy(newLandOverlays)){
+        println("some commodities for new productions couldn't be bought")
+      }
     }
 
 
@@ -616,6 +621,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     __do{
       farmerExiting()
       updateProductions()
+      //
+      chooseAndInstantiateNextProduction
       //at the end of each year, update prices base on selling performances
       if(s.timer / 365 >= yearCounter){
         yearCounter += 1
