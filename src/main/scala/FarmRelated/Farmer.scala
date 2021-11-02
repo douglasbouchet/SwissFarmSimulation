@@ -303,6 +303,16 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
 
     //-----------------------------------------------------------
 
+    //------methods for capital management-----------------------
+
+  /** put current year incomes at the head of last5HouseHoldIncomes and remove last element. Also clear prevIncomes */
+    def updateHouseHold(): Unit = {
+      val yearIncomes: Int = prevIncomes.foldLeft(0.0) { (acc, tup) => acc + tup._2 }.toInt
+      last5HouseHoldIncomes ::= yearIncomes
+      last5HouseHoldIncomes = last5HouseHoldIncomes.dropRight(1)
+      prevIncomes.clear()
+    }
+
     //------methods for handling production of commodities-------
 
     /**  Instantiate a new Production
@@ -587,7 +597,9 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       //at the end of each year, update prices base on selling performances
       if(s.timer / 365 >= yearCounter){
         yearCounter += 1
+        updateHouseHold()
         updatePrice()
+
       }
     },
     __wait(31*CONSTANTS.TICKS_TIMER_PER_DAY)
