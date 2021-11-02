@@ -36,6 +36,8 @@ class Production(
   var endProductionTimer: Int = s.timer + timeToComplete
   val _produced: List[(Commodity, Int)] = produced
 
+  override def toString = "Production: " + produced.head._1 + " " + owner
+
   //Constructor
   {
     //hire the employee
@@ -81,6 +83,7 @@ class Production(
         val totalCost : Double = costsConsumables + personnelCosts
         val unitCost = totalCost / unitsProduced
         if(unitsProduced > 0) owner.make(com, unitsProduced, unitCost)
+
         println(this + "produced:" + com + " " + unitsProduced)
     }
   }
@@ -101,7 +104,10 @@ class Production(
   def addAsSeller(): Unit = {
     produced.foreach{
       case(com: Commodity, _ : Int) =>
-        s.market(com).add_seller(owner)
+        if(!s.market(com).sellers.contains(owner)){
+          s.market(com).add_seller(owner)
+        }
+
     }
   }
 

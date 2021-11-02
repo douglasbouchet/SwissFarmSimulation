@@ -8,9 +8,10 @@ type ITEM_T = Security
 
 package Owner {
 
+import Companies.Supermarket
 import contact.ContactNetwork
-import Securities.Commodities.Commodity
-
+import Securities.Commodities.{Bread, Commodity}
+import FarmRelated.Farmer
 
 case class BalanceSheet(
   balance               : Int,
@@ -181,10 +182,19 @@ class Owner {
     // a bug elsewhere.
 
     //if(! GLOBAL.silent) {
-    //  println((this + " sells " + units + "*" + item + " to " + buyer +
-    //  //println((this + " sells " + availableUnits + "*" + item + " to " + buyer +
-    // " at " + (unit_price/100).toInt) + "/unit");
+
+    //if(this.isInstanceOf[this]){
+
     //}
+    if(item != Bread){
+      println(this + " sells " + units + "*" + item + " to " + buyer + " " +
+        //  //println((this + " sells " + availableUnits + "*" + item + " to " + buyer + " at " +
+        unit_price + "/unit");
+    }
+
+      //}
+
+
 
 
     if(unit_price < inventory_avg_cost(item))

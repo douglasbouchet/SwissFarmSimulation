@@ -26,7 +26,7 @@ object MainSwissFarmSimulation {
   //    s.run(argv(0).toInt);
   //}
   def main(argv: Array[String]) {
-    s.run(180);
+    s.run(1000);
   }
 }
 

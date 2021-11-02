@@ -23,10 +23,15 @@ case class Supermarket(s: Simulation,lAdmin: LandAdministrator, _parcels: List[C
   lAdmin.addAgent(this)
 
 
+  override def toString(): String = "lol "
+
+
 }
 
 case class Mill(s: Simulation, lAdmin: LandAdministrator, _parcels: List[CadastralParcel], pls: ProductionLineSpec) 
                 extends Company(s, lAdmin, _parcels, List(new Factory(pls, s))){
   lAdmin.addAgent(this)
-  
+
+  override def toString(): String = "lol "
+
 }

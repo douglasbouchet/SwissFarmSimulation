@@ -337,7 +337,7 @@ private def initPerson(s: Simulation,lAdmin: LandAdministrator): List[Person] = 
 private def initLandsAndFarms(landAdministrator: LandAdministrator, s: Simulation, obs: Observator, prices: Prices): List[Farmer] = {
 
   //val farms = assignParcelsToFarms(s, obs, prices,landAdministrator)
-  val farms = assignParcelsToFarms(s, obs, prices,landAdministrator).take(4)
+  val farms = assignParcelsToFarms(s, obs, prices,landAdministrator).take(2)
   println("Number of farms = " + farms.length)
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init)
@@ -386,7 +386,7 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
   val farms: List[Farmer] = initLandsAndFarms(landAdministrator, s, observator, prices)
   val mills: List[Mill] = CreateMills(s, landAdministrator, observator, canton)
   val supermarkets: List[Supermarket] = CreateSupermarket(s, landAdministrator, observator, canton)
-  val coop : List[AgriculturalCooperative] = initCoop(farms, s)
+  //val coop : List[AgriculturalCooperative] = initCoop(farms, s)
   val sources: List[Source] = generateSources(s)
 
 
@@ -394,9 +394,9 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
 
   //we place farms and cooperative inside cities
 
-  coop.foreach(_.city = cities(rnd.nextInt(nCities)))
+  //coop.foreach(_.city = cities(rnd.nextInt(nCities)))
 
-  s.init(people ::: List(observator, prices, externalCommodityDemand) ::: farms ::: coop ::: mills ::: supermarkets ::: sources)
+  s.init(people ::: List(observator, prices, externalCommodityDemand) ::: farms /*::: coop*/ ::: mills ::: supermarkets ::: sources)
 
   //generateRoadNetwork()
 }

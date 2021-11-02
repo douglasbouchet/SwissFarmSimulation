@@ -25,6 +25,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     var cooperative: Option[AgriculturalCooperative] = None
     val obs = _obs
     val s = _s
+    var yearCounter: Int = 0
 
 
     //Strategy for selling
@@ -49,6 +50,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     //var bank: Bank
     //var tools: List[someStuff]
 
+    override def toString = "Farmer " + parcels.head + " "
+
 
     //TODO might be useless, replaced by a better method for land leasing
     def addParcels(newParcels: List[CadastralParcel]): Unit = {
@@ -58,124 +61,28 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     /** For each dummy, make an average over all crops that produces this dummy */
     //TODO there should be one method to tell the company that production is ready, with only inventory avg cost,
     //and one that accept a price proposed by a company
-    override def price(dummy: Commodity): Option[Double] = {
-      //println(s"The actual price for com $dummy is : " + 1.05 * inventory_avg_cost.getOrElse(dummy, 0.0))
-      //println("The market price is : " + s.prices.getPriceOf(dummy))
-      //if (crops.nonEmpty && (saleableUnits(dummy) > 0))
-      //  Some(1.05 * inventory_avg_cost.getOrElse(dummy, 0.0))
-      //else None
-      Some(0)
+    override def price(com: Commodity): Option[Double] = {
+      //margin already included inside prices
+      if(s.timer == 150){
+        val x = 2
+      }
+      val p = prices.getOrElse(com, inventory_avg_cost.getOrElse(com,0.0))
+      if(p != 0.0) Some(p)
+      else None
     }
 
     //private def changeActivity(newState: Boolean, prodL: ProductionLine) {prodL.active = newState}
 
     override def stat: Unit = {
-      //println(this + " " + inventory_to_string())
-
-      //Voir combien on pait pour les resources car 40000 enormes ?
       println(this + " capital = " + capital/100 + "  " + inventory_to_string)
     }
-
-    //TODO Will be replaced by behave
-    //override def algo: __forever = _*_forever(
-      /*
-      __do {
-        //println("Potential candidates:" + landAdmin.findNClosestFarmers(parcels(0), 2))
-        //Each turn, get the emissions of each crop/herd
-        updateCropsAndHerdsEmissions()
-
-        crops.foreach(crop => {
-          //if there is a cooperative, buy from it. Else by itself
-          val boostersToBuy = crop.pls.boosters match {
-            case Some(list) => list.map(elem => (elem._1, elem._2))
-            case None => List() 
-          }
-          cooperative match {
-            case Some(_) => buyMissingFromCoop(crop.pls.consumed ++ boostersToBuy)
-            case None => bulk_buy_missing(crop.pls.consumed ++ boostersToBuy, 1)
-          }
-
-          //if quality of soil is not to low, we can use fertilizer
-          //if(crop.lOver.soilQuality > 1.0) fertilize(crop)
-          //else fertilize(crop, state = false)
-          //Update the state of the ground to impact it according to actions taken
-          //if(crop.fertilized) crop.lOver.soilQuality = Math.max(crop.lOver.soilQuality - 0.03, 0.5) 
-          //else crop.lOver.soilQuality = Math.min(crop.lOver.soilQuality + 0.02, 1.0)
-        })
-
-
-        //Buy the necessary stuff for herds if needed
-        herds.foreach(herd => {
-          //There is no more grass on the current Paddock, so buy for 1 month of grass for the all herd. Buy should only happen if only one paddock is available
-          //TODO  a problem might occur if cows consumption > prod of all paddocks -> #grass will tend to 0. And this code might not scale well if multiple herds are presents
-          //Fix this next (maybe add condition on expected consumption or only buy few amounts of grass each time (to last one week))
-          if(herd.newGrassOrdered && paddocks.length == 1){
-            assert(herd.cows.nonEmpty)
-            cooperative match {
-              case Some(_) => buyMissingFromCoop(List((Grass, herd.cows.length * herd.cows.head.dailyGrassCons * 30 / CONSTANTS.TICKS_TIMER_PER_DAY)))
-              case None => bulk_buy_missing(List((Grass, herd.cows.head.dailyGrassCons * 30 / CONSTANTS.TICKS_TIMER_PER_DAY)),  herd.cows.length)
-            }
-            herd.newGrassOrdered = false
-          }
-        })
-        assert(hr.employees.length == crops.map(_.pls.employees_needed).sum +
-          herds.foldLeft(0){(acc, num) => acc + num.cows.map(cow => cow.pls.employees_needed).sum })
-        hr.pay_workers()
-        removeExpiredItems(s.timer)
-        sellingStrategy //manage hold commodities
-      },
-      __if(s.timer % 365*CONSTANTS.TICKS_TIMER_PER_DAY == 0){
-        __do{
-          //Each year, check if a farmer needs to retire, and if so, handle it
-          farmerExiting
-          age += 1
-        }
-      },
-      __wait(1)
-
-       */
-    //)
 
     override def mycopy(
         _shared: Simulation,
         _substitution: mutable.Map[SimO, SimO]
     ): SimO = ???
 
-    //SHould be useless now
-    /*
-    def addCrop(crop: Crop): Unit = {
-      val area: Double = crop.getSurface
-      val nWorker = math.round((area / CONSTANTS.HA_PER_WORKER).toFloat)
-      val worker = if (nWorker > 0) nWorker else 1
-      CONSTANTS.workercounter += worker
-      val prodSpec: ProductionLineSpec = ProductionLineSpec(
-        worker,
-        List(/** (
-         * WheatSeeds,
-         * (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt) */),
-        List(
-          (WheatSeeds, (area * CONSTANTS.WHEAT_SEEDS_PER_HA).toInt
 
-            /** * 1000 */
-          ),
-        ),
-        (
-          Wheat,
-          (area * CONSTANTS.WHEAT_PRODUCED_PER_HA).toInt
-        ),
-        CONSTANTS.CROP_PROD_DURATION.getOrElse(Wheat, 1000),
-        Some(List((Fertilizer, 10, 1.20)))
-      )
-      hr.hire(worker)
-      val prodL = new CropProductionLine(crop, prodSpec, this, hr.salary, s.timer)
-      crops ::= prodL
-      s.market(prodSpec.produced._1).add_seller(this)
-
-      //add the basic crop rotation schedule
-      cropRotationSchedule.put(prodL, List(Pea, CanolaOil, Wheat, Wheat))
-    }
-
-    */
     /** Create a factory for each landOverlay of purpose the farm has
       * ProductionLineSpec is determined in function of area, and purpose of
       * LandOverlay
@@ -195,31 +102,6 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       landOverlays.foreach(lOver =>
         productions ::= instantiateProductionFromLandOverlay(lOver)
       )
-
-      val x = 2
-      //TODO also rethink all the init function, should only add some basic capital/material, as land overlays
-      //use is now call if they are empty (i.e no purpose)
-      /*
-      //We only populate 1 paddock with animals, and keep the others paddock empty, in order to put animals inside them when their current paddock is out of grass
-      var paddockOccupied: Boolean = false
-
-      landOverlays.foreach {
-        case lOver@(_: Paddock) => {
-          if(!paddockOccupied){
-            val herd: Herd = new Herd(this, lOver, 20, hr.salary)
-            herd.initHerd()
-            herds ::= herd
-            hr.hire(1)
-            paddockOccupied = true
-          }
-          paddocks ::= lOver
-
-        case lOver@(crop: Crop) =>
-          addCrop(crop: Crop)
-
-        case _ => {} //we already did above, implement with crop when done
-      }
-       */
     }
 
     /** Returns whether everything was successfully bought. */
@@ -447,9 +329,10 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       
     }
 
-    //Should be called at the end of every year (as work for SwissLand).
+    //Should be called at the end of every year (as work for SwissLand). ! Always after production is decided
     def updatePrice(): Unit = {
       //useful to not update multiple time price of commodities of the same type
+      println("updatting prices")
       var increasedCommodities: List[Commodity] = List[Commodity]()
       all_commodities.foreach((com: Commodity) => {
         if (inventory.contains(com)) {
@@ -700,14 +583,13 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     __do{
       farmerExiting()
       updateProductions()
-    },
-    __if(s.timer % 364 == 0)(
       //at the end of each year, update prices base on selling performances
-      __do{
+      if(s.timer / 365 >= yearCounter){
+        yearCounter += 1
         updatePrice()
       }
-    ),
-    __wait(30*CONSTANTS.TICKS_TIMER_PER_DAY)
+    },
+    __wait(31*CONSTANTS.TICKS_TIMER_PER_DAY)
   )
   //----------------------------------------------------
 
