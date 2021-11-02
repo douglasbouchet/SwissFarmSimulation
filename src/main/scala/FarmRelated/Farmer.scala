@@ -378,6 +378,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
 
   //-----------------------------------------------------------
 
+    type A <: LandOverlay
     /** This function should be called each epoch
      * In case some LandOverlays don't have any purpose, call the oracle to decide what to do with these LandOverlays
      * @param n: Int, once this number of LandOverlays without purpose is reached, call the oracle
@@ -389,10 +390,29 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       List()
     }
 
-    type A <: LandOverlay
+    def strategicComToBuy: List[(Commodity, Double)] = {
+      var ls = List[(Commodity, Double)]()
+      //val overlays = getOracleStrategy(capital, parcels)
+      val overlays = chooseAndInstantiateNextProduction
+      overlays.foreach(o =>
+        PROD_MAP(o.purpose)._1.map(
+          x => {ls :::= List((x._1, o.getSurface * x._2))}
+        )
+      )
+      ls
+    }
+
+
     //TODO this needs tests
     //def getOracleStrategy(budget: Double, landResources: List[CadastralParcel]) : List[A] = ???
-    def chooseNextProduction: List[LandOverlay] = {
+
+  /**
+   * Give one parcel of the Production that had the lowest benefits (or loss) and give it to the best
+   * Assume for the moment, landOverlay new purpose is the same as the old one
+   * After: Induce some changes (e.g by making new activities)
+   * @return the new LandOverlays with purpose assigned
+   */
+    def chooseAndInstantiateNextProduction: List[LandOverlay] = {
       //iterate over unusedLOver, for each produced commodity, get its benefits
       var producedCommodities: List[Commodity] = List[Commodity]()
       landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose).foreach((lOver: LandOverlay) => {
@@ -426,6 +446,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       newLandOverlays.foreach((lOver: LandOverlay) => {
         lOver.purpose = lOver.prevPurpose
       })
+      //next setup a Production for each LandOverlay that needs to produce
+      newLandOverlays.foreach(instantiateProductionFromLandOverlay(_))
       newLandOverlays
     }
 
@@ -620,18 +642,6 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
          case _ => false
       }
 
-  
-  def strategicComToBuy(): List[(Commodity, Double)] = {
-      var ls = List[(Commodity, Double)]()
-      //val overlays = getOracleStrategy(capital, parcels)
-      val overlays = chooseNextProduction
-      overlays.foreach(o => 
-        PROD_MAP(o.purpose)._1.map(
-          x => {ls :::= List((x._1, o.getSurface * x._2))}
-        )
-      )
-    ls
-  }
 
 }
 
