@@ -280,14 +280,11 @@ class Generator(canton: String) {
           landAdministrator.landOverlays ::= overlay
           val n = scala.util.Random.nextInt(100)
           if (n < 50) {
-            landOverlays = landOverlays.filterNot(_ == overlay)
-            landOverlays ::= landAdministrator.changePurpose(overlay, LandOverlayPurpose.wheatField)
+            landAdministrator.changePurpose(overlay, LandOverlayPurpose.wheatField)
           }
           //else if (n >= 75 && n < 95){
           else{
-            //remove the landOverlay and create a Paddock instead (inherits from landOverlay so no problem)
-            landOverlays = landOverlays.filterNot(_ == overlay)
-            landOverlays ::= landAdministrator.changePurpose(overlay, LandOverlayPurpose.paddock)
+            landAdministrator.changePurpose(overlay, LandOverlayPurpose.paddock)
           }
           //else{
           //  landAdministrator.purposeOfLandOverlay += (overlay -> meadow)

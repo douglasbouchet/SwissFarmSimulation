@@ -419,7 +419,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       //iterate over unusedLOver, for each produced commodity, get its benefits
       var producedCommodities: List[Commodity] = List[Commodity]()
       landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose).foreach((lOver: LandOverlay) => {
-        val res : (List[(Commodity, Int)], List[(Commodity, Int)]) = PROD_MAP.getOrElse(lOver.purpose, (List(), List()))
+        val res : (List[(Commodity, Int)], List[(Commodity, Int)]) = PROD_MAP.getOrElse(lOver.prevPurpose, (List(), List()))
         if(res != (List(), List())){
           producedCommodities ::= res._2.head._1
         }
@@ -621,14 +621,12 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     __do{
       farmerExiting()
       updateProductions()
-      //
       chooseAndInstantiateNextProduction
       //at the end of each year, update prices base on selling performances
       if(s.timer / 365 >= yearCounter){
         yearCounter += 1
         updateHouseHold()
         updatePrice()
-
       }
     },
     __wait(31*CONSTANTS.TICKS_TIMER_PER_DAY)

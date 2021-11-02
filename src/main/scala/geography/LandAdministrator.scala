@@ -77,11 +77,10 @@ class LandAdministrator(s: Simulation, canton: String) extends SimO(s) {
   def changePurpose(
                      landOverlay: LandOverlay,
                      newPurpose: LandOverlayPurpose.Value
-                   ): LandOverlay = {
+                   ): Unit = {
     //remove the landOverlay, but keep its land in memory, as only the purpose changes
-    val oldLands: List[(CadastralParcel, Double)] = landOverlay.landsLot
-    removeLandOverlay(landOverlay)
-    addLandOverlay(oldLands, newPurpose)
+    landOverlay.prevPurpose = landOverlay.prevPurpose
+    landOverlay.purpose = newPurpose
   }
 
   def removeLandOverlay(landOverlay: LandOverlay): Unit = {
