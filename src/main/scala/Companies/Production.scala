@@ -35,6 +35,7 @@ class Production(
   frac = computeFrac
   var endProductionTimer: Int = s.timer + timeToComplete
   val _produced: List[(Commodity, Int)] = produced
+  var alive = true
 
   override def toString = "Production: " + produced.head._1 + " " + owner
 
@@ -93,6 +94,7 @@ class Production(
   def die(): Unit = {
     employees.foreach(s.labour_market.push(_))
     employees.clear()
+    alive = false
     //If some landOverlay were assigned to this production, save current purpose, and mark the new one as no purpose
     if(landOverlay.isDefined) {
       landOverlay.get.prevPurpose = landOverlay.get.purpose
@@ -117,10 +119,9 @@ class Production(
    * @return false if the production has ended
    * */
   def getProduction: Boolean = {
-    if(s.timer >= endProductionTimer){
+    if(s.timer >= endProductionTimer && alive){
       computeProduction()
       die()
-      
       if(frac > 0) addAsSeller
       return false
     }
