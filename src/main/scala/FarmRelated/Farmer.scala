@@ -65,10 +65,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     //and one that accept a price proposed by a company
     override def price(com: Commodity): Option[Double] = {
       //margin already included inside prices
-      if(s.timer == 150){
-        val x = 2
-      }
-      val p = prices.getOrElse(com, inventory_avg_cost.getOrElse(com,0.0))
+      val p = prices.getOrElse(com, 1.2 * inventory_avg_cost.getOrElse(com,0.0))
       if(p != 0.0) Some(p)
       else None
     }
@@ -344,24 +341,35 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     //Should be called at the end of every year (as work for SwissLand). ! Always after production is decided
     def updatePrice(): Unit = {
       //useful to not update multiple time price of commodities of the same type
+      if(s.timer == 372){
+        val x = 2
+      }
       println("updatting prices")
-      var increasedCommodities: List[Commodity] = List[Commodity]()
+      var priceChangedCommodities: List[Commodity] = List[Commodity]()
       all_commodities.foreach((com: Commodity) => {
         if (inventory.contains(com)) {
           val prevBenefits = computeBenef(com)
           val margin = 20.0 / 100 //TODO pass it as a constant, easier to change policy
           val sameCommType: List[Commodity] = relatedCommodities.filter(ls => ls.contains(com)).flatten
           //increase price of each concurrent commodity by margin%. If no previous price in prices, gives inventory avg cost
-          if (prevBenefits > 0 && sameCommType.exists(increasedCommodities.contains)) {
-            increasedCommodities ::= com
+          //TODO problem with sameCommType.exists(increasedCommodities.contains)
+          if (prevBenefits > 0 && priceChangedCommodities.forall(!sameCommType.contains(_))) {
+            //add all of equivalent commodities inside increasedCommodities, as we update all at same time
+            priceChangedCommodities :::= sameCommType
+            //increasedCommodities ::= com
             sameCommType.foreach((c: Commodity) =>
               prices.put(c, prices.getOrElse(c, inventory_avg_cost.getOrElse(c, 0.0)) * (1 + margin)))
+            //TODO add incCom of all update type
           }
           //we should only decrease price if not everything was sold
-          else if (prevBenefits < 0  && sameCommType.exists(increasedCommodities.contains))
-            increasedCommodities ::= com
+          else if (prevBenefits < 0  && priceChangedCommodities.forall(!sameCommType.contains(_))) {
+            //increasedCommodities ::= com
+            priceChangedCommodities :::= sameCommType
+
             sameCommType.foreach((c: Commodity) =>
               prices.put(c, prices.getOrElse(c, inventory_avg_cost.getOrElse(c, 0.0)) * (1 - margin)))
+            //TODO add incCom of all update type
+          }
           //TODO do we reset the inventory average cost ?
         }
       })
@@ -627,9 +635,10 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       chooseAndInstantiateNextProduction
       //at the end of each year, update prices base on selling performances
       if(s.timer / 365 >= yearCounter){
+        age += 1
         yearCounter += 1
-        updateHouseHold()
         updatePrice()
+        updateHouseHold()
       }
     },
     __wait(31*CONSTANTS.TICKS_TIMER_PER_DAY)

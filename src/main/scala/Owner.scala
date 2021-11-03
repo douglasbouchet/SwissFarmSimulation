@@ -193,11 +193,10 @@ class Owner {
     }
     //in case this was a farmer, update its prevIncomes
     if(this.isInstanceOf[Farmer]){
-      val y = 1
+
       val com = item.asInstanceOf[Commodity]
       this.asInstanceOf[Farmer].prevIncomes.update(com, this.asInstanceOf[Farmer].prevIncomes.getOrElse(com, 0.0) +
       units * unit_price)
-      val x = 1
     }
 
 
