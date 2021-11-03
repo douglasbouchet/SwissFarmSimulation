@@ -97,6 +97,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       //give some capital + commodities to start
       capital += 20000000
       make(WheatSeeds, 1300, 10)
+      make(SoybeansSeeds, 1300, 10)
+      make(RapeseedSeeds, 1300, 10)
       make(Fertilizer, 7, 2)
       landOverlays.filter(_.purpose != LandOverlayPurpose.noPurpose).foreach(lOver =>
         productions ::= instantiateProductionFromLandOverlay(lOver)

@@ -18,9 +18,10 @@
 package generation
 
 import Companies.{Mill, Supermarket}
-import Securities.Commodities.{FeedStuff, Fertilizer, Flour, Wheat, WheatSeeds, Bread, Grass}
+import Securities.Commodities.{Bread, FeedStuff, Fertilizer, Flour, Grass, RapeseedSeeds, Soybeans, SoybeansSeeds, Wheat, WheatSeeds}
 import _root_.Simulation.SimLib.Source
 import _root_.Simulation.{SimO, Simulation}
+import geography.LandOverlayPurpose.{LandOverlayPurpose, rapeseedField, soybeansField}
 //import _root_.Simulation.Factory.ProductionLineSpec
 import FarmRelated._
 import geography._
@@ -36,8 +37,8 @@ import scala.annotation.tailrec
 class Generator(canton: String) {
 
   val rnd: scala.util.Random = new scala.util.Random // fix the seed
-  private val f = new File("C:/Users/youss/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
-  //val f = new File("/Users/douglasbouchet/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
+  //private val f = new File("C:/Users/youss/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
+  val f = new File("/Users/douglasbouchet/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
   val sheet = WorkbookFactory.create(f).getSheetAt(0)  
 
   /** this will be used to assign a number of parcels to each farm 
@@ -166,7 +167,8 @@ class Generator(canton: String) {
     var ended: Boolean = false
 
     def assignAreas(_farm: Farmer) {
-    while(sum < area && !parcels.isEmpty){
+      //at least 3 parcels per farm
+      while((sum < area && !parcels.isEmpty) || _farm.parcels.length < 2){
           _farm.parcels ::= parcels.head
           parcels = parcels.tail
           sum = 0.0
@@ -240,8 +242,8 @@ class Generator(canton: String) {
 
   /**
     * Create the land overlays for each farm (i.e which crops/paddoc/meadow it will have)
-    * Select a number between 1 and 3 land overlays per farm (depending on number of parcels)
-    * Assign each overlay between 1 parcel and 1/3 of total parcels of the farm
+    * If #parcels in [2,10] (WheatField, and Paddock, noPurpose)
+    * Else (WheatField, soybeansField, rapeseedField, Paddock, noPurpose)
     * If the farm possess only 1 parcel, reduce the number of landOverlays
     * For each land overlay assign purpose:
     *   WheatField with proba 0.75
@@ -254,7 +256,30 @@ class Generator(canton: String) {
     farms.foreach{farm => {
       val nParcels = farm.parcels.length
       var landOverlays: List[LandOverlay] = List()
-      if(nParcels == 1){
+      var toAssign: List[LandOverlayPurpose] = List[LandOverlayPurpose](LandOverlayPurpose.wheatField, LandOverlayPurpose.paddock, LandOverlayPurpose.noPurpose)
+      if(nParcels > 5){
+        print("we should have pb")
+        toAssign :::= List(LandOverlayPurpose.soybeansField, LandOverlayPurpose.rapeseedField)
+      }
+
+      val nPurpose = toAssign.length //+1 for the no purpose LOverlay
+      val parcelsRepartition : List[List[CadastralParcel]] = {
+        for(i <- 1 to nPurpose) yield farm.parcels.slice((i-1)*nParcels/nPurpose,(i)*nParcels/nPurpose)
+      }.toList
+      //for each parcel, we give 90% of its area to the landOverlay
+      val repartition: List[List[(CadastralParcel, Double)]] = parcelsRepartition.map(list => list.map((_, 0.9)))
+      repartition.foreach(landOverlays ::= new LandOverlay(_))
+      landAdministrator.landOverlays :::= landOverlays
+      for(i <- 1 to nPurpose){
+        landAdministrator.changePurpose(landOverlays(i-1), toAssign(i-1))
+      }
+
+      farm.landOverlays :::= landOverlays
+
+      val x = 1
+
+
+      /*if(nParcels == 1){
         //Assign only one landOverlay over 50% of the parcel
         landOverlays ::= new LandOverlay(List((farm.parcels.head, 0.5)))
       }
@@ -274,9 +299,9 @@ class Generator(canton: String) {
         landOverlays ::= new LandOverlay(splittedParcels(1))
         landOverlays ::= new LandOverlay(splittedParcels(2))
       }
-      
+      */
       //assign in priority
-      val len = landOverlays.length
+      /*val len = landOverlays.length
       if(len >= 1){
         landAdministrator.changePurpose(landOverlays(0), LandOverlayPurpose.wheatField)
         if(len >= 2){
@@ -289,7 +314,9 @@ class Generator(canton: String) {
           }
         }
       }
-      farm.landOverlays :::= landOverlays
+      */
+
+
     }
     }
   }
@@ -297,9 +324,11 @@ class Generator(canton: String) {
   def generateSources( s: Simulation): List[Source] = {
     val seedsSeller = new Source(WheatSeeds, 10000000,300, s);
     val seedsSeller1 = new Source(WheatSeeds, 100000,340, s);
+    val seedsSeller2 = new Source(SoybeansSeeds, 100000,340, s);
+    val seedsSeller3 = new Source(RapeseedSeeds, 100000,340, s);
     val feedStuffSeller = new Source(FeedStuff, 100000,100, s);
     val grassSource = new Source(Grass, units = 1000000, 100, s)
-    List(seedsSeller, seedsSeller1, feedStuffSeller, grassSource)
+    List(seedsSeller, seedsSeller1,seedsSeller2,seedsSeller3,  feedStuffSeller, grassSource)
   }
 
   /** Next we generate the road network */
