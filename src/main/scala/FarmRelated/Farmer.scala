@@ -341,10 +341,6 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     //Should be called at the end of every year (as work for SwissLand). ! Always after production is decided
     def updatePrice(): Unit = {
       //useful to not update multiple time price of commodities of the same type
-      if(s.timer == 372){
-        val x = 2
-      }
-      println("updatting prices")
       var priceChangedCommodities: List[Commodity] = List[Commodity]()
       all_commodities.foreach((com: Commodity) => {
         if (inventory.contains(com)) {
@@ -352,23 +348,17 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
           val margin = 20.0 / 100 //TODO pass it as a constant, easier to change policy
           val sameCommType: List[Commodity] = relatedCommodities.filter(ls => ls.contains(com)).flatten
           //increase price of each concurrent commodity by margin%. If no previous price in prices, gives inventory avg cost
-          //TODO problem with sameCommType.exists(increasedCommodities.contains)
           if (prevBenefits > 0 && priceChangedCommodities.forall(!sameCommType.contains(_))) {
             //add all of equivalent commodities inside increasedCommodities, as we update all at same time
             priceChangedCommodities :::= sameCommType
-            //increasedCommodities ::= com
             sameCommType.foreach((c: Commodity) =>
               prices.put(c, prices.getOrElse(c, inventory_avg_cost.getOrElse(c, 0.0)) * (1 + margin)))
-            //TODO add incCom of all update type
           }
           //we should only decrease price if not everything was sold
           else if (prevBenefits < 0  && priceChangedCommodities.forall(!sameCommType.contains(_))) {
-            //increasedCommodities ::= com
             priceChangedCommodities :::= sameCommType
-
             sameCommType.foreach((c: Commodity) =>
               prices.put(c, prices.getOrElse(c, inventory_avg_cost.getOrElse(c, 0.0)) * (1 - margin)))
-            //TODO add incCom of all update type
           }
           //TODO do we reset the inventory average cost ?
         }
