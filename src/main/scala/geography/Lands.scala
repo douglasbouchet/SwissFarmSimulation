@@ -228,8 +228,11 @@ package geography {
   object LandOverlayPurpose extends Enumeration {
     type LandOverlayPurpose = Value
     val wheatField = Value("Wheat field")
+    val soybeansField = Value("Soybeens field")
+    val rapeseedField = Value("Rapeseed field")
     val paddock = Value("Paddock")
     val meadow = Value("Meadow")
+    
     val noPurpose = Value("no purpose")
   }
 }

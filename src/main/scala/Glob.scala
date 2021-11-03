@@ -12,6 +12,8 @@ package object CONSTANTS {
 
   val WHEAT_SEEDS_PER_HA: Int = 150 // in kg per ha
   val WHEAT_PRODUCED_PER_HA: Int = 6000 // in kg per ha
+  val SOYBEANS_PRODUCED_PER_HA: Int = 3000 //TODO check real values
+  val RAPESEED_PRODUCED_PER_HA: Int = 3000 //TODO check real values
   val KG_GRASS_PER_PADDOCK_HA: Int = 1300
   val HA_PER_WORKER: Int = 20
   val CONVERSION_WHEAT_FLOUR: Double = 0.8
@@ -45,18 +47,24 @@ package object CONSTANTS {
   val ACTIVITIES_PROD_DURATION: collection.mutable.Map[LandOverlayPurpose, Int] = scala.collection.mutable.Map[LandOverlayPurpose, Int](
     wheatField -> 100 * TICKS_TIMER_PER_DAY,//TODO check real vallues
     paddock -> MEATCOW_PROD_DURATION, 
+    soybeansField -> 100 * TICKS_TIMER_PER_DAY,
+    rapeseedField -> 100 * TICKS_TIMER_PER_DAY
    // Pea -> 364 * TICKS_TIMER_PER_DAY,//TODO check real vallues
     //CanolaOil -> 364 * TICKS_TIMER_PER_DAY//TODO check real vallues
   )
 
   val CROP_EFFICIENCY: collection.mutable.Map[Commodity, Int] = scala.collection.mutable.Map[Commodity, Int](
     Wheat -> WHEAT_PRODUCED_PER_HA, // in tones
+    Soybeans -> 3000,
+    Rapeseed -> 3000,
     Pea -> 4000,//TODO check real vallues
     CanolaOil -> 5000//TODO check real vallues
   )
 
   val SEEDS_PER_HA: collection.mutable.Map[Commodity, Int] = scala.collection.mutable.Map[Commodity, Int](
     Wheat -> 150,
+    Soybeans -> 100, //TODO check real values
+    Rapeseed -> 100, //TODO check real values
     Pea -> 200,//TODO check real vallues
     CanolaOil -> 100//TODO check real vallues
   )
@@ -66,17 +74,23 @@ package object CONSTANTS {
   val PROD_MAP: collection.mutable.Map[LandOverlayPurpose, (List[(Commodity, Int)], List[(Commodity, Int)])] = scala.collection.mutable.Map[LandOverlayPurpose, (List[(Commodity, Int)], List[(Commodity, Int)])](
     wheatField -> (List((WheatSeeds, WHEAT_SEEDS_PER_HA)), List((Wheat, WHEAT_PRODUCED_PER_HA))),
     paddock -> (List((Grass, KG_GRASS_PER_PADDOCK_HA)), List((Beef, KG_OF_BEEF_PER_MEATCOW))),
+    soybeansField -> (List((SoybeansSeeds, SEEDS_PER_HA(Soybeans))), List((Soybeans, SOYBEANS_PRODUCED_PER_HA))),
+    rapeseedField -> (List((RapeseedSeeds, SEEDS_PER_HA(Rapeseed))), List((Rapeseed, RAPESEED_PRODUCED_PER_HA))),
     noPurpose -> (List(), List())
     
   )
 
   val LAND_OVERLAY_PURPOSE_TO_COMMODITY: scala.collection.mutable.Map[LandOverlayPurpose, Commodity] = scala.collection.mutable.Map[LandOverlayPurpose, Commodity](
     wheatField -> Wheat,
+    soybeansField -> Soybeans,
+    rapeseedField -> Rapeseed,
     paddock -> Beef,
   )
 
   val COMMODITY_TO_LAND_OVERLAY_PURPOSE: scala.collection.mutable.Map[Commodity, LandOverlayPurpose] = scala.collection.mutable.Map[Commodity, LandOverlayPurpose](
      Wheat -> wheatField,
+     Soybeans -> soybeansField,
+     Rapeseed -> rapeseedField,
      Beef -> paddock,
   )
 
