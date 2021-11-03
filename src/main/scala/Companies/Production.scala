@@ -120,10 +120,15 @@ class Production(
    * */
   def getProduction: Boolean = {
     if(s.timer >= endProductionTimer && alive){
-      computeProduction()
       die()
-      if(frac > 0) addAsSeller
+      if(frac > 0) {
+        addAsSeller
+        computeProduction()
+      }
+        
       return false
+      
+      
     }
     return true
   }

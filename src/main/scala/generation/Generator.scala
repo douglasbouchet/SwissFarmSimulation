@@ -48,7 +48,6 @@ class Generator(canton: String) {
   var totalWheatCropsArea: List[(String, Int)] = List()
   var totalSurface:        List[(String, Int)] = List()
   var population:          List[(String, Int)] = List()
-
   /** get data from excel file (26 cantons + Switzerland) */
   for (i <- 1 to 27) {
     nbFarmPerCanton = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(1).toString().toDouble).toInt) :: nbFarmPerCanton
@@ -166,15 +165,15 @@ class Generator(canton: String) {
     var ended: Boolean = false
 
     def assignAreas(_farm: Farmer) {
-    while(sum < area && !parcels.isEmpty){
-          _farm.parcels ::= parcels.head
-          parcels = parcels.tail
-          sum = 0.0
-          _farm.parcels.foreach(parcel => {
-            sum += parcel.area
-            parcel.owner = _farm
-          })
-      }
+      while(sum < area && !parcels.isEmpty){
+            _farm.parcels ::= parcels.head
+            parcels = parcels.tail
+            sum = 0.0
+            _farm.parcels.foreach(parcel => {
+              sum += parcel.area
+              parcel.owner = _farm
+            })
+        }
     }
 
     while(!parcels.isEmpty && (ended == false)){
@@ -189,6 +188,8 @@ class Generator(canton: String) {
           children ::= new Child(s: Simulation, 30, "male", rnd.nextFloat() < 0.8)
         }
       }
+
+      println("nb_childrennnnn : " + children.length)
       var age = 0
       val n = rnd.nextFloat()
       //if (n < 0.038) age = 22
