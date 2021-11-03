@@ -36,8 +36,8 @@ import scala.annotation.tailrec
 class Generator(canton: String) {
 
   val rnd: scala.util.Random = new scala.util.Random // fix the seed
-  //private val f = new File("C:/Users/youss/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
-  val f = new File("/Users/douglasbouchet/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
+  private val f = new File("C:/Users/youss/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
+  //val f = new File("/Users/douglasbouchet/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
   val sheet = WorkbookFactory.create(f).getSheetAt(0)  
 
   /** this will be used to assign a number of parcels to each farm 
@@ -276,10 +276,17 @@ class Generator(canton: String) {
       }
       
       //assign in priority
-      if(landOverlays.length >= 1){
+      val len = landOverlays.length
+      if(len >= 1){
         landAdministrator.changePurpose(landOverlays(0), LandOverlayPurpose.wheatField)
-        if(landOverlays.length >= 2){
+        if(len >= 2){
           landAdministrator.changePurpose(landOverlays(1), LandOverlayPurpose.paddock)
+          if (len >= 3){
+            landAdministrator.changePurpose(landOverlays(2), LandOverlayPurpose.soybeansField)
+            if (len >= 4){
+            landAdministrator.changePurpose(landOverlays(3), LandOverlayPurpose.rapeseedField)
+            }
+          }
         }
       }
       farm.landOverlays :::= landOverlays
