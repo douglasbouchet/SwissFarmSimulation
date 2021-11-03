@@ -418,7 +418,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
    */
     def chooseAndInstantiateNextProduction(): Unit = {
       val withoutPurpose: List[LandOverlay] = landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose)
-      if(withoutPurpose.length > 1 || landOverlays.length == 1){
+      //TODO change prevIncomes.nonEmpty by some condition on if the products were sold
+      if(withoutPurpose.length > 1 || landOverlays.length == 1 /*&& prevIncomes.nonEmpty*/){
         //iterate over unusedLOver, for each produced commodity, get its benefits
         var producedCommodities: List[Commodity] = List[Commodity]()
         withoutPurpose.foreach((lOver: LandOverlay) => {
@@ -626,7 +627,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     __do{
       farmerExiting()
       updateProductions()
-      chooseAndInstantiateNextProduction
+      //chooseAndInstantiateNextProduction
       //at the end of each year, update prices base on selling performances
       if(s.timer / 365 >= yearCounter){
         age += 1
@@ -635,7 +636,10 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
         updateHouseHold()
       }
     },
-    __wait(31*CONSTANTS.TICKS_TIMER_PER_DAY)
+    __wait(31*CONSTANTS.TICKS_TIMER_PER_DAY),
+    __do{
+      chooseAndInstantiateNextProduction
+    }
   )
   //----------------------------------------------------
 
