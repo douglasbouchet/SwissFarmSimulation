@@ -125,11 +125,8 @@ class Production(
         addAsSeller
         computeProduction()
       }
-        
       return false
-      
-      
     }
-    return true
+    true
   }
 }

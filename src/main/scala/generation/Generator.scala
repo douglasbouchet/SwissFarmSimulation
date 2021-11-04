@@ -36,8 +36,8 @@ import scala.annotation.tailrec
 class Generator(canton: String) {
 
   val rnd: scala.util.Random = new scala.util.Random // fix the seed
-  private val f = new File("C:/Users/youss/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
-  //val f = new File("/Users/douglasbouchet/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
+  //private val f = new File("C:/Users/youss/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
+  val f = new File("/Users/douglasbouchet/Desktop/SwissFarmSimulation/src/main/data/statistical_data/canton_stats.xlsx")
   val sheet = WorkbookFactory.create(f).getSheetAt(0)  
 
   /** this will be used to assign a number of parcels to each farm 
@@ -198,7 +198,7 @@ class Generator(canton: String) {
       //else if(n < 0.3787) age = 40
       //else if(n < 0.7937) age = 50
       //else age = 64
-      age = 62 // just to test they all exit
+      age = 64 // just to test they all exit
 
 
       if(assignedSmallFarms.length < nSmallFarms){
