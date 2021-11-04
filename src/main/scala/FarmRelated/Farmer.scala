@@ -97,6 +97,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       //give some capital + commodities to start
       capital += 20000000
       make(WheatSeeds, 1300, 10)
+      make(SoybeansSeeds, 1300, 10)
+      make(RapeseedSeeds, 1300, 10)
       make(Fertilizer, 7, 2)
       make(Soybeans, 1,1)
       landOverlays.filter(_.purpose != LandOverlayPurpose.noPurpose).foreach(lOver =>
@@ -417,7 +419,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
    */
     def chooseAndInstantiateNextProduction(): Unit = {
       val withoutPurpose: List[LandOverlay] = landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose)
-      if(withoutPurpose.length > 1 || landOverlays.length == 1){
+      //TODO change prevIncomes.nonEmpty by some condition on if the products were sold
+      if(withoutPurpose.length > 1 || landOverlays.length == 1 /*&& prevIncomes.nonEmpty*/){
         //iterate over unusedLOver, for each produced commodity, get its benefits
         var producedCommodities: List[Commodity] = List[Commodity]()
         withoutPurpose.foreach((lOver: LandOverlay) => {
@@ -435,6 +438,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
           val bestLandOverlay : LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.getOrElse(orderedByBenef.head._1, null)).head
           val worstLandOverlay: LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.getOrElse(orderedByBenef.last._1, null)).head
           //val toIncreaseArea: Double        = math.min(bestLandOverlay.getSurface * 0.20, worstLandOverlay.getSurface)
+          assert(worstLandOverlay.landsLot.length >= 1)
           bestLandOverlay.landsLot = bestLandOverlay.landsLot :+ (worstLandOverlay.landsLot.head._1,  1.0)
           worstLandOverlay.landsLot = worstLandOverlay.landsLot.tail
           //TODO merge prevpurpose == nopurpose land overlays with the best one
@@ -640,7 +644,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
     __do{
       farmerExiting()
       updateProductions()
-      chooseAndInstantiateNextProduction
+      //chooseAndInstantiateNextProduction
       //at the end of each year, update prices base on selling performances
       if(s.timer / 365 >= yearCounter){
         age += 1
@@ -650,7 +654,10 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
         updateHouseHold()
       }
     },
-    __wait(31*CONSTANTS.TICKS_TIMER_PER_DAY)
+    __wait(31*CONSTANTS.TICKS_TIMER_PER_DAY),
+    __do{
+      chooseAndInstantiateNextProduction
+    }
   )
   //----------------------------------------------------
 
