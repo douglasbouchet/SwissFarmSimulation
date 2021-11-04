@@ -100,6 +100,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       make(SoybeansSeeds, 1300, 10)
       make(RapeseedSeeds, 1300, 10)
       make(Fertilizer, 7, 2)
+      make(Soybeans, 1,1)
       landOverlays.filter(_.purpose != LandOverlayPurpose.noPurpose).foreach(lOver =>
         productions ::= instantiateProductionFromLandOverlay(lOver)
       )
@@ -333,7 +334,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
      * Should be call each epoch inside "algo"*/
     def updateProductions(): Unit = {
       productions.foreach(p => {
-        if (!p.getProduction)
+        if (!p.getProduction) 
           p._produced.map(x => totalCostPerCom(x._1) = inventory_total_cost(x._1))
 
       }) //TODO getProd ret boolean commea ca on remove the productions après ce call)
@@ -438,7 +439,6 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
           val worstLandOverlay: LandOverlay = landOverlays.filter(_.prevPurpose == CONSTANTS.COMMODITY_TO_LAND_OVERLAY_PURPOSE.getOrElse(orderedByBenef.last._1, null)).head
           //val toIncreaseArea: Double        = math.min(bestLandOverlay.getSurface * 0.20, worstLandOverlay.getSurface)
           assert(worstLandOverlay.landsLot.length >= 1)
-
           bestLandOverlay.landsLot = bestLandOverlay.landsLot :+ (worstLandOverlay.landsLot.head._1,  1.0)
           worstLandOverlay.landsLot = worstLandOverlay.landsLot.tail
           //TODO merge prevpurpose == nopurpose land overlays with the best one
@@ -475,17 +475,34 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
        */
       def shouldExit: Boolean =  age >= 65 || last5HouseHoldIncomes.forall(_ < 0)
 
-      /**
-       * Same logic as SwissLand
-       * @return true if Farmer has a child, and household incomes are slightly above a regional average
-       */
-      def childShouldInherit: Boolean = children.nonEmpty && last5HouseHoldIncomes.head > 1.01 * regionalAverageHouseHoldIncomes
+
+      def childrenShouldInherit: Boolean = children.filter(c => c.want_take_over && c.gender == "male").nonEmpty //&& last5HouseHoldIncomes.head > 1.01 * regionalAverageHouseHoldIncomes
 
       /** Keeps all the herds, crops, contact network,... So just reset the age to 35 (assume) and give a child with probability 0.875 (respect probability used by SwissLand)*/
-      def transferToChild: Unit = {
+      def transferToChildren: Unit = {
         //no problem like in Terminator where John Connor is older than Sarah Connor cause if exit before 65, this is because
         //house holds are negative, thus son will not take over (only if all regional incomes are negative but in this case there is a problem)
-        age = CONSTANTS.CHILD_TAKE_OVER_AGE
+        val successors = children.filter(_.want_take_over)
+        val nbParcelsPerChild = parcels.length / successors.length
+        var remaining_parcels = parcels.length % nbParcelsPerChild
+        //println("NB_PARCELS= "+parcels)
+        //println("NB_SUCCESSORS = " + successors.length)
+        successors.foreach((succ: Child) => {
+          val newFarmer = new Farmer(s, obs, landAdmin, succ.age, List())
+          if (remaining_parcels != 0){
+            newFarmer.parcels = parcels.take(nbParcelsPerChild + 1)
+            parcels = parcels.drop(nbParcelsPerChild + 1)
+            remaining_parcels -= 1
+          } else {
+            newFarmer.parcels = parcels.take(nbParcelsPerChild)
+            parcels = parcels.drop(nbParcelsPerChild)
+          }
+          //println("Child parcels =" + newFarmer.parcels)
+          s.sims = newFarmer :: s.sims
+        })
+        s.sims = s.sims.filter(_ != this)
+        
+
         // TODO this will be modified children = scala.util.Random.nextFloat() < 0.875
       }
 
@@ -522,8 +539,8 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       }
 
       if (shouldExit) {
-        if(childShouldInherit){
-          transferToChild
+        if(childrenShouldInherit){
+          transferToChildren
         }
         else{
           if(!sellToOtherFarmer){
@@ -566,7 +583,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
      * If new purpose is a paddock, add the parcel as a new paddock to paddock's list
      * Meadow and no purpose, just add them to list of parcels atm*/
 
-    def handleNewParcel(parcel: CadastralParcel, new_purpose : LandOverlayPurpose.Value): Unit = ???
+    def handleNewParcel(parcel: CadastralParcel, new_purpose : LandOverlayPurpose.Value): Unit = {}
       //TODO to adapt
     /*def handleNewParcel(parcel: CadastralParcel, new_purpose : LandOverlayPurpose.Value): Unit = {
       new_purpose match {
@@ -631,6 +648,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       //at the end of each year, update prices base on selling performances
       if(s.timer / 365 >= yearCounter){
         age += 1
+        println("age =" + age)
         yearCounter += 1
         updatePrice()
         updateHouseHold()

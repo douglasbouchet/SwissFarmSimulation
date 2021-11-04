@@ -49,7 +49,6 @@ class Generator(canton: String) {
   var totalWheatCropsArea: List[(String, Int)] = List()
   var totalSurface:        List[(String, Int)] = List()
   var population:          List[(String, Int)] = List()
-
   /** get data from excel file (26 cantons + Switzerland) */
   for (i <- 1 to 27) {
     nbFarmPerCanton = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(1).toString().toDouble).toInt) :: nbFarmPerCanton
@@ -191,6 +190,8 @@ class Generator(canton: String) {
           children ::= new Child(s: Simulation, 30, "male", rnd.nextFloat() < 0.8)
         }
       }
+
+      println("nb_childrennnnn : " + children.length)
       var age = 0
       val n = rnd.nextFloat()
       //if (n < 0.038) age = 22
@@ -199,7 +200,7 @@ class Generator(canton: String) {
       //else if(n < 0.3787) age = 40
       //else if(n < 0.7937) age = 50
       //else age = 64
-      age = 62 // just to test they all exit
+      age = 64 // just to test they all exit
 
 
       if(assignedSmallFarms.length < nSmallFarms){

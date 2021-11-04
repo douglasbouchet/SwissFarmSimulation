@@ -127,6 +127,6 @@ class Production(
       }
       return false
     }
-    return true
+    true
   }
 }
