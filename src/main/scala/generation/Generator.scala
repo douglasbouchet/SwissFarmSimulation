@@ -51,8 +51,8 @@ class Generator(canton: String) {
   var population:          List[(String, Int)] = List()
   /** get data from excel file (26 cantons + Switzerland) */
   for (i <- 1 to 27) {
-    nbFarmPerCanton = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(1).toString().toDouble).toInt) :: nbFarmPerCanton
-    nbFarmMore30ha = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(2).toString().toDouble).toInt) :: nbFarmMore30ha
+    nbFarmPerCanton = (sheet.getRow(i).getCell(0).toString, math.round(sheet.getRow(i).getCell(1).toString.toDouble).toInt) :: nbFarmPerCanton
+    nbFarmMore30ha = (sheet.getRow(i).getCell(0).toString, math.round(sheet.getRow(i).getCell(2).toString.toDouble).toInt) :: nbFarmMore30ha
     nbFarmMore10Less30 = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(3).toString().toDouble).toInt) :: nbFarmMore10Less30
     nbFarmLess10 = (sheet.getRow(i).getCell(0).toString(), math.round(sheet.getRow(i).getCell(4).toString().toDouble).toInt) :: nbFarmLess10
     /** This numbers seems a bit low, check afterwards total use for agricultural purpose */
@@ -165,9 +165,9 @@ class Generator(canton: String) {
     var area: Double = 0.0
     var ended: Boolean = false
 
-    def assignAreas(_farm: Farmer) {
+    def assignAreas(_farm: Farmer): Unit = {
       //at least 3 parcels per farm
-      while((sum < area && !parcels.isEmpty) || _farm.parcels.length < 2){
+      while((sum < area && parcels.nonEmpty) || _farm.parcels.length < 2){
           _farm.parcels ::= parcels.head
           parcels = parcels.tail
           sum = 0.0
@@ -178,7 +178,7 @@ class Generator(canton: String) {
       }
     }
 
-    while(!parcels.isEmpty && (ended == false)){
+    while(!parcels.isEmpty && !ended){
       //TODO assign an age and a child to a farmer
 
       //Here we assign a child to a farmer with probability 0.875 and give an age according to
@@ -190,17 +190,15 @@ class Generator(canton: String) {
           children ::= new Child(s: Simulation, 30, "male", rnd.nextFloat() < 0.8)
         }
       }
-
-      println("nb_childrennnnn : " + children.length)
       var age = 0
-      val n = rnd.nextFloat()
+      //val n = rnd.nextFloat()
       //if (n < 0.038) age = 22
       //else if(n < 0.137)  age = 66
       //else if(n < 0.797)  age = 30
       //else if(n < 0.3787) age = 40
       //else if(n < 0.7937) age = 50
       //else age = 64
-      age = 64 // just to test they all exit
+      age = 62 // just to test they all exit
 
 
       if(assignedSmallFarms.length < nSmallFarms){
@@ -342,6 +340,7 @@ class Generator(canton: String) {
  * We put groups of 4 people on the same parcel
  * */
 private def initPerson(s: Simulation,lAdmin: LandAdministrator): List[Person] = {
+  @tailrec
   def recCreatePerson(parcels: List[CadastralParcel], n: Int, acc: List[Person]): List[Person] = {
     if (n == 0) acc
     else {
@@ -364,7 +363,7 @@ private def initLandsAndFarms(landAdministrator: LandAdministrator, s: Simulatio
   val farms = assignParcelsToFarms(s, obs, prices,landAdministrator).take(2)
   println("Number of farms = " + farms.length)
   createAndAssignLandOverlays(farms, landAdministrator)
-  farms.foreach(_.init)
+  farms.foreach(_.init())
   obs.farms :::= farms
   farms
 }
@@ -427,7 +426,7 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
 
 def generateRoadNetwork(): RoadNetwork = {
   val roadNetworkInstance: RoadNetwork = new RoadNetwork()
-  LocationAdministrator.cities.forall(city => roadNetworkInstance.createNode(city.name) == true)
+  LocationAdministrator.cities.forall(city => roadNetworkInstance.createNode(city.name))
   LocationAdministrator.cities.foreach((cityA: City) => {
     LocationAdministrator.cities.filterNot(_ == cityA).foreach((cityB:City) => {
       //we add an edge of fly distance length between CityA and all CityB

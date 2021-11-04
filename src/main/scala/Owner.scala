@@ -105,9 +105,11 @@ class Owner {
   private def recalculate_inv_avg_cost(item: ITEM_T,
       units_added: Int, unit_cost: Double) {
     if(! inventory.contains(item)) init_inv(item);
-    if(inventory(item) + units_added == 0)
-      inventory_avg_cost(item) = 0
-    else
+      //TODO modified
+    //if(inventory(item) + units_added == 0)
+    //  inventory_avg_cost(item) = 0
+    //else
+    if(inventory(item) + units_added != 0)
       inventory_avg_cost(item) = (inventory_total_cost(item) +
         units_added * unit_cost) / (inventory(item) + units_added)
 
