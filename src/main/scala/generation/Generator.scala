@@ -18,8 +18,9 @@
 package generation
 
 import Companies.{Mill, Supermarket}
-import Securities.Commodities.{Bread, FeedStuff, Fertilizer, Flour, Grass, RapeseedSeeds, Soybeans, SoybeansSeeds, Wheat, WheatSeeds}
-import _root_.Simulation.SimLib.Source
+import Securities.Commodities.{Bread, Commodity, FeedStuff, Fertilizer, Flour, Grass, RapeseedSeeds, Soybeans, SoybeansSeeds, Wheat, WheatSeeds}
+import _root_.Simulation.SimLib.{Source}
+import modifyFromKoch.Trader
 import _root_.Simulation.{SimO, Simulation}
 import geography.LandOverlayPurpose.{LandOverlayPurpose, rapeseedField, soybeansField}
 //import _root_.Simulation.Factory.ProductionLineSpec
@@ -120,6 +121,7 @@ class Generator(canton: String) {
   }
 
   //assume for the moment supermarket make their own bread (add bakery afterwards)
+  //And only by wheat and soja atm, and does not by any rape
   private def CreateSupermarket(s: Simulation, lAdmin: LandAdministrator, obs: Observator, canton: String): List[Supermarket] = {
     //we use the estimated total area used for crop purpose to deduce how much company we will need for the food supply chain
     val anticipatedFlourProd = totalWheatCropsArea.filter(_._1 == canton).head._2 * CONSTANTS.WHEAT_PRODUCED_PER_HA* CONSTANTS.CONVERSION_WHEAT_FLOUR
@@ -167,7 +169,7 @@ class Generator(canton: String) {
 
     def assignAreas(_farm: Farmer): Unit = {
       //at least 3 parcels per farm
-      while((sum < area && parcels.nonEmpty) || _farm.parcels.length < 2){
+      while((sum < area && parcels.nonEmpty) || _farm.parcels.length < 5){
           _farm.parcels ::= parcels.head
           parcels = parcels.tail
           sum = 0.0
@@ -412,6 +414,8 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
   //val coop : List[AgriculturalCooperative] = initCoop(farms, s)
   val sources: List[Source] = generateSources(s)
 
+  val sojaTrader = Trader(Soybeans, 40000, s)
+
 
 
 
@@ -419,7 +423,7 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
 
   //coop.foreach(_.city = cities(rnd.nextInt(nCities)))
 
-  s.init(people ::: List(observator, prices, externalCommodityDemand) ::: farms /*::: coop*/ ::: mills ::: supermarkets ::: sources)
+  s.init(people ::: List(observator, prices, externalCommodityDemand, sojaTrader) ::: farms /*::: coop*/ ::: mills ::: supermarkets ::: sources)
 
   //generateRoadNetwork()
 }

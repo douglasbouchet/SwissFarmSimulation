@@ -104,6 +104,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       landOverlays.filter(_.purpose != LandOverlayPurpose.noPurpose).foreach(lOver =>
         productions ::= instantiateProductionFromLandOverlay(lOver)
       )
+      val x = 1
     }
 
     /** Returns whether everything was successfully bought. */
