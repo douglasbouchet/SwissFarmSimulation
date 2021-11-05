@@ -169,7 +169,7 @@ class Generator(canton: String) {
 
     def assignAreas(_farm: Farmer): Unit = {
       //at least 3 parcels per farm
-      while((sum < area && parcels.nonEmpty) || _farm.parcels.length < 5){
+      while((sum < area && parcels.nonEmpty) || _farm.parcels.length < 6){
           _farm.parcels ::= parcels.head
           parcels = parcels.tail
           sum = 0.0
@@ -200,7 +200,7 @@ class Generator(canton: String) {
       //else if(n < 0.3787) age = 40
       //else if(n < 0.7937) age = 50
       //else age = 64
-      age = 62 // just to test they all exit
+      age = 60 // just to test they all exit
 
 
       if(assignedSmallFarms.length < nSmallFarms){

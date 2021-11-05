@@ -419,6 +419,12 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
    * @return the new LandOverlays with purpose assigned
    */
     def chooseAndInstantiateNextProduction(): Unit = {
+      if(s.timer > 400){
+        val x = 1
+      }
+      if(s.timer > 500){
+        val x = 1
+      }
       val withoutPurpose: List[LandOverlay] = landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose)
       //TODO change prevIncomes.nonEmpty by some condition on if the products were sold
       if(withoutPurpose.length > 1 || landOverlays.length == 1 /*&& prevIncomes.nonEmpty*/){
