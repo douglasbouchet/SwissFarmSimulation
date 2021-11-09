@@ -18,8 +18,9 @@
 package generation
 
 import Companies.{Mill, Supermarket}
+import Government.Government
 import Securities.Commodities.{Bread, Commodity, FeedStuff, Fertilizer, Flour, Grass, RapeseedSeeds, Soybeans, SoybeansSeeds, Wheat, WheatSeeds}
-import _root_.Simulation.SimLib.{Source}
+import _root_.Simulation.SimLib.Source
 import modifyFromKoch.Trader
 import _root_.Simulation.{SimO, Simulation}
 import geography.LandOverlayPurpose.{LandOverlayPurpose, rapeseedField, soybeansField}
@@ -401,6 +402,7 @@ private def initCoop(farms: List[Farmer], s: Simulation): List[AgriculturalCoope
 def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = {
 
   //val parcels = generateCadastralParcel(canton, 2)
+  val government: Government = new Government(s)
   val observator: Observator = new Observator(s, List())
   val prices: Prices = new Prices(s)
   val externalCommodityDemand: ExternalCommodityDemand = new ExternalCommodityDemand(s, observator)
@@ -423,7 +425,7 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
 
   //coop.foreach(_.city = cities(rnd.nextInt(nCities)))
 
-  s.init(people ::: List(observator, prices, externalCommodityDemand, sojaTrader) ::: farms /*::: coop*/ ::: mills ::: supermarkets ::: sources)
+  s.init(people ::: List(government, observator, prices, externalCommodityDemand, sojaTrader) ::: farms /*::: coop*/ ::: mills ::: supermarkets ::: sources)
 
   //generateRoadNetwork()
 }
