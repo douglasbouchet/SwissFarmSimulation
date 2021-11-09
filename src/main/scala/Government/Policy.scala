@@ -32,7 +32,6 @@ sealed trait Policy {
 //In both case we compute the optimal imports, but if we allow to change the use of landOverlay to max incomes per policy
 //Then we could achieve some global maximum instead of local maximum
 
-
 case class MaximumPollution() extends Policy {
   override val name = "MaximumPollution"
   override def projectIncomes(lOvers: List[LandOverlay], budget: Int): (List[LandOverlay], Int) = {
