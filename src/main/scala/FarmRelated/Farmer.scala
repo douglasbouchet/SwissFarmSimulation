@@ -320,7 +320,10 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
      *  Consumed & Produced are based on the MAP que tu viens de définir
      */
     def instantiateProductionFromLandOverlay(lOver : LandOverlay): Production = {
-      val prod = new Production(s, this, 1, 1000, PROD_MAP(lOver.purpose)._1, PROD_MAP(lOver.purpose)._2,
+      val consumed: List[(Commodity, Int)] =  PROD_MAP(lOver.purpose)._1.map(tup => (tup._1, (tup._2 * lOver.getSurface).toInt))
+      val produced: List[(Commodity, Int)] = PROD_MAP(lOver.purpose)._2.map(tup => (tup._1, (tup._2 * lOver.getSurface).toInt))
+
+      val prod = new Production(s, this, 1, 4000, consumed, produced,
                                 ACTIVITIES_PROD_DURATION(lOver.purpose), landOverlay = Some(lOver))
       productions = prod :: productions
       prod
@@ -419,12 +422,6 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
    * @return the new LandOverlays with purpose assigned
    */
     def chooseAndInstantiateNextProduction(): Unit = {
-      if(s.timer > 400){
-        val x = 1
-      }
-      if(s.timer > 500){
-        val x = 1
-      }
       val withoutPurpose: List[LandOverlay] = landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose)
       //TODO change prevIncomes.nonEmpty by some condition on if the products were sold
       if(withoutPurpose.length > 1 || landOverlays.length == 1 /*&& prevIncomes.nonEmpty*/){
