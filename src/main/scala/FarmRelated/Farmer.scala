@@ -1,5 +1,6 @@
 
 package FarmRelated
+import Government.Government
 import Securities.Commodities._
 import Securities._
 import Simulation._
@@ -19,7 +20,7 @@ import scala.collection.mutable
 import Companies.Production
 
 
-class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _age: Int, _children: List[Child]) extends SimO(_s) {
+class Farmer(_s: Simulation, gov: Government, _obs: Observator, _landAdmin: LandAdministrator, _age: Int, _children: List[Child]) extends SimO(_s) {
     var parcels: List[CadastralParcel] = List()
     var landOverlays: List[LandOverlay] = List()
     var cooperative: Option[AgriculturalCooperative] = None
@@ -94,6 +95,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       */
     def init(): Unit = {
       landAdmin.addAgent(this)
+      gov.addFarmer(this)
       //give some capital + commodities to start
       capital += 20000000
       make(WheatSeeds, 1300, 10)
@@ -425,6 +427,9 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
       val withoutPurpose: List[LandOverlay] = landOverlays.filter(_.purpose == LandOverlayPurpose.noPurpose)
       //TODO change prevIncomes.nonEmpty by some condition on if the products were sold
       if(withoutPurpose.length > 1 || landOverlays.length == 1 /*&& prevIncomes.nonEmpty*/){
+        println("-----------------------------------------------------------")
+        gov.getPolicies.foreach(_.projectIncomes(withoutPurpose, 1))
+        println("-----------------------------------------------------------")
         //iterate over unusedLOver, for each produced commodity, get its benefits
         var producedCommodities: List[Commodity] = List[Commodity]()
         withoutPurpose.foreach((lOver: LandOverlay) => {
@@ -492,7 +497,7 @@ class Farmer(_s: Simulation, _obs: Observator, _landAdmin: LandAdministrator, _a
         //println("NB_PARCELS= "+parcels)
         //println("NB_SUCCESSORS = " + successors.length)
         successors.foreach((succ: Child) => {
-          val newFarmer = new Farmer(s, obs, landAdmin, succ.age, List())
+          val newFarmer = new Farmer(s, gov, obs, landAdmin, succ.age, List())
           if (remaining_parcels != 0){
             newFarmer.parcels = parcels.take(nbParcelsPerChild + 1)
             parcels = parcels.drop(nbParcelsPerChild + 1)

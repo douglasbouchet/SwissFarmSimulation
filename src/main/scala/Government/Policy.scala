@@ -16,8 +16,11 @@ sealed trait Policy {
   def landOverlaysToUnit(lOvers: List[LandOverlay]): mutable.Map[Commodity, Int] = {
     val comToUnit = scala.collection.mutable.Map[Commodity, Int]()
     lOvers.foreach(lOver => {
-      val (com, quantity) : (Commodity, Int) = PROD_MAP(lOver.prevPurpose)._2.map(tup => (tup._1, (tup._2 * lOver.getSurface).toInt)).head
-      comToUnit.put(com, comToUnit.getOrElse(com, 0) + quantity)
+      val t = PROD_MAP(lOver.prevPurpose)._2.map(tup => (tup._1, (tup._2 * lOver.getSurface).toInt))
+      if(t.nonEmpty){
+        val (com, quantity) : (Commodity, Int) = t.head
+        comToUnit.put(com, comToUnit.getOrElse(com, 0) + quantity)
+      }
     })
     comToUnit
   }

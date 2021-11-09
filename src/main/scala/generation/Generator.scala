@@ -154,7 +154,7 @@ class Generator(canton: String) {
    *    big farm: from 30 to (60?) (Uniform)
    *  Assign parcels until area reach the number of ha
    */ 
-  private def assignParcelsToFarms(s: Simulation, obs: Observator, prices: Prices, landAdmin: LandAdministrator): List[Farmer] = {
+  private def assignParcelsToFarms(s: Simulation, gov: Government, obs: Observator, prices: Prices, landAdmin: LandAdministrator): List[Farmer] = {
     var parcels : List[CadastralParcel] = landAdmin.cadastralParcels
     val nSmallFarms: Int = nbFarmLess10.filter(_._1 == canton).head._2
     val nMedFarms:   Int = nbFarmMore10Less30.filter(_._1 == canton).head._2
@@ -206,19 +206,19 @@ class Generator(canton: String) {
 
       if(assignedSmallFarms.length < nSmallFarms){
         area = 2 + scala.util.Random.nextInt(7)
-        val farm: Farmer = new Farmer(s, obs,landAdmin, age, children)
+        val farm: Farmer = new Farmer(s, gov, obs,landAdmin, age, children)
         assignAreas(farm)
         assignedSmallFarms ::= farm
       }
       else if(assignedMedFarms.length < nMedFarms){
         area = 10 + scala.util.Random.nextInt(20)
-        val farm = new Farmer(s, obs,landAdmin, age, children)
+        val farm = new Farmer(s, gov, obs,landAdmin, age, children)
         assignAreas(farm)
         assignedMedFarms ::= farm
       }
       else if(assignedBigFarms.length < nBigFarms){
         area = 30 + scala.util.Random.nextInt(31)
-        val farm = new Farmer(s, obs,landAdmin, age, children)
+        val farm = new Farmer(s, gov, obs,landAdmin, age, children)
         assignAreas(farm)
         assignedBigFarms ::= farm
       }
@@ -360,10 +360,10 @@ private def initPerson(s: Simulation,lAdmin: LandAdministrator): List[Person] = 
   people
 }
 
-private def initLandsAndFarms(landAdministrator: LandAdministrator, s: Simulation, obs: Observator, prices: Prices): List[Farmer] = {
+private def initLandsAndFarms(landAdministrator: LandAdministrator, s: Simulation, gov: Government, obs: Observator, prices: Prices): List[Farmer] = {
 
   //val farms = assignParcelsToFarms(s, obs, prices,landAdministrator)
-  val farms = assignParcelsToFarms(s, obs, prices,landAdministrator).take(2)
+  val farms = assignParcelsToFarms(s, gov, obs, prices,landAdministrator).take(2)
   println("Number of farms = " + farms.length)
   createAndAssignLandOverlays(farms, landAdministrator)
   farms.foreach(_.init())
@@ -402,7 +402,7 @@ private def initCoop(farms: List[Farmer], s: Simulation): List[AgriculturalCoope
 def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = {
 
   //val parcels = generateCadastralParcel(canton, 2)
-  val government: Government = new Government(s)
+  val gov: Government = new Government(s)
   val observator: Observator = new Observator(s, List())
   val prices: Prices = new Prices(s)
   val externalCommodityDemand: ExternalCommodityDemand = new ExternalCommodityDemand(s, observator)
@@ -410,7 +410,7 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
   val cities: List[City] = generateCities(nCities, List())
   LocationAdministrator.init(cities)
   val people: List[Person] = initPerson(s, landAdministrator)
-  val farms: List[Farmer] = initLandsAndFarms(landAdministrator, s, observator, prices)
+  val farms: List[Farmer] = initLandsAndFarms(landAdministrator, s, gov, observator, prices)
   val mills: List[Mill] = CreateMills(s, landAdministrator, observator, canton)
   val supermarkets: List[Supermarket] = CreateSupermarket(s, landAdministrator, observator, canton)
   //val coop : List[AgriculturalCooperative] = initCoop(farms, s)
@@ -425,7 +425,7 @@ def generateAgents(landAdministrator: LandAdministrator, s: Simulation): Unit = 
 
   //coop.foreach(_.city = cities(rnd.nextInt(nCities)))
 
-  s.init(people ::: List(government, observator, prices, externalCommodityDemand, sojaTrader) ::: farms /*::: coop*/ ::: mills ::: supermarkets ::: sources)
+  s.init(people ::: List(gov, observator, prices, externalCommodityDemand, sojaTrader) ::: farms /*::: coop*/ ::: mills ::: supermarkets ::: sources)
 
   //generateRoadNetwork()
 }
