@@ -22,7 +22,11 @@ class Government(s: Simulation) extends SimO(s){
   override def mycopy(_shared: Simulation, _substitution: mutable.Map[SimO, SimO]): SimO = ???
 
   override protected def algo: Instruction = __do{
-    addPolicy(ConvertToOrganic())
+    addPolicy(MaximumPollution())
+    addPolicy(TaxPollutingCrops())
     println("The policies are : " + getPolicies)
   }
+
+
+
 }

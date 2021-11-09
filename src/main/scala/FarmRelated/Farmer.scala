@@ -1,6 +1,6 @@
 
 package FarmRelated
-import Government.Government
+import Government.{Government, Policy}
 import Securities.Commodities._
 import Securities._
 import Simulation._
@@ -428,7 +428,8 @@ class Farmer(_s: Simulation, gov: Government, _obs: Observator, _landAdmin: Land
       //TODO change prevIncomes.nonEmpty by some condition on if the products were sold
       if(withoutPurpose.length > 1 || landOverlays.length == 1 /*&& prevIncomes.nonEmpty*/){
         println("-----------------------------------------------------------")
-        gov.getPolicies.foreach(_.projectIncomes(withoutPurpose, 1))
+        val bestUseAndInc = gov.getPolicies.map((pol: Policy) => pol.projectIncomes(withoutPurpose, 1)).sortBy(- _._2)
+        println(bestUseAndInc)
         println("-----------------------------------------------------------")
         //iterate over unusedLOver, for each produced commodity, get its benefits
         var producedCommodities: List[Commodity] = List[Commodity]()

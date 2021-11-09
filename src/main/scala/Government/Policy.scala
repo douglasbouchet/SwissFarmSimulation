@@ -9,8 +9,8 @@ import scala.collection.mutable
 sealed trait Policy {
   val name: String = "not implemented policy"
 
-  //def projectIncomes(lovers: List[LandOverlay], budget: Int): (List[LandOverlay], Int)
-  def projectIncomes(lovers: List[LandOverlay], budget: Int): Unit
+  def projectIncomes(lovers: List[LandOverlay], budget: Int): (List[LandOverlay], Int)
+  //def projectIncomes(lovers: List[LandOverlay], budget: Int): Unit
 
   /** Compute a map which map each commodity to its quantity produced, for all landOverlays */
   def landOverlaysToUnit(lOvers: List[LandOverlay]): mutable.Map[Commodity, Int] = {
@@ -29,10 +29,24 @@ sealed trait Policy {
 //TODO do we pass lOvers with already some purpose ? should be yes
 //Also, do we want to get the max incomes for the given purpose distribution for the land Overlays,
 //or we want to propose new landOverlays that could maximize the imports ?
+//In both case we compute the optimal imports, but if we allow to change the use of landOverlay to max incomes per policy
+//Then we could achieve some global maximum instead of local maximum
 
-case class ConvertToOrganic() extends Policy {
-  override val name = "ConvertToOrganic"
-  //override def projectIncomes(lOvers: List[LandOverlay], budget: Int): (List[LandOverlay], Int) =
-  override def projectIncomes(lOvers: List[LandOverlay], budget: Int): Unit =
-    println("The production should be " + landOverlaysToUnit(lOvers))
+
+case class MaximumPollution() extends Policy {
+  override val name = "MaximumPollution"
+  override def projectIncomes(lOvers: List[LandOverlay], budget: Int): (List[LandOverlay], Int) = {
+  //override def projectIncomes(lOvers: List[LandOverlay], budget: Int): Unit =
+    //println("The production should be " + landOverlaysToUnit(lOvers))
+    (List(), 100)
+  }
+}
+
+case class TaxPollutingCrops() extends Policy {
+  override val name = "TaxPollutingCrops"
+  override def projectIncomes(lOvers: List[LandOverlay], budget: Int): (List[LandOverlay], Int) = {
+    //override def projectIncomes(lOvers: List[LandOverlay], budget: Int): Unit =
+    //println("The production should be " + landOverlaysToUnit(lOvers))
+    (List(), 50)
+  }
 }
